@@ -1,3 +1,4 @@
+```
 .
 ├── Config/
 │ ├── compose.dev.yml
@@ -9,7 +10,7 @@
 │ └── dockerfiles/
 │ ├── frontend.dockerfile.dev
 │ ├── frontend.dockerfile.prod
-│ └── docker_secrets/
+│ └── secrets/
 │ └── secretx
 ├── api-gateway/
 │ ├── src/
@@ -17,19 +18,18 @@
 │ ├── dockerfiles/
 │ │ ├── api-gateway.dockerfile.dev
 │ │ └── api-gateway.dockerfile.prod
-│ └── docker_secrets/
+│ └── secrets/
 │ └── secretx
 └── microservices/
-└── microserviceX/
+│ └─── microserviceX/
 ├── src
 ├── package.json
 ├── dockerfiles/
 │ ├── microserviceX.dockerfile.dev
 │ └── microserviceX.dockerfile.prod
-├─── docker_secrets/
-│ └── secretx
-└── enviroment/
-└── .dev.env
+├─── secrets/
+  └── secretx
+```
 
 api-gateway:
 
