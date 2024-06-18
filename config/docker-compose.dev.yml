@@ -1,0 +1,137 @@
+version: "3.8"
+name: "app"
+services:
+  # Frontend Service
+  # ---------------------
+  # This service hosts the frontend of the application.
+
+  frontend:
+    image: app_frontend
+    container_name: frontend
+    build:
+      context: ../frontend/
+      dockerfile: ./dockerfiles/Dockerfile
+    ports:
+      - "3000:3000"
+    command: npm run dev
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      frontend:
+        aliases:
+          - "frontend"
+      backend:
+        aliases:
+          - "frontend"
+
+  # API Gateway Service
+  # ---------------------
+  # This service acts as the API gateway for routing requests to backend services.
+  api-gateway:
+    image: app_api_gateway
+    container_name: api-gateway
+    build:
+      context: ../krakend-api-gateway/
+      dockerfile: ./dockerfiles/krakend-api-gateway.Dockerfile.dev
+    ports:
+      - "1234:1234"
+      - "8080:8080"
+      - "8090:8090"
+    networks:
+      frontend:
+        aliases:
+          - "front-gate"
+      backend:
+        aliases:
+          - "back-gate"
+
+  # # Authentication Service
+  # # ---------------------
+  # # This service handles authentication and user management.
+  # #
+
+  auth-service:
+    image: app_auth_service
+    container_name: auth-service
+    build:
+      context: ../microservices/auth-service/
+      dockerfile: ./dockerfiles/auth-service.Dockerfile.dev
+    ports:
+      - "8000:8000" # Map container port 3000 to host port 3000 for frontend
+    command: npm run start
+    networks:
+      backend:
+        aliases:
+          - "auth"
+
+  # Database Service
+  # ---------------------
+  # This service manages the application's database operations.
+  #
+  database-service:
+    # image: app_databse_service
+    container_name: database-service
+    build:
+      context: ../microservices/database-service/
+      dockerfile: ./dockerfiles/database-service.Dockerfile.dev
+    ports:
+      - "8002:8002" # Map container port 3000 to host port 3000 for frontend
+    expose:
+      - "8002"
+    command: npm run start
+    networks:
+      backend:
+        aliases:
+          - "db"
+
+  # Stripe Service
+  # ---------------------
+  # This service integrates with the Stripe payment platform.
+  #
+  stripe-service:
+    container_name: stripe-service
+    build:
+      context: ../microservices/stripe-service/
+      dockerfile: ./dockerfiles/stripe-service.Dockerfile.dev
+    ports:
+      - "8003:8003" # Map container port 3000 to host port 3000 for frontend
+    command: npm run start
+    networks:
+      backend:
+        aliases:
+          - "stripe"
+
+  #   # ----------------------------------------------
+  #   # Add new microservices below
+  #   # ----------------------------------------------
+
+  #   # My New Service
+  #   # ---------------------
+  #   # Description of what this new service does.
+  #   #
+  #   # my-new-service:
+  #   #   container_name: my-new-service
+  #   #   build:
+  #   #     # Specifies the directory context for building the Docker image of "my-new-service"
+  #   #     context: ../microservices/my-new-service/
+  #   #     # Specifies the Dockerfile to use for building the image of "my-new-service"
+  #   #     dockerfile: ./dockerfiles/my-new-service.Dockerfile.dev
+  #   #   ports:
+  #   #     # Maps container port 8005 to host port 8005 for communication with the service
+  #   #     - "800X:800X" # Map container port 8005 to host port 800X
+  #   #   # Specifies the command to run when the container for "my-new-service" starts
+  #   #   command: npm run start
+  #   #   networks:
+  #   #     # Adds "my-new-service" to the "backend" network for communication with other services
+  #   #     backend:
+  #   #       aliases:
+  #   #         - "what you want to reference this service by"
+networks:
+  backend:
+    name: backend
+    driver: bridge
+  frontend:
+    name: frontend
+    driver: bridge

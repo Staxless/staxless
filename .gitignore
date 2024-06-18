@@ -1,0 +1,15 @@
+# Node.js backend
+**/node_modules
+**/npm-debug.log
+**/.env
+**/.DS_Store
+**/.pem
+
+# React frontend
+**/client/node_modules
+**/client/build
+**/.env
+**/.DS_Store
+
+# Docker
+**/.dockerignore
