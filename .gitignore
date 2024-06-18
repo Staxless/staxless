@@ -13,3 +13,6 @@
 
 # Docker
 **/.dockerignore
+
+# misc
+**/misc
