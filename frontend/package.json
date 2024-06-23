@@ -8,8 +8,11 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "keywords": [],
+  "author": "Zachary Benson",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
-    "@clerk/nextjs": "^5.1.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.395.0",
