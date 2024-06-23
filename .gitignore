@@ -16,3 +16,6 @@
 
 # misc
 **/misc
+
+#White list
+!**/template.env
