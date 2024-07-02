@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:14
+FROM node:latest
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -8,7 +8,8 @@ WORKDIR /app
 COPY ../package*.json ./
 
 # Install dependencies using npm
-RUN npm install express stripe nodemon dotenv axios
+RUN npm install nodemon --save-dev
+RUN npm install axios cors stripe express
 
 # Copy the rest of the application code to the working directory
 COPY ../ .
@@ -17,4 +18,4 @@ COPY ../ .
 EXPOSE 8003
 
 # Command to run the Stripe service when the container starts
-CMD ["npm", "start"]
+CMD ["npm, "start"]

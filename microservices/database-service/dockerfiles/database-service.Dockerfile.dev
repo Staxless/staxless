@@ -8,7 +8,8 @@ WORKDIR /app
 COPY ../package*.json ./
 
 # Install dependencies using npm
-RUN npm install express nodemon dotenv @supabase/supabase-js bcrypt axios
+RUN npm install nodemon --save-dev
+RUN npm install express dotenv @supabase/supabase-js bcrypt axios cookie-parser
 
 # Copy the rest of the application code to the working directory
 COPY ../ .

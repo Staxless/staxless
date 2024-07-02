@@ -2,7 +2,7 @@
 FROM node:latest
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -10,13 +10,9 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 RUN npm install axios
-RUN cd
 
 # Bundle app source
 COPY . .
-
-# Build your Next.js app for production
-RUN npm run build
 
 # Start the application
 CMD ["npm","run","dev"]

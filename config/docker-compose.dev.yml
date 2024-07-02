@@ -14,10 +14,13 @@ services:
     ports:
       - "3000:3000"
     command: npm run dev
+    restart: always
     volumes:
-      - ../frontend:/app
+      - ../frontend/src/:/app/src
       - /app/node_modules
       - /app/.next
+    environment:
+      - "NEXT_WEBPACK_USEPOLLING=1"
     networks:
       frontend:
         aliases:
@@ -58,8 +61,13 @@ services:
     build:
       context: ../microservices/auth-service/
       dockerfile: ./dockerfiles/auth-service.Dockerfile.dev
+    env_file:
+      - path: ../microservices/auth-service/secrets/.env
     ports:
       - "8000:8000" # Map container port 3000 to host port 3000 for frontend
+    volumes:
+      - ../microservices/auth-service/src:/app/src
+      - ../microservices/auth-service/server.js:/app/server.js
     command: npm run start
     networks:
       backend:
@@ -76,8 +84,13 @@ services:
     build:
       context: ../microservices/database-service/
       dockerfile: ./dockerfiles/database-service.Dockerfile.dev
+    env_file:
+      - path: ../microservices/database-service/secrets/.env
     ports:
       - "8002:8002" # Map container port 3000 to host port 3000 for frontend
+    volumes:
+      - ../microservices/database-service/src:/app/src
+      - ../microservices/database-service/server.js:/app/server.js
     expose:
       - "8002"
     command: npm run start
@@ -96,7 +109,14 @@ services:
       context: ../microservices/stripe-service/
       dockerfile: ./dockerfiles/stripe-service.Dockerfile.dev
     ports:
-      - "8003:8003" # Map container port 3000 to host port 3000 for frontend
+      - "8003:8003"
+    env_file:
+      - path: ../microservices/stripe-service/secrets/.env
+
+    volumes:
+      - ../microservices/stripe-service/src:/app/src
+      - ../microservices/stripe-service/server.js:/app/server.js
+
     command: npm run start
     networks:
       backend:
@@ -118,6 +138,7 @@ services:
   #   #     context: ../microservices/my-new-service/
   #   #     # Specifies the Dockerfile to use for building the image of "my-new-service"
   #   #     dockerfile: ./dockerfiles/my-new-service.Dockerfile.dev
+  #   #   env_file: ".env"
   #   #   ports:
   #   #     # Maps container port 8005 to host port 8005 for communication with the service
   #   #     - "800X:800X" # Map container port 8005 to host port 800X
