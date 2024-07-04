@@ -4,20 +4,22 @@ services:
   # Frontend Service
   # ---------------------
   # This service hosts the frontend of the application.
-
   frontend:
     image: app_frontend
     container_name: frontend
     build:
       context: ../frontend/
-      dockerfile: ./dockerfiles/Dockerfile
+      dockerfile: ./dockerfiles/frontend.Dockerfile
+      target: dev
     ports:
       - "3000:3000"
-    command: npm run dev
+    restart: always
     volumes:
-      - ../frontend:/app
+      - ../frontend/src/:/app/src
       - /app/node_modules
       - /app/.next
+    environment:
+      - "NEXT_WEBPACK_USEPOLLING=1"
     networks:
       frontend:
         aliases:
@@ -34,7 +36,8 @@ services:
     container_name: api-gateway
     build:
       context: ../gateway/
-      dockerfile: ./dockerfiles/gateway.Dockerfile.dev
+      dockerfile: ./dockerfiles/gateway.Dockerfile
+      target: dev
     ports:
       - "1234:1234"
       - "8080:8080"
@@ -57,10 +60,15 @@ services:
     container_name: auth-service
     build:
       context: ../microservices/auth-service/
-      dockerfile: ./dockerfiles/auth-service.Dockerfile.dev
+      dockerfile: ./dockerfiles/auth-service.Dockerfile
+      target: dev
+    env_file:
+      - path: ../microservices/auth-service/secrets/.env
     ports:
       - "8000:8000" # Map container port 3000 to host port 3000 for frontend
-    command: npm run start
+    volumes:
+      - ../microservices/auth-service/src:/home/node/src
+      - ../microservices/auth-service/server.js:/home/node/server.js
     networks:
       backend:
         aliases:
@@ -75,12 +83,17 @@ services:
     container_name: database-service
     build:
       context: ../microservices/database-service/
-      dockerfile: ./dockerfiles/database-service.Dockerfile.dev
+      dockerfile: ./dockerfiles/database-service.Dockerfile
+      target: dev
+    env_file:
+      - path: ../microservices/database-service/secrets/.env
     ports:
       - "8002:8002" # Map container port 3000 to host port 3000 for frontend
+    volumes:
+      - ../microservices/database-service/src:/home/node/src
+      - ../microservices/database-service/server.js:/home/node/server.js
     expose:
       - "8002"
-    command: npm run start
     networks:
       backend:
         aliases:
@@ -94,10 +107,16 @@ services:
     container_name: stripe-service
     build:
       context: ../microservices/stripe-service/
-      dockerfile: ./dockerfiles/stripe-service.Dockerfile.dev
+      dockerfile: ./dockerfiles/stripe-service.Dockerfile
+      target: dev
     ports:
-      - "8003:8003" # Map container port 3000 to host port 3000 for frontend
-    command: npm run start
+      - "8003:8003"
+    env_file:
+      - path: ../microservices/stripe-service/secrets/.env
+
+    volumes:
+      - ../microservices/stripe-service/src:/home/node/src
+      - ../microservices/stripe-service/server.js:/home/node/server.js
     networks:
       backend:
         aliases:
@@ -117,7 +136,8 @@ services:
   #   #     # Specifies the directory context for building the Docker image of "my-new-service"
   #   #     context: ../microservices/my-new-service/
   #   #     # Specifies the Dockerfile to use for building the image of "my-new-service"
-  #   #     dockerfile: ./dockerfiles/my-new-service.Dockerfile.dev
+  #   #     dockerfile: ./dockerfiles/my-new-service.Dockerfile
+  #   #   env_file: ".env"
   #   #   ports:
   #   #     # Maps container port 8005 to host port 8005 for communication with the service
   #   #     - "800X:800X" # Map container port 8005 to host port 800X

@@ -1,0 +1,110 @@
+version: "3.8"
+services:
+  # Frontend Service
+  # ---------------------
+  # This service hosts the frontend of the application.
+  frontend:
+    image: app_frontend
+    container_name: frontend
+    build:
+      context: ../frontend/
+      dockerfile: ./dockerfiles/frontend.Dockerfile
+      target: prod
+    ports:
+      - "3000:3000"
+    networks:
+      frontend:
+        aliases:
+          - "frontend"
+      backend:
+        aliases:
+          - "frontend"
+
+  # API Gateway Service
+  # ---------------------
+  # This service acts as the API gateway for routing requests to backend services.
+  api-gateway:
+    image: app_api_gateway
+    container_name: api-gateway
+    build:
+      context: ../gateway/
+      dockerfile: ./dockerfiles/gateway.Dockerfile
+      target: prod
+    ports:
+      - "1234:1234"
+      - "8080:8080"
+      - "8090:8090"
+    networks:
+      frontend:
+        aliases:
+          - "front-gate"
+      backend:
+        aliases:
+          - "back-gate"
+
+  # # Authentication Service
+  # # ---------------------
+  # # This service handles authentication and user management.
+  # #
+
+  auth-service:
+    image: app_auth_service
+    container_name: auth-service
+    build:
+      context: ../microservices/auth-service/
+      dockerfile: ./dockerfiles/auth-service.Dockerfile
+      target: prod
+    env_file:
+      - ../microservices/auth-service/secrets/.env
+    ports:
+      - "8000:8000" # Map container port 3000 to host port 3000 for frontend
+    networks:
+      backend:
+        aliases:
+          - "auth"
+
+  # Database Service
+  # ---------------------
+  # This service manages the application's database operations.
+  #
+  database-service:
+    # image: app_databse_service
+    container_name: database-service
+    build:
+      context: ../microservices/database-service/
+      dockerfile: ./dockerfiles/database-service.Dockerfile
+      target: prod
+    env_file:
+      - ../microservices/database-service/secrets/.env
+    ports:
+      - "8002:8002" # Map container port 3000 to host port 3000 for frontend
+    networks:
+      backend:
+        aliases:
+          - "db"
+
+  # Stripe Service
+  # ---------------------
+  # This service integrates with the Stripe payment platform.
+  #
+  stripe-service:
+    container_name: stripe-service
+    build:
+      context: ../microservices/stripe-service/
+      dockerfile: ./dockerfiles/stripe-service.Dockerfile
+      target: prod
+    ports:
+      - "8003:8003"
+    env_file:
+      - ../microservices/stripe-service/secrets/.env
+    networks:
+      backend:
+        aliases:
+          - "stripe"
+networks:
+  backend:
+    name: backend
+    driver: bridge
+  frontend:
+    name: frontend
+    driver: bridge

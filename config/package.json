@@ -15,10 +15,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "docker-dev-up": "docker-compose -f docker-compose.dev.yml up --build",
-    "docker-dev-down": "docker-compose -f docker-compose.dev.yml down",
-    "docker-prod-up": "docker-compose -f docker-compose.prod.yml up --build",
-    "docker-prod-down": "docker-compose -f docker-compose.prod.yml down"
+    "dev-up-build": "docker-compose -f docker-compose.dev.yml up --build",
+    "dev-up": "docker-compose -f docker-compose.dev.yml up",
+    "dev-down": "docker-compose -f docker-compose.dev.yml down"
   },
   "eslintConfig": {
     "extends": ["react-app", "react-app/jest"]
