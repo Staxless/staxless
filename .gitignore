@@ -1,9 +1,13 @@
+# Next.js
+**/.next
+
 # Node.js backend
 **/node_modules
 **/npm-debug.log
 **/.env
 **/.DS_Store
 **/.pem
+**/package-lock.json
 
 # React frontend
 **/client/node_modules
