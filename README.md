@@ -37,3 +37,21 @@ api-gateway:
 - Front end -> proxy api/ to frontgate
   -> api-gate way routes to backend service
   -> backend service handles call
+
+  IMAGE CONTAINER SIZES
+
+  ENV: DEVELOPMENT
+  REPOSITORY             SIZE
+  app_frontend           1.86GB
+  app_auth_service       1.15GB
+  app-database-service   1.15GB
+  app-stripe-service     1.15GB
+  app_api_gateway        133MB
+
+  ENV: PRODUCTION
+  REPOSITORY             SIZE
+  app_frontend           145MB
+  app_auth_service       193MB
+  app-database-service   191MB
+  app-stripe-service     186MB
+  app_api_gateway        129MB
