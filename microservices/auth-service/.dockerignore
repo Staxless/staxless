@@ -47,3 +47,9 @@
 
 # Ignore other artifacts
 **/*.swp
+
+# Ignore secrets directory
+**/secrets
+
+# Ignore dockerfiles directory
+**/dockerfiles
