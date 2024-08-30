@@ -1,4 +1,20 @@
 // auth-routes.js
+
+/**
+ * OAuth Authentication Routes
+ *
+ * This module defines routes for initiating and handling OAuth login and callback processes.
+ * It supports multiple OAuth providers, allowing users to authenticate using their preferred service.
+ * The routes are structured to:
+ *   - Initiate the login process by redirecting users to the provider's authorization URL.
+ *   - Handle the callback from the provider, validate the authorization code, and manage user sessions.
+ *
+ * @module auth-routes
+ * @requires express
+ * @requires providers from oauth-config.js
+ * @requires handleLogin and handleCallback from oauth.js
+ */
+
 import express from "express";
 import { providers } from "../config/oauth-config.js";
 import { handleLogin, handleCallback } from "../lib/oauth.js";
@@ -6,27 +22,24 @@ import { handleLogin, handleCallback } from "../lib/oauth.js";
 const router = express.Router();
 
 /**
- * Route handler for initiating the OAuth login process with a specified
- * provider.
+ * Route handler for initiating the OAuth login process with a specified provider.
  *
  * @route GET /auth/login/:provider
- * @param {string} provider - The name of the OAuth provider to use.
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @returns {Promise<void>} A promise that resolves when the login process
- *   is handled.
  */
-router.get("/auth/login/:provider", async (req, res) => {
+router.get("/auth/login/:provider", async (req, res, next) => {
   const providerName = req.params.provider;
   const provider = providers[providerName];
+
   if (!provider) {
     return res.status(404).json({ error: "Provider not supported" });
   }
+
+  provider.name = providerName; // Only set if provider exists
+
   try {
     await handleLogin(provider, req, res);
   } catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).json({ error: "Internal server error" });
+    next(error); // Forward to centralized error handler
   }
 });
 
@@ -34,44 +47,19 @@ router.get("/auth/login/:provider", async (req, res) => {
  * Route handler for processing the OAuth callback after user authorization.
  *
  * @route GET /auth/:provider/callback
- * @param {string} provider - The name of the OAuth provider.
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @returns {Promise<void>} A promise that resolves when the callback process
- *   is handled.
  */
-router.get("/auth/:provider/callback", async (req, res) => {
+router.get("/auth/:provider/callback", async (req, res, next) => {
   const providerName = req.params.provider;
   const provider = providers[providerName];
+
   if (!provider) {
     return res.status(404).json({ error: "Provider not supported" });
   }
   try {
     await handleCallback(provider, req, res);
   } catch (error) {
-    console.error("Error during callback:", error);
-    res.status(500).json({ error: "Internal server error" });
+    next(error); // Forward to centralized error handler
   }
-});
-
-/**
- * Route handler for logging out the current user by invalidating their
- * session.
- *
- * @route POST /auth/logout
- * @param {Object} _ - The HTTP request object (not used).
- * @param {Object} res - The HTTP response object.
- * @returns {Promise<void>} A promise that resolves when the user is logged
- *   out and redirected.
- */
-router.post("/auth/logout", async (_, res) => {
-  if (!res.locals.session) {
-    return res.status(401).end();
-  }
-  await lucia.invalidateSession(res.locals.session.id);
-  return res
-    .setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())
-    .redirect("/login");
 });
 
 export default router;

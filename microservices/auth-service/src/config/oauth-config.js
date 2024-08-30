@@ -29,3 +29,4 @@ export const providers = {
 
 // Add user url to each
 providers["github"].userInfoUrl = "https://api.github.com/user";
+providers["github"].scopes = ["user:email"];
