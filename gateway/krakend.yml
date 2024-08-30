@@ -32,22 +32,8 @@ cache_ttl: 300s
 
 # API Endpoints Configuration
 endpoints:
-  - endpoint: /register # Register endpoint
-    input_query_strings:
-      - "*" # Accept any query string
-    method: POST
-    output_encoding: json
-    backend:
-      - url_pattern: /users/register # Backend URL pattern for registration
-        encoding: json
-        sd: static # Use static discovery
-        method: POST
-        disable_host_sanitize: true # Disable host sanitization
-        host:
-          - http://database-service:8002 # Backend host for registration
-
-  - endpoint: /login # Login endpoint
-    method: POST
+  - endpoint: /auth/login/{provider} # Login endpoint
+    method: GET
     output_encoding: no-op # No encoding for output
     headers_to_pass:
       - Content-Type
@@ -60,35 +46,15 @@ endpoints:
           response_headers:
             Set-Cookie: "*" # Set Cookie header in response
     backend:
-      - url_pattern: /login # Backend URL pattern for login
+      - url_pattern: /auth/login/{provider} # Backend URL pattern for login
         encoding: no-op
-        method: POST
+        method: GET
         host:
           - http://auth-service:8000 # Backend host for login
 
-  - endpoint: /logout # Logout endpoint
+  - endpoint: /auth/logout # Logout endpoint
     method: POST
     output_encoding: no-op # No encoding for output
-    headers_to_pass:
-      - Content-Type
-      - cookie
-    extra_config:
-      github.com/devopsfaith/krakend/proxy:
-        http_proxy:
-          request_headers:
-            Content-Type: application/json # Set Content-Type for proxy request
-          response_headers:
-            Set-Cookie: "*" # Set Cookie header in response
-    backend:
-      - url_pattern: /logout # Backend URL pattern for logout
-        encoding: no-op
-        method: POST
-        host:
-          - http://auth-service:8000 # Backend host for logout
-
-  - endpoint: /validate-token # Validate token endpoint
-    method: GET
-    output_encoding: json
     headers_to_pass:
       - Content-Type
       - Authorization
@@ -97,42 +63,65 @@ endpoints:
         http_proxy:
           request_headers:
             Content-Type: application/json # Set Content-Type for proxy request
+            Cookie: "*" # Forward all cookies to the backend
           response_headers:
             Set-Cookie: "*" # Set Cookie header in response
     backend:
-      - url_pattern: /validate-token # Backend URL pattern for token validation
+      - url_pattern: /auth/logout # Backend URL pattern for logout
+        encoding: no-op
+        method: POST
+        host:
+          - http://auth-service:8000 # Backend host for logout
+
+  - endpoint: /auth/validate-request # Validate request endpoint
+    method: POST
+    output_encoding: json
+    headers_to_pass:
+      - Content-Type
+      - Authorization
+      - auth_session # Include Cookie header to pass cookies
+    extra_config:
+      github.com/devopsfaith/krakend/proxy:
+        http_proxy:
+          request_headers:
+            Content-Type: application/json # Set Content-Type for proxy request
+            Cookie: "*" # Forward all cookies to the backend
+          response_headers:
+            Set-Cookie: "*" # Allow setting cookies in the response
+    backend:
+      - url_pattern: /auth/validate-request # Backend URL pattern for token validation
         encoding: json
-        method: GET
+        method: POST
         host:
           - http://auth-service:8000 # Backend host for token validation
 
-  - endpoint: /checkout # Checkout endpoint
-    input_query_strings:
-      - "*" # Accept any query string
-    method: POST
-    output_encoding: json
-    backend:
-      - url_pattern: /checkout # Backend URL pattern for checkout
-        encoding: json
-        sd: static # Use static discovery
-        method: POST
-        disable_host_sanitize: true # Disable host sanitization
-        host:
-          - http://stripe-service:8003 # Backend host for checkout
+  # - endpoint: /checkout # Checkout endpoint
+  #   input_query_strings:
+  #     - "*" # Accept any query string
+  #   method: POST
+  #   output_encoding: json
+  #   backend:
+  #     - url_pattern: /checkout # Backend URL pattern for checkout
+  #       encoding: json
+  #       sd: static # Use static discovery
+  #       method: POST
+  #       disable_host_sanitize: true # Disable host sanitization
+  #       host:
+  #         - http://stripe-service:8003 # Backend host for checkout
 
-  - endpoint: /generate-text # Generate text endpoint
-    input_query_strings:
-      - "*" # Accept any query string
-    method: POST
-    output_encoding: json
-    backend:
-      - url_pattern: /generate-text # Backend URL pattern for text generation
-        encoding: json
-        sd: static # Use static discovery
-        method: POST
-        disable_host_sanitize: true # Disable host sanitization
-        host:
-          - http://openai-service:8004 # Backend host for text generation
+  # - endpoint: /generate-text # Generate text endpoint
+  #   input_query_strings:
+  #     - "*" # Accept any query string
+  #   method: POST
+  #   output_encoding: json
+  #   backend:
+  #     - url_pattern: /generate-text # Backend URL pattern for text generation
+  #       encoding: json
+  #       sd: static # Use static discovery
+  #       method: POST
+  #       disable_host_sanitize: true # Disable host sanitization
+  #       host:
+  #         - http://openai-service:8004 # Backend host for text generation
 
 # Add new endpoints below this line
 # Example:
