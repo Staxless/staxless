@@ -11,26 +11,19 @@ const userSchema = {
     description: "must be a string and is required",
     uniqueItems: true,
   },
-  id: {
+  _id: {
     bsonType: "string",
     description: "must be a string and is required",
     uniqueItems: true,
   },
-  createdAt: {
+  created_at: {
     bsonType: "date",
     description: "must be a date and is required",
-    default: () => new Date(),
   },
   roles: {
     bsonType: "array",
     items: { bsonType: "string" },
     description: "must be an array of strings",
-    default: ["user"],
-  },
-  lastActive: {
-    bsonType: "date",
-    description: "must be a date and is required",
-    default: () => new Date(),
   },
 };
 
@@ -50,24 +43,24 @@ const connectToMongoDB = async () => {
   }
 };
 
-// Function to check and create the users collection
-const createUsersCollection = async () => {
+// Function to check and create the user collection
+const createuserCollection = async () => {
   try {
-    const collections = await db.listCollections({ name: "users" }).toArray();
+    const collections = await db.listCollections({ name: "user" }).toArray();
     if (collections.length === 0) {
       // Collection does not exist, create it with validation
-      await db.createCollection("users", {
+      await db.createCollection("user", {
         validator: {
           $jsonSchema: {
             bsonType: "object",
-            required: ["name", "id", "createdAt", "roles", "lastActive"],
+            required: ["name", "_id", "roles"], //, "createdAt","lastActive"],
             properties: userSchema,
           },
         },
       });
-      console.log("Users collection created!");
+      console.log("user collection created!");
     } else {
-      console.log("Users collection already exists.");
+      console.log("user collection already exists.");
     }
   } catch (error) {
     console.error("Error checking or creating collection:", error);
@@ -88,14 +81,14 @@ const listCollections = async () => {
   }
 };
 
-// Define methods for interacting with the users collection
+// Define methods for interacting with the user collection
 const User = {
   async create(userData) {
     try {
       userData.createdAt = userData.createdAt || new Date();
       userData.lastActive = userData.lastActive || new Date();
       console.log("Inserting user data:", userData);
-      const result = await db.collection("users").insertOne(userData);
+      const result = await db.collection("user").insertOne(userData);
       console.log("User inserted:", result);
       return result;
     } catch (error) {
@@ -112,7 +105,7 @@ const User = {
       if (name) query.name = name;
 
       // Perform the query
-      return await db.collection("users").findOne(query);
+      return await db.collection("user").findOne(query);
     } catch (error) {
       console.error("Error finding user by criteria:", error);
       throw error;
@@ -122,7 +115,7 @@ const User = {
   async updateLastActive(name) {
     try {
       return await db
-        .collection("users")
+        .collection("user")
         .updateOne({ name }, { $set: { lastActive: new Date() } });
     } catch (error) {
       console.error("Error updating last active:", error);
@@ -136,7 +129,7 @@ const User = {
 // Main function to connect and initialize the database
 const initializeDatabase = async () => {
   await connectToMongoDB();
-  await createUsersCollection();
+  await createuserCollection();
   await listCollections();
 };
 
