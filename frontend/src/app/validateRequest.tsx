@@ -33,7 +33,7 @@ export default async function getUser(): Promise<string | null> {
     );
 
     const { user, session } = sessionInfo.data;
-    if (session && session.fresh) {
+    if (session && user) {
       return user.username;
     }
 
