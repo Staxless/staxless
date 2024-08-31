@@ -1,11 +1,28 @@
-"use client";
-// /pages/login.js
-import { FormEvent, useState } from "react";
+// /pages/dashboard.js
+import getUser from "@/app/validateRequest";
+import { redirect } from "next/navigation";
 
-interface ApiError extends Error {
-  response?: Response;
+export default async function Dashboard() {
+  let user;
+  try {
+    user = await getUser();
+    console.log("page user", user);
+  } catch (error) {
+    console.log(error);
+  }
+
+  if (!user) {
+    console.log("no user");
+    return redirect("/login");
+  }
+
+  return (
+    <>
+      <h1>Hello {user} </h1>
+    </>
+  );
 }
 
-export default function Dashboard() {
-  return <h1> Hello Auth User </h1>;
+interface ActionResult {
+  error: string | null;
 }

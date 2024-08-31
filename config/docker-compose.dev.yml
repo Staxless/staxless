@@ -50,11 +50,30 @@ services:
         aliases:
           - "back-gate"
 
-  # # Authentication Service
-  # # ---------------------
-  # # This service handles authentication and user management.
-  # #
+  # MongoDb Service
+  # ---------------------
+  # This service acts as the central database for all the backend services.
+  mongodb-service:
+    image: mongo:latest
+    container_name: mongodb-service
+    ports:
+      - "27017:27017"
+    restart: always
+    logging:
+      options:
+        max-size: 1g
+    command: mongod --quiet --logpath /dev/null
+    # volumes:
+    #   - mongo_data:/data/db
+    networks:
+      backend:
+        aliases:
+          - "back-gate"
 
+  # Authentication Service
+  # ---------------------
+  # This service handles authentication and user management.
+  #
   auth-service:
     image: app_auth_service
     container_name: auth-service
@@ -68,7 +87,7 @@ services:
       - "8000:8000" # Map container port 3000 to host port 3000 for frontend
     volumes:
       - ../microservices/auth-service/src:/home/node/src
-      - ../microservices/auth-service/server.js:/home/node/server.js
+      - ../microservices/auth-service/src/server.js:/home/node/server.js
     networks:
       backend:
         aliases:
@@ -78,26 +97,26 @@ services:
   # ---------------------
   # This service manages the application's database operations.
   #
-  database-service:
-    # image: app_databse_service
-    container_name: database-service
+  user-service:
+    image: app_user_service
+    container_name: user-service
     build:
-      context: ../microservices/database-service/
-      dockerfile: ./dockerfiles/database-service.Dockerfile
+      context: ../microservices/user-service/
+      dockerfile: ./dockerfiles/user-service.Dockerfile
       target: dev
     env_file:
-      - path: ../microservices/database-service/secrets/.env
+      - path: ../microservices/user-service/secrets/.env
     ports:
       - "8002:8002" # Map container port 3000 to host port 3000 for frontend
     volumes:
-      - ../microservices/database-service/src:/home/node/src
-      - ../microservices/database-service/server.js:/home/node/server.js
+      - ../microservices/user-service/src:/home/node/src
+      - ../microservices/user-service/src/server.js:/home/node/server.js
     expose:
       - "8002"
     networks:
       backend:
         aliases:
-          - "db"
+          - "user"
 
   # Stripe Service
   # ---------------------
@@ -116,7 +135,7 @@ services:
 
     volumes:
       - ../microservices/stripe-service/src:/home/node/src
-      - ../microservices/stripe-service/server.js:/home/node/server.js
+      - ../microservices/stripe-service/src/server.js:/home/node/server.js
     networks:
       backend:
         aliases:

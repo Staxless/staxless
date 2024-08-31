@@ -11,7 +11,7 @@ WORKDIR /home/node
 COPY --chown=node:node ["../package.json", "./"]
 
 # Install the necessary packages: axios, cors, stripe, and express
-RUN ["npm", "install", "express", "dotenv", "@supabase/supabase-js", "bcrypt", "axios", "cookie-parser"]
+RUN ["npm", "install", "express", "dotenv", "axios", "cookie-parser", "mongodb-tools","mongoose"]
 
 # Copy the rest of the application files and change ownership to 'node' user
 COPY --chown=node:node ["../", "."] # Consider specifying specific files for better control
@@ -23,7 +23,7 @@ COPY --chown=node:node ["../", "."] # Consider specifying specific files for bet
 FROM builder AS dev
 
 # Install 'nodemon' for development purposes and save it as a dev dependency
-RUN ["npm", "install","nodemon", "--save-dev"]
+RUN ["npm", "install","nodemon","mongo", "--save-dev"]
 
 # Expose port 8003 for development
 EXPOSE 8002
