@@ -91,6 +91,9 @@ const DocItem = memo(({ item }: { item: DocItem }) => {
   );
 });
 
+// Set the display name for the DocItem component
+DocItem.displayName = "DocItem";
+
 export function DocNavigation({ docStructure }: DocNavigationProps) {
   return (
     <nav className="w-64 lg:w-72 flex-shrink-0 border-r border-border h-[calc(100vh-4rem)]">

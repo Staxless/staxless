@@ -15,14 +15,14 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 /**
- * Type definition for a feature.
- *
- * @typedef {Object} Feature
- * @property {string} title - The title of the feature.
- * @property {string} description - A brief description of the feature.
- * @property {string} image - The path to the feature image.
- * @property {string[]} benefits - A list of benefits associated with the feature.
+ * Interface definition for a feature.
  */
+interface Feature {
+  title: string;
+  description: string;
+  image: string;
+  benefits: string[];
+}
 
 const features: Feature[] = [
   {

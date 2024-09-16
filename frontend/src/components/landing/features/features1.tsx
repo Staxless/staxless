@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
@@ -52,6 +52,16 @@ const features: Feature[] = [
 export default function Features() {
   const [activeFeature, setActiveFeature] = useState(0);
 
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    index: number,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      setActiveFeature(index);
+      event.preventDefault();
+    }
+  };
+
   return (
     <section className="bg-background py-20">
       <div className="container mx-auto px-4">
@@ -64,7 +74,7 @@ export default function Features() {
           </p>
         </div>
         <div className="flex flex-col lg:flex-row gap-12">
-          <div className="lg:w-1/3">
+          <div className="lg:w-1/3" role="tablist" aria-label="Feature list">
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -74,16 +84,14 @@ export default function Features() {
                     : "hover:bg-muted"
                 }`}
                 onClick={() => setActiveFeature(index)}
-                role="button"
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                role="tab"
+                tabIndex={0}
                 aria-selected={activeFeature === index}
-                aria-labelledby={`feature-title-${index}`}
+                aria-controls={`feature-panel-${index}`}
+                id={`feature-tab-${index}`}
               >
-                <h3
-                  id={`feature-title-${index}`}
-                  className="text-xl font-semibold mb-2"
-                >
-                  {feature.title}
-                </h3>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p
                   className={
                     activeFeature === index
@@ -97,30 +105,37 @@ export default function Features() {
             ))}
           </div>
           <div className="lg:w-2/3">
-            <div className="bg-card rounded-lg shadow-lg p-8">
-              <Image
-                src={features[activeFeature].image}
-                alt={features[activeFeature].title}
-                width={800}
-                height={450}
-                className="rounded-lg mb-8"
-              />
-              <h3 className="text-2xl font-bold mb-4">
-                {features[activeFeature].title}
-              </h3>
-              <ul className="space-y-4 mb-8">
-                {features[activeFeature].details.map((detail, index) => (
-                  <li key={index} className="flex items-start">
-                    <ChevronRight className="w-5 h-5 text-primary mr-2 mt-1" />
-                    <span>{detail}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button size="lg">
-                Learn More
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                role="tabpanel"
+                id={`feature-panel-${index}`}
+                aria-labelledby={`feature-tab-${index}`}
+                hidden={activeFeature !== index}
+                className="bg-card rounded-lg shadow-lg p-8"
+              >
+                <Image
+                  src={feature.image}
+                  alt={feature.title}
+                  width={800}
+                  height={450}
+                  className="rounded-lg mb-8"
+                />
+                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
+                <ul className="space-y-4 mb-8">
+                  {feature.details.map((detail, detailIndex) => (
+                    <li key={detailIndex} className="flex items-start">
+                      <ChevronRight className="w-5 h-5 text-primary mr-2 mt-1" />
+                      <span>{detail}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button size="lg">
+                  Learn More
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
