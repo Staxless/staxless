@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import { cookies } from "next/headers";
+import getUser from "./app/validateRequest";
 
-// Specify protected and public routes
+// Define protected and public routes
 const protectedRoutes = ["/dashboard"];
 const publicRoutes = ["/login", "/register"];
 

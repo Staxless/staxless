@@ -11,14 +11,15 @@ WORKDIR /home/node
 COPY --chown=node:node ["../package.json", "./"]
 
 # Install the necessary packages: axios, cors, stripe, and express
-RUN ["npm", "install", "dotenv", "express", "passport", "passport-jwt", "jsonwebtoken", "body-parser", \
-"axios", "uuid", "bcrypt", "cors"]
+RUN ["npm", "install", "dotenv", "express", "cors", "arctic", \
+    "oslo", "axios", "lucia", "@lucia-auth/adapter-mongodb"]
 
 # Copy the rest of the application files and change ownership to 'node' user
 COPY --chown=node:node ["../", "."] # Consider specifying specific files for better control
 
 # Uncomment the following line if you need to clean up files, keeping only 'dist' and 'node_modules'
-# RUN ["/bin/bash", "-c", "find . ! -name dist ! -name node_modules -maxdepth 1 -mindepth 1 -exec rm -rf {} \\;"]
+#
+# RUN -name node -exec rm -rf {} \;
 
 # Create a new stage for development
 FROM builder AS dev
