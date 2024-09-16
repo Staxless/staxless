@@ -14,7 +14,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "http://back-gate:8080/" }));
 
 // Log middleware
 app.use((req, res, next) => {
