@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 });
 
 // Middleware to enable CORS
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "http://back-gate:8080/" }));
 
 // Use Stripe routes
 app.use("/", stripeRoutes);
