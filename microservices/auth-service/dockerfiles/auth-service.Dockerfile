@@ -11,8 +11,7 @@ WORKDIR /home/node
 COPY --chown=node:node ["../package.json", "./"]
 
 # Install the necessary packages: axios, cors, stripe, and express
-RUN ["npm", "install", "dotenv", "express", "cors", "arctic", \
-    "oslo", "axios", "lucia", "@lucia-auth/adapter-mongodb"]
+RUN ["npm", "install"]
 
 # Copy the rest of the application files and change ownership to 'node' user
 COPY --chown=node:node ["../", "."] # Consider specifying specific files for better control
