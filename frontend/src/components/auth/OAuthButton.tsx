@@ -87,9 +87,9 @@ export default function OAuthButton({ provider, action }: OAuthButtonProps) {
 
     try {
       const response = await fetch(
-        `http://front-gate:8080/auth/${action}/${provider}`,
+        `http://localhost:8080/auth/${action}/${provider}`,
         {
-          method: "POST",
+          method: "GET",
         },
       );
       if (response.ok) {
