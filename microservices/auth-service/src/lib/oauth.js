@@ -150,7 +150,7 @@ export async function handleCallback(provider, req, res) {
       const session = await lucia.createSession(userResponse._id, {});
       const sessionCookie = lucia.createSessionCookie(session.id).serialize();
       res.cookie(sessionCookie);
-      return res.redirect("http://localhost:3000/dashboard");
+      return res.redirect("http://localhost:3000/");
     }
 
     if (existingSession && existingSession.fresh) {
