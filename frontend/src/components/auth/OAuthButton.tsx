@@ -103,6 +103,7 @@ export default function OAuthButton({
     setError(null);
 
     try {
+
       const endpoint = `http://localhost:3000/auth/${action}/${provider}`;
       window.location.href = endpoint;
       setIsLoading(false);
@@ -110,6 +111,7 @@ export default function OAuthButton({
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unknown error occurred",
+
       );
       setIsLoading(false);
     }
