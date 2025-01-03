@@ -11,7 +11,7 @@ import Features from "@/components/landing/features/features3";
 import Hero from "@/components/landing/hero/splitHero";
 import Pricing from "@/components/landing/pricing/oneTimePricing";
 import Pricing2 from "@/components/landing/pricing/togglePricing";
-import Navbar from "@/app/Navbar";
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Landing Page",
