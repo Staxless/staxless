@@ -1,21 +1,20 @@
 /**
- * OAuthButton Component
- *
- * This component renders a button for OAuth authentication with the specified provider.
- * It supports various OAuth providers and displays an appropriate icon and styling based on the provider.
- * The button triggers the OAuth flow on click by sending a POST request to the authentication endpoint.
- *
- * @module components/ui/oauth-button
+ * @file OAuthButton.tsx
+ * @description Provides a reusable OAuth button component for various providers
+ * @module components/OAuthButton
  */
 
-import { Button } from "@/components/ui/button";
+// External imports
+import { useState } from "react";
 import { Github, Facebook, Twitter, Twitch, Apple, Gitlab } from "lucide-react";
 import { FaGoogle, FaMicrosoft, FaDiscord, FaBitbucket } from "react-icons/fa";
 import { SiAuth0, SiOkta } from "react-icons/si";
 
+// Internal imports
+import { Button } from "@/components/ui/button";
+
 /**
- * List of supported OAuth providers.
- * @type {string}
+ * @description Types of OAuth providers supported by the component
  */
 type ConfiguredProvider =
   | "google"
@@ -32,14 +31,27 @@ type ConfiguredProvider =
   | "twitch";
 
 /**
- * Props for the OAuthButton component.
+ * @description Form data structure for registration
  */
-interface OAuthButtonProps {
-  provider: string; // OAuth provider (e.g., "google", "github")
-  action: "login" | "register"; // Action to perform (login or register)
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
-// Configuration for OAuth providers including icons and colors.
+/**
+ * @description Props for the OAuthButton component
+ */
+interface OAuthButtonProps {
+  provider: string;
+  action: "login" | "register";
+  onRedirect: (url: string) => void;
+  formData?: FormData;
+}
+
+/**
+ * @description Configuration for each OAuth provider
+ */
 const providerConfig = {
   google: { icon: FaGoogle, color: "bg-[#4285F4] hover:bg-[#357AE8]" },
   github: { icon: Github, color: "bg-[#24292e] hover:bg-[#1c2126]" },
@@ -56,61 +68,75 @@ const providerConfig = {
 } as const;
 
 /**
- * OAuthButton component renders a button for OAuth authentication with the specified provider.
- *
- * @param provider - The OAuth provider to use (e.g., "google", "github").
- * @param action - The action for the button, either "login" or "register".
- *
- * @returns The OAuthButton component.
+ * @description OAuth button component for various providers
+ * @param {OAuthButtonProps} props - The component props
+ * @returns {JSX.Element} The rendered OAuth button
  */
-export default function OAuthButton({ provider, action }: OAuthButtonProps) {
+export default function OAuthButton({
+  provider,
+  action,
+  onRedirect,
+  formData,
+}: OAuthButtonProps): JSX.Element {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const isConfigured = provider in providerConfig;
   const { icon: Icon, color } = isConfigured
     ? providerConfig[provider as ConfiguredProvider]
     : { icon: () => null, color: "bg-gray-500 hover:bg-gray-600" };
 
-  // Button text based on the action and provider
   const buttonText = `${action === "login" ? "Login" : "Register"} with ${
     provider.charAt(0).toUpperCase() + provider.slice(1)
   }`;
 
   /**
-   * Handles button click event to initiate OAuth flow.
-   *
-   * Sends a POST request to the OAuth provider and redirects the user based on the response.
+   * @description Handles the button click event
    */
   const handleClick = async () => {
     if (!isConfigured) {
-      console.error(`Provider ${provider} is not configured`);
+      setError(`Provider ${provider} is not configured`);
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const response = await fetch(
-        `http://localhost:8080/auth/${action}/${provider}`,
-        {
-          method: "GET",
-        },
+
+      const endpoint = `http://localhost:3000/auth/${action}/${provider}`;
+      window.location.href = endpoint;
+      setIsLoading(false);
+      onRedirect(endpoint);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred",
+
       );
-      if (response.ok) {
-        const data = await response.json();
-        window.location.href = data.url;
-      } else {
-        console.error("Failed to initiate OAuth flow");
-      }
-    } catch (error) {
-      console.error("Error initiating OAuth flow:", error);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Button
-      className={`w-full ${color} text-white flex items-center justify-center`}
-      onClick={handleClick}
-      disabled={!isConfigured}
-    >
-      {Icon && <Icon className="mr-2 h-4 w-4" />}
-      <span className="truncate">{buttonText}</span>
-    </Button>
+    <div>
+      <Button
+        className={`w-full ${color} text-white flex items-center justify-center`}
+        onClick={handleClick}
+        disabled={!isConfigured || isLoading}
+        aria-label={buttonText}
+        aria-busy={isLoading}
+        aria-disabled={!isConfigured || isLoading}
+      >
+        {Icon && <Icon className="mr-2 h-4 w-4" aria-hidden="true" />}
+        <span className="truncate">
+          {isLoading ? "Loading..." : buttonText}
+        </span>
+      </Button>
+      {error && (
+        <p className="text-red-500 text-sm mt-2" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }

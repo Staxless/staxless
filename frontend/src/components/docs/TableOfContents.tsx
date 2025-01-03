@@ -1,23 +1,27 @@
+/**
+ * @file TableOfContents Component
+ * @module TableOfContents
+ * @description A React component that generates a table of contents for an article based on h2 elements.
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-/**
- * Interface representing an item in the Table of Contents (TOC).
- */
+// Types and Interfaces
 interface TOCItem {
   id: string;
   text: string;
 }
 
 /**
- * TableOfContents component generates a table of contents for the article based on h2 elements.
+ * @function TableOfContents
+ * @description Generates a table of contents for the article based on h2 elements.
  * It provides smooth scrolling and navigation functionality to the headings.
- *
- * @returns {JSX.Element} - The TableOfContents component.
+ * @returns {JSX.Element} The TableOfContents component.
  */
-export function TableOfContents() {
+export function TableOfContents(): JSX.Element {
   const [toc, setToc] = useState<TOCItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -58,6 +62,11 @@ export function TableOfContents() {
     }
   }, []);
 
+  /**
+   * @function handleClick
+   * @description Handles the click event on a table of contents item.
+   * @param {string} id - The id of the heading to scroll to.
+   */
   const handleClick = (id: string) => {
     if (!id) {
       console.warn("Attempted to navigate to an empty id");
@@ -104,3 +113,5 @@ export function TableOfContents() {
     </nav>
   );
 }
+
+export default TableOfContents;

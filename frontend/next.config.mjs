@@ -4,6 +4,9 @@ import rehypeHighlight from "rehype-highlight";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: true,
+  },
   // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   // Optionally, add any other Next.js config below
@@ -20,6 +23,14 @@ const nextConfig = {
       {
         source: "/api/:path*",
         destination: "http://front-gate:8080/:path*",
+      },
+      {
+        source: "/auth/:provider/:path*",
+        destination: "http://auth-service:8000/auth/:provider/:path*",
+      },
+      {
+        source: "/auth/logout",
+        destination: "http://auth-service:8000/auth/logout",
       },
     ];
   },

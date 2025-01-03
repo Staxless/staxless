@@ -1,6 +1,21 @@
+/**
+ * @file Blog Posts Retrieval Utility
+ * @module getBlogPosts
+ * @description A utility function to retrieve all blog posts by fetching MDX file content from the "blog" directory.
+ */
+
 import getAllMDXContent from "@/lib/getAllMDXContent";
 import getMDXFileContent from "@/lib/getMDXFileContent";
 
+/**
+ * @interface BlogPost
+ * @description Represents a blog post with its metadata
+ * @property {string} slug - The unique identifier for the blog post
+ * @property {string} title - The title of the blog post
+ * @property {string} date - The publication date of the blog post
+ * @property {string} excerpt - A short summary or excerpt of the blog post
+ * @property {string[]} authors - An array of author names for the blog post
+ */
 interface BlogPost {
   slug: string;
   title: string;
@@ -9,10 +24,23 @@ interface BlogPost {
   authors: string[];
 }
 
+/**
+ * @interface Blogposts
+ * @description Represents a collection of blog posts
+ * @property {BlogPost[]} posts - An array of BlogPost objects
+ */
 interface Blogposts {
   posts: BlogPost[];
 }
 
+/**
+ * @interface MDXData
+ * @description Represents the metadata extracted from an MDX file
+ * @property {string} [title] - The title of the blog post
+ * @property {string} [date] - The publication date of the blog post
+ * @property {string} [excerpt] - A short summary or excerpt of the blog post
+ * @property {string[]} [authors] - An array of author names for the blog post
+ */
 interface MDXData {
   title?: string;
   date?: string;
@@ -26,7 +54,7 @@ interface MDXData {
  * This function gets the list of all MDX files in the "blog" directory and fetches their content.
  * It maps the content to a standardized `BlogPost` format, including title, date, excerpt, and authors.
  *
- * @returns A promise that resolves to an object containing an array of `BlogPost` objects.
+ * @returns {Promise<Blogposts>} A promise that resolves to an object containing an array of `BlogPost` objects.
  */
 export async function getBlogPosts(): Promise<Blogposts> {
   try {

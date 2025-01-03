@@ -1,15 +1,11 @@
 /**
- * Features Component
- *
- * This component displays a list of features with associated icons and descriptions.
- * It utilizes a responsive grid layout to showcase each feature in a card format.
- *
+ * @file Features Component
  * @module Features
- * @returns {JSX.Element} The rendered Features component
+ * @description Displays a list of features with associated icons and descriptions in a responsive grid layout.
  */
 
 import {
-  LucideIcon,
+  type LucideIcon,
   Zap,
   Shield,
   BarChart,
@@ -21,21 +17,14 @@ import {
   Lock,
 } from "lucide-react";
 
-/**
- * Type definition for a feature.
- *
- * @typedef {Object} Feature
- * @property {string} title - The title of the feature.
- * @property {string} description - A brief description of the feature.
- * @property {LucideIcon} icon - The icon representing the feature.
- */
-
+// Types and Interfaces
 type Feature = {
   title: string;
   description: string;
   icon: LucideIcon;
 };
 
+// Array of feature items
 const features: Feature[] = [
   {
     title: "Lightning Fast",
@@ -87,7 +76,12 @@ const features: Feature[] = [
   },
 ];
 
-export default function Features() {
+/**
+ * @function Features
+ * @description Renders a section displaying a grid of feature cards.
+ * @returns {JSX.Element} The Features component.
+ */
+export default function Features(): JSX.Element {
   return (
     <section className="bg-background py-20">
       <div className="container mx-auto px-4">

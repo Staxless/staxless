@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY ["package.json", "./"]
-RUN ["npm", "install", "axios", "next@latest", "react@latest", "react-dom@latest"]
+RUN ["npm", "install", "axios", "next@latest", "react@latest", "react-dom@latest", "react-cookie"]
 
 FROM base as dev
 WORKDIR /app

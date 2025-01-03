@@ -159,7 +159,7 @@ services:
   #   #   env_file: ".env"
   #   #   ports:
   #   #     # Maps container port 8005 to host port 8005 for communication with the service
-  #   #     - "800X:800X" # Map container port 8005 to host port 800X
+  #   #     - "800X:800X" # Map container port 800X to host port 800X
   #   #   # Specifies the command to run when the container for "my-new-service" starts
   #   #   command: npm run start
   #   #   networks:

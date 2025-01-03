@@ -1,6 +1,18 @@
+/**
+ * @file MDX Content Retrieval Utility
+ * @module getAllMDXContent
+ * @description A utility function to retrieve all MDX file paths and their slugs from a specified directory within the app directory.
+ */
+
 import path from "path";
 import { glob } from "glob";
 
+/**
+ * @interface MDXFile
+ * @description Represents an MDX file with its file path and slug
+ * @property {string} filePath - The full path to the MDX file
+ * @property {string} slug - The slug derived from the file name
+ */
 interface MDXFile {
   filePath: string;
   slug: string;
@@ -11,16 +23,14 @@ interface MDXFile {
  *
  * This function searches for MDX files in the specified directory, excluding directories named "components".
  *
- * @param dirName - The name of the directory to search within (e.g., "posts").
- * @returns A promise that resolves to an array of MDXFile objects, each containing the file path and slug.
+ * @param {string} dirName - The name of the directory to search within (e.g., "posts").
+ * @returns {Promise<MDXFile[]>} A promise that resolves to an array of MDXFile objects, each containing the file path and slug.
  */
 async function getAllMDXContent(dirName: string): Promise<MDXFile[]> {
   const rootDir = process.cwd();
-
-  // Pattern to find the app directory
   const appDirPattern = path.join(rootDir, "**/app");
+
   try {
-    // Find app directories
     const appDirs = await glob(appDirPattern);
 
     if (appDirs.length === 0) {
@@ -33,10 +43,7 @@ async function getAllMDXContent(dirName: string): Promise<MDXFile[]> {
     }
 
     const appDir = appDirs[0];
-
-    // Pattern to find the specified directory within the app directory
     const dirGlobPattern = path.join(appDir, "**", dirName);
-
     const dirs = await glob(dirGlobPattern);
 
     if (dirs.length === 0) {
@@ -44,7 +51,6 @@ async function getAllMDXContent(dirName: string): Promise<MDXFile[]> {
       return [];
     }
 
-    // Select a suitable directory, excluding directories named "components"
     let selectedDir: string | null = null;
     for (const dir of dirs) {
       if (!dir.includes(path.join("components", dirName))) {
@@ -60,7 +66,6 @@ async function getAllMDXContent(dirName: string): Promise<MDXFile[]> {
       return [];
     }
 
-    // Pattern to find all MDX files in the selected directory, excluding "components"
     const mdxGlobPattern = path.join(
       selectedDir,
       "**",
@@ -68,12 +73,10 @@ async function getAllMDXContent(dirName: string): Promise<MDXFile[]> {
       "*.mdx",
     );
 
-    // Find MDX files
     const files = await glob(mdxGlobPattern, { nodir: true });
 
-    // Map MDX files to MDXFile objects with paths and slugs
     const mdxFiles = files.map((filePath) => {
-      const relativePath = path.relative(selectedDir, filePath);
+      const relativePath = path.relative(selectedDir!, filePath);
       const slug = path.basename(relativePath, ".mdx");
       return { filePath, slug };
     });

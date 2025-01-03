@@ -1,9 +1,13 @@
+/**
+ * @file app/robots.ts
+ * @description Generates the robots.txt configuration for the website
+ */
+
 import type { MetadataRoute } from "next";
 
 /**
  * Generates the robots.txt configuration for the website.
- *
- * @returns The robots.txt configuration object.
+ * @returns {MetadataRoute.Robots} The robots.txt configuration object
  */
 export default function robots(): MetadataRoute.Robots {
   return {

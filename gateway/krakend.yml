@@ -32,6 +32,26 @@ cache_ttl: 300s
 
 # API Endpoints Configuration
 endpoints:
+  - endpoint: /auth/register/{provider} # Register endpoint
+    method: GET
+    output_encoding: no-op # No encoding for output
+    headers_to_pass:
+      - Content-Type
+      - Authorization # Pass Content-Type and Authorization headers
+    extra_config:
+      github.com/devopsfaith/krakend/proxy:
+        http_proxy:
+          request_headers:
+            Content-Type: application/json # Set Content-Type for proxy request
+          response_headers:
+            Set-Cookie: "*" # Set Cookie header in response
+    backend:
+      - url_pattern: /auth/register/{provider} # Backend URL pattern for register
+        encoding: no-op
+        method: GET
+        host:
+          - http://auth-service:8000 # Backend host for register
+
   - endpoint: /auth/login/{provider} # Login endpoint
     method: GET
     output_encoding: no-op # No encoding for output
@@ -95,19 +115,19 @@ endpoints:
         host:
           - http://auth-service:8000 # Backend host for token validation
 
-  # - endpoint: /checkout # Checkout endpoint
-  #   input_query_strings:
-  #     - "*" # Accept any query string
-  #   method: POST
-  #   output_encoding: json
-  #   backend:
-  #     - url_pattern: /checkout # Backend URL pattern for checkout
-  #       encoding: json
-  #       sd: static # Use static discovery
-  #       method: POST
-  #       disable_host_sanitize: true # Disable host sanitization
-  #       host:
-  #         - http://stripe-service:8003 # Backend host for checkout
+  - endpoint: /checkout # Checkout endpoint
+    input_query_strings:
+      - "*" # Accept any query string
+    method: POST
+    output_encoding: json
+    backend:
+      - url_pattern: /checkout # Backend URL pattern for checkout
+        encoding: json
+        sd: static # Use static discovery
+        method: POST
+        disable_host_sanitize: true # Disable host sanitization
+        host:
+          - http://stripe-service:8003 # Backend host for checkout
 
   # - endpoint: /generate-text # Generate text endpoint
   #   input_query_strings:

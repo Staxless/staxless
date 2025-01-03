@@ -1,6 +1,6 @@
 /**
- * @file MongoDB connection and session collection management
- * @description This module handles the connection to MongoDB, manages the session collection schema, and provides methods for interacting with session data.
+ * @file sessionModel.js
+ * @description MongoDB connection and session collection management
  * @module sessionDb
  */
 
@@ -61,7 +61,6 @@ const createSessionCollection = async () => {
   try {
     const collections = await db.listCollections({ name: "session" }).toArray();
     if (collections.length === 0) {
-      // Collection does not exist, create it with validation
       await db.createCollection("session", {
         validator: { $jsonSchema: sessionSchema },
       });
@@ -92,6 +91,10 @@ const listCollections = async () => {
   }
 };
 
+/**
+ * Session operations object
+ * @type {Object}
+ */
 export const Session = {
   /**
    * Create a new session entry.
@@ -127,7 +130,11 @@ export const Session = {
   // Add more methods as needed
 };
 
-// Main function to connect and initialize the database
+/**
+ * Initialize the database connection and setup collections.
+ * @returns {Promise<void>}
+ * @throws {Error} If there's an error initializing the database.
+ */
 const initializeDatabase = async () => {
   await connectToMongoDB();
   await createSessionCollection();

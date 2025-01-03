@@ -1,12 +1,8 @@
 /**
- * Hero Component
- *
- * This component renders a hero section for the landing page, including a title,
- * description, action buttons, and a promotional image. It features a background
- * gradient and overlay elements for visual effects.
- *
+ * @file Hero Component
  * @module Hero
- * @returns {JSX.Element} The rendered Hero component
+ * @description Renders a hero section for the landing page, including a title,
+ * description, action buttons, and a promotional image with visual effects.
  */
 
 import { Button } from "@/components/ui/button";
@@ -14,16 +10,12 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 /**
- * Hero Component
- *
- * This component is used to showcase the main features of the platform and encourage
- * users to engage with the site through action buttons. It includes a headline, a
- * description, and a call-to-action with buttons, along with a visually appealing
- * image and background effects.
- *
+ * @function Hero
+ * @description Showcases the main features of the platform and encourages
+ * user engagement through action buttons.
  * @returns {JSX.Element} The Hero section of the landing page
  */
-export default function Hero() {
+export default function Hero(): JSX.Element {
   return (
     <section className="relative bg-gradient-to-br from-primary/20 to-secondary/20 py-20 sm:py-32 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +41,7 @@ export default function Hero() {
           <div className="mt-12 lg:mt-0 lg:w-1/2">
             <div className="relative">
               <Image
-                src="./public/placeholder.svg"
+                src="@/public/placeholder.svg"
                 alt="App interface"
                 width={600}
                 height={400}
