@@ -1,10 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { Check, Minus } from "lucide-react";
+/**
+ * @file Pricing Component
+ * @module Pricing
+ * @description Renders a pricing table with different plans and their features.
+ */
 
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Check, Minus, Loader2 } from "lucide-react";
+import { getProducts, Product } from "@/app/actions/getProducts";
+
+// Types and Interfaces
 type PricingPlan = {
   name: string;
   price: string;
   buttonText: string;
+  priceId: string;
 };
 
 type Feature = {
@@ -12,28 +25,125 @@ type Feature = {
   [key: string]: string | boolean;
 };
 
-const plans: PricingPlan[] = [
-  { name: "Free", price: "$0", buttonText: "Get started" },
-  { name: "Pro", price: "$49", buttonText: "Try it free" },
-  { name: "Enterprise", price: "Custom", buttonText: "Contact us" },
-];
+// Constants
+const CACHE_KEY = "stripePricingPlans";
+const CACHE_EXPIRATION = 1000 * 60 * 60; // 1 hour in milliseconds
 
-const features: Feature[] = [
-  { name: "Users", free: "1", pro: "5", enterprise: "Unlimited" },
-  { name: "Projects", free: "3", pro: "50", enterprise: "Unlimited" },
-  { name: "Storage", free: "1GB", pro: "100GB", enterprise: "1TB" },
-  {
-    name: "Support",
-    free: "Community",
-    pro: "Priority",
-    enterprise: "24/7 Dedicated",
-  },
-  { name: "Analytics", free: "Basic", pro: "Advanced", enterprise: "Custom" },
-  { name: "API Access", free: false, pro: true, enterprise: true },
-  { name: "Custom Integrations", free: false, pro: false, enterprise: true },
-];
+/**
+ * @function Pricing
+ * @description Renders a pricing table component with plan details and features.
+ * @returns {JSX.Element} The Pricing component
+ */
+export default function Pricing(): JSX.Element {
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default function Pricing() {
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setIsLoading(true);
+
+        // Check for cached data
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+          const { data, timestamp } = JSON.parse(cachedData);
+          if (Date.now() - timestamp < CACHE_EXPIRATION) {
+            setPlans(data.plans);
+            setFeatures(data.features);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // If no valid cache, fetch from API
+        const products = await getProducts();
+        const formattedPlans = formatPlans(products);
+        const extractedFeatures = extractFeatures(products);
+
+        setPlans(formattedPlans);
+        setFeatures(extractedFeatures);
+
+        // Cache the fetched data
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            data: { plans: formattedPlans, features: extractedFeatures },
+            timestamp: Date.now(),
+          }),
+        );
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+        setError("Failed to load pricing plans. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  /**
+   * @function formatPlans
+   * @description Formats the product data into pricing plans.
+   * @param {Product[]} products - The array of products from the API.
+   * @returns {PricingPlan[]} Formatted pricing plans.
+   */
+  const formatPlans = (products: Product[]): PricingPlan[] => {
+    return products.map((product) => ({
+      name: product.name,
+      price: product.default_price
+        ? new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: product.default_price.currency,
+            minimumFractionDigits: 0,
+          }).format(product.default_price.unit_amount / 100) +
+          (product.default_price.recurring
+            ? `/${product.default_price.recurring.interval}`
+            : "")
+        : "Custom",
+      buttonText: "Get Started",
+      priceId: product.default_price?.id || "",
+    }));
+  };
+
+  /**
+   * @function extractFeatures
+   * @description Extracts and formats features from the products.
+   * @param {Product[]} products - The array of products from the API.
+   * @returns {Feature[]} Extracted and formatted features.
+   */
+  const extractFeatures = (products: Product[]): Feature[] => {
+    const allFeatures = products.flatMap((product) => product.features || []);
+    const uniqueFeatures = Array.from(new Set(allFeatures));
+
+    return uniqueFeatures.map((feature) => {
+      const featureObj: Feature = { name: feature };
+      products.forEach((product) => {
+        featureObj[product.name.toLowerCase()] =
+          product.features?.includes(feature) || false;
+      });
+      return featureObj;
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 p-4">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
     <section className="bg-background py-20">
       <div className="container mx-auto px-4">
@@ -53,7 +163,12 @@ export default function Pricing() {
                     <div className="text-2xl font-bold">{plan.name}</div>
                     <div className="mt-2 text-3xl font-bold">{plan.price}</div>
                     <div className="mt-4">
-                      <Button size="sm">{plan.buttonText}</Button>
+                      <Link
+                        href={`/auth/register?tier=${encodeURIComponent(plan.name)}&price=${encodeURIComponent(plan.priceId)}`}
+                        passHref
+                      >
+                        <Button size="sm">{plan.buttonText}</Button>
+                      </Link>
                     </div>
                   </th>
                 ))}

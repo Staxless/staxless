@@ -1,7 +1,34 @@
-import { useState } from "react";
+/**
+ * @file TogglePricing Component
+ * @module TogglePricing
+ * @description A React component that displays pricing plans with toggle functionality between monthly and yearly pricing.
+ */
+
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+
+// Types and Interfaces
+interface Price {
+  id: string;
+  currency: string;
+  unit_amount: number;
+  recurring?: {
+    interval: "month" | "year";
+  };
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  features?: string[];
+  prices: Price[];
+}
 
 type PricingPlan = {
   name: string;
@@ -10,49 +37,207 @@ type PricingPlan = {
   description: string;
   features: string[];
   buttonText: string;
+  monthlyPriceId: string;
+  yearlyPriceId: string;
 };
 
-const plans: PricingPlan[] = [
-  {
-    name: "Basic",
-    monthlyPrice: "$19",
-    yearlyPrice: "$190",
-    description: "For individuals and small teams",
-    features: ["1 user", "10 projects", "5GB storage", "Basic support"],
-    buttonText: "Get Basic",
-  },
-  {
-    name: "Pro",
-    monthlyPrice: "$49",
-    yearlyPrice: "$490",
-    description: "For growing businesses",
-    features: [
-      "5 users",
-      "50 projects",
-      "100GB storage",
-      "Priority support",
-      "Advanced analytics",
-    ],
-    buttonText: "Go Pro",
-  },
-  {
-    name: "Enterprise",
-    monthlyPrice: "Custom",
-    yearlyPrice: "Custom",
-    description: "For large organizations",
-    features: [
-      "Unlimited users",
-      "Unlimited projects",
-      "1TB storage",
-      "24/7 dedicated support",
-      "Custom integrations",
-    ],
-    buttonText: "Contact Sales",
-  },
-];
+// Constants
+const CACHE_KEY = "stripePricingPlans";
+const CACHE_EXPIRATION = 1000 * 60 * 60; // 1 hour in milliseconds
 
-export default function Pricing() {
+/**
+ * @function getProducts
+ * @description Fetches product data (placeholder implementation)
+ * @returns {Promise<Product[]>} Array of products
+ */
+async function getProducts(): Promise<Product[]> {
+  // This is a placeholder for the actual implementation
+  // In a real scenario, this would fetch data from an API
+  return [
+    {
+      id: "prod_basic",
+      name: "Basic",
+      description: "For individuals and small teams",
+      features: ["Feature 1", "Feature 2", "Feature 3"],
+      prices: [
+        {
+          id: "price_basic_monthly",
+          currency: "usd",
+          unit_amount: 1000,
+          recurring: { interval: "month" },
+        },
+        {
+          id: "price_basic_yearly",
+          currency: "usd",
+          unit_amount: 10000,
+          recurring: { interval: "year" },
+        },
+      ],
+    },
+    {
+      id: "prod_pro",
+      name: "Pro",
+      description: "For growing businesses",
+      features: [
+        "Feature 1",
+        "Feature 2",
+        "Feature 3",
+        "Feature 4",
+        "Feature 5",
+      ],
+      prices: [
+        {
+          id: "price_pro_monthly",
+          currency: "usd",
+          unit_amount: 2000,
+          recurring: { interval: "month" },
+        },
+        {
+          id: "price_pro_yearly",
+          currency: "usd",
+          unit_amount: 20000,
+          recurring: { interval: "year" },
+        },
+      ],
+    },
+    {
+      id: "prod_enterprise",
+      name: "Enterprise",
+      description: "For large organizations",
+      features: [
+        "Feature 1",
+        "Feature 2",
+        "Feature 3",
+        "Feature 4",
+        "Feature 5",
+        "Feature 6",
+        "Feature 7",
+      ],
+      prices: [
+        {
+          id: "price_enterprise",
+          currency: "usd",
+          unit_amount: 0,
+          recurring: { interval: "month" },
+        },
+      ],
+    },
+  ];
+}
+
+/**
+ * @function TogglePricing
+ * @description Renders a pricing section with toggle functionality between monthly and yearly pricing.
+ * @returns {JSX.Element} The TogglePricing component
+ */
+export default function TogglePricing(): JSX.Element {
   const [isYearly, setIsYearly] = useState(false);
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setIsLoading(true);
+
+        // Check for cached data
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+          const { data, timestamp } = JSON.parse(cachedData);
+          if (Date.now() - timestamp < CACHE_EXPIRATION) {
+            setPlans(data);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // If no valid cache, fetch from API
+        const products = await getProducts();
+        const formattedPlans = formatPlans(products);
+
+        setPlans(formattedPlans);
+
+        // Cache the fetched data
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            data: formattedPlans,
+            timestamp: Date.now(),
+          }),
+        );
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+        setError("Failed to load pricing plans. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  /**
+   * @function formatPlans
+   * @description Formats the product data into pricing plans
+   * @param {Product[]} products - Array of products
+   * @returns {PricingPlan[]} Formatted pricing plans
+   */
+  const formatPlans = (products: Product[]): PricingPlan[] => {
+    return products.map((product) => {
+      const monthlyPrice = product.prices.find(
+        (price) => price.recurring?.interval === "month",
+      );
+      const yearlyPrice = product.prices.find(
+        (price) => price.recurring?.interval === "year",
+      );
+
+      return {
+        name: product.name,
+        monthlyPrice: formatPrice(monthlyPrice),
+        yearlyPrice: formatPrice(yearlyPrice),
+        description: product.description || "",
+        features: product.features || [],
+        buttonText:
+          product.name === "Enterprise"
+            ? "Contact Sales"
+            : `Get ${product.name}`,
+        monthlyPriceId: monthlyPrice?.id || "",
+        yearlyPriceId: yearlyPrice?.id || "",
+      };
+    });
+  };
+
+  /**
+   * @function formatPrice
+   * @description Formats the price for display
+   * @param {Price | undefined} price - Price object
+   * @returns {string} Formatted price string
+   */
+  const formatPrice = (price: Price | undefined): string => {
+    if (!price) return "Custom";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: price.currency,
+      minimumFractionDigits: 0,
+    }).format(price.unit_amount / 100);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 p-4">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <section className="bg-background py-20">
@@ -76,37 +261,48 @@ export default function Pricing() {
             </span>
           </div>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className="flex flex-col p-6 bg-card rounded-lg shadow-lg border border-primary/10"
-            >
-              <h3 className="text-2xl font-bold">{plan.name}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {plan.description}
-              </p>
-              <div className="mt-4 text-4xl font-bold">
-                {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                <span className="text-base font-normal text-muted-foreground">
-                  {plan.name !== "Enterprise" &&
-                    (isYearly ? "/year" : "/month")}
-                </span>
+        {plans.length > 0 ? (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className="flex flex-col p-6 bg-card rounded-lg shadow-lg border border-primary/10"
+              >
+                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
+                <div className="mt-4 text-4xl font-bold">
+                  {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                  <span className="text-base font-normal text-muted-foreground">
+                    {plan.name !== "Enterprise" &&
+                      (isYearly ? "/year" : "/month")}
+                  </span>
+                </div>
+                <ul className="mt-6 space-y-4 flex-grow">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={`/auth/register?tier=${encodeURIComponent(plan.name)}&price=${encodeURIComponent(isYearly ? plan.yearlyPriceId : plan.monthlyPriceId)}`}
+                  passHref
+                >
+                  <Button className="mt-8 w-full" size="lg">
+                    {plan.buttonText}
+                  </Button>
+                </Link>
               </div>
-              <ul className="mt-6 space-y-4 flex-grow">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button className="mt-8" size="lg">
-                {plan.buttonText}
-              </Button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-yellow-500 p-4">
+            <p>No pricing plans are currently available.</p>
+          </div>
+        )}
       </div>
     </section>
   );
