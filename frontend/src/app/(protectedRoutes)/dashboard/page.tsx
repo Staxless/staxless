@@ -6,7 +6,7 @@
 import { headers } from "next/headers";
 import DashboardContent from "@/components/DashboardContent";
 import Footer from "@/components/Footer";
-import Navbar from "@/app/Navbar";
+import Navbar from "@/components/Navbar";
 
 /**
  * Dashboard component
