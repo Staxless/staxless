@@ -1,15 +1,17 @@
+/**
+ * @file CTA (Call To Action) Component
+ * @module CTA
+ * @description A React component for encouraging users to start a free trial or schedule a demo.
+ */
+
 import { Button } from "@/components/ui/button";
 
 /**
- * CTA (Call To Action) component for encouraging users to start a free trial
- * or schedule a demo.
- *
- * This component displays a section with a heading, a brief description, and
- * two call-to-action buttons for starting a free trial or scheduling a demo.
- *
- * @returns {JSX.Element} - The CTA component.
+ * @function CTA
+ * @description Renders a Call To Action component with buttons for free trial and demo scheduling.
+ * @returns {JSX.Element} The CTA component.
  */
-export default function CTA() {
+export default function CTA(): JSX.Element {
   return (
     <section className="bg-primary py-20">
       <div className="container mx-auto px-4 text-center">

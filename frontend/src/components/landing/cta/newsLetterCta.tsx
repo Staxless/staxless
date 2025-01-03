@@ -1,24 +1,28 @@
+/**
+ * @file CTA (Call To Action) Component
+ * @module CTA
+ * @description A React component for subscribing to a newsletter.
+ */
+
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 
 /**
- * CTA (Call To Action) component for subscribing to a newsletter.
- *
- * This component allows users to enter their email address to subscribe to a newsletter.
- * Upon submission, it shows a toast notification and clears the email input.
- *
- * @returns {JSX.Element} - The CTA component.
+ * @function CTA
+ * @description Renders a Call To Action component for newsletter subscription.
+ * @returns {JSX.Element} The CTA component.
  */
-export default function CTA() {
+export default function CTA(): JSX.Element {
   const [email, setEmail] = useState<string>("");
 
   /**
-   * Handles the form submission by preventing the default behavior,
-   * logging the submitted email, showing a toast notification, and clearing the email input.
-   *
-   * @param e - The form event.
+   * @function handleSubmit
+   * @description Handles the form submission for newsletter subscription.
+   * @param {React.FormEvent} e - The form event.
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

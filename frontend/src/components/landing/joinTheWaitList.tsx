@@ -1,27 +1,27 @@
+/**
+ * @file WaitlistHeroSimple Component
+ * @module WaitlistHeroSimple
+ * @description A React component that displays a section for users to join a waitlist by entering their email address.
+ */
+
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 
 /**
- * WaitlistHeroSimple Component
- *
- * This component displays a section where users can join a waitlist by entering
- * their email address. It includes a heading, a description, an email input field,
- * a submit button, and a message about early bird discounts.
- *
- * @module WaitlistHeroSimple
- * @returns {JSX.Element} The rendered WaitlistHeroSimple component
+ * @function WaitlistHeroSimple
+ * @description Renders a section where users can join a waitlist by entering their email address.
+ * @returns {JSX.Element} The WaitlistHeroSimple component
  */
-export default function WaitlistHeroSimple() {
+export default function WaitlistHeroSimple(): JSX.Element {
   const [email, setEmail] = useState<string>("");
 
   /**
-   * Handles the form submission.
-   *
-   * Prevents the default form submission behavior, logs the submitted email,
-   * displays a success toast notification, and clears the email input.
-   *
+   * @function handleSubmit
+   * @description Handles the form submission for the waitlist.
    * @param {React.FormEvent} e - The form submission event
    */
   const handleSubmit = (e: React.FormEvent) => {

@@ -1,30 +1,27 @@
-// server.js
+/**
+ * @file server.js
+ * @description Express server setup for Stripe integration, including routes for regular Stripe operations and webhooks.
+ * @module stripeServer
+ */
 
-/*
-  Description: Entry point for the Stripe API microservice.
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import stripeRoutes from "./src/stripe-routes.js";
+import webhookRoutes from "./src/stripe-webhook-routes.js";
 
-  How to get started:
-  - Add products to Supabase database.
-  - Set the following environment variables in your .env file:
-    - PORT: The port number for the server to listen on.
-    - STRIPE_PRIVATE_KEY: The API key you get from your Stripe Account.
-    - CLIENT_URL: Your checkout URL.
-*/
+// Load environment variables
+dotenv.config({ path: "./secrets/.env" });
 
-// Load environment variables from .env file
-require("dotenv").config({ path: "./secrets/.env" });
-
-// Import required modules and libraries
-const express = require("express");
-const cors = require("cors");
-
-// Import route handlers
-const stripeRoutes = require("./src/stripe.js");
-
-// Initialize the Express application
 const app = express();
+const PORT = process.env.PORT || 8003;
 
-// Middleware to log route and time
+/**
+ * Logging middleware
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 app.use((req, res, next) => {
   console.log(
     `Route: ${req.originalUrl} | Time: ${new Date().toLocaleString()}`,
@@ -32,14 +29,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware to enable CORS
-app.use(cors({ origin: "http://back-gate:8080/" }));
+// IMPORTANT: Handle Stripe webhook route BEFORE body parsing middleware
+app.use("/", webhookRoutes);
 
-// Use Stripe routes
+// Regular routes can use JSON parsing
+app.use(express.json());
+app.use(cors("*"));
 app.use("/", stripeRoutes);
 
-// Start the server
-const PORT = process.env.PORT || 8003;
+/**
+ * Start the Express server
+ */
 app.listen(PORT, () =>
   console.log(
     `${new Date().toLocaleTimeString()}: Server is running on port ${PORT}...`,

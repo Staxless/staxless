@@ -1,18 +1,7 @@
 /**
- * `DocNavigation` Component
- *
- * A React component that renders a sidebar navigation menu for documentation.
- * It displays a hierarchical list of document items, allowing users to expand
- * and collapse sections.
- *
- * @component
- * @example
- * <DocNavigation docStructure={docStructure} />
- *
- * @param {DocNavigationProps} props - The component props.
- * @param {DocItem[]} props.docStructure - The hierarchical structure of documentation items.
- *
- * @returns {JSX.Element} The rendered component.
+ * @file DocNavigation Component
+ * @module DocNavigation
+ * @description A React component that renders a sidebar navigation menu for documentation.
  */
 
 "use client";
@@ -23,6 +12,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// Types and Interfaces
 interface DocItem {
   name: string;
   slug: string;
@@ -35,19 +25,25 @@ interface DocNavigationProps {
 }
 
 /**
- * Converts a string to title case.
- *
+ * @function toTitleCase
+ * @description Converts a string to title case.
  * @param {string} str - The input string to be converted.
  * @returns {string} The converted title case string.
  */
 function toTitleCase(str: string): string {
   return str
-    .split(/[\s-_]+/) // Split by spaces, hyphens, or underscores
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word and make the rest lowercase
-    .join(" "); // Join the words with a space
+    .split(/[\s-_]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
-// Memoized DocItem component for performance optimization
+/**
+ * @function DocItem
+ * @description Renders a single documentation item or a nested list of items.
+ * @param {Object} props - The component props.
+ * @param {DocItem} props.item - The documentation item to render.
+ * @returns {JSX.Element} The rendered DocItem component.
+ */
 const DocItem = memo(({ item }: { item: DocItem }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -91,9 +87,15 @@ const DocItem = memo(({ item }: { item: DocItem }) => {
   );
 });
 
-// Set the display name for the DocItem component
 DocItem.displayName = "DocItem";
 
+/**
+ * @function DocNavigation
+ * @description Renders a sidebar navigation menu for documentation.
+ * @param {DocNavigationProps} props - The component props.
+ * @param {DocItem[]} props.docStructure - The hierarchical structure of documentation items.
+ * @returns {JSX.Element} The rendered DocNavigation component.
+ */
 export function DocNavigation({ docStructure }: DocNavigationProps) {
   return (
     <nav className="w-64 lg:w-72 flex-shrink-0 border-r border-border h-[calc(100vh-4rem)]">

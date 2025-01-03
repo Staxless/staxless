@@ -1,8 +1,17 @@
+/**
+ * @file FAQ Component with Search Functionality
+ * @module FAQ
+ * @description A React component that displays a list of frequently asked questions with search functionality.
+ */
+
+"use client";
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
+// Types and Interfaces
 type FAQItem = {
   question: string;
   answer: string;
@@ -48,16 +57,17 @@ const faqItems: FAQItem[] = [
 ];
 
 /**
- * FAQ component with search functionality to filter frequently asked questions.
- *
- * @returns {JSX.Element} - The FAQ component.
+ * @function FAQ
+ * @description Renders a FAQ section with search functionality to filter questions.
+ * @returns {JSX.Element} The FAQ component.
  */
-export default function FAQ() {
+export default function FAQ(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredFAQs, setFilteredFAQs] = useState(faqItems);
 
   /**
-   * Filters the FAQ items based on the search term.
+   * @function handleSearch
+   * @description Filters the FAQ items based on the search term.
    */
   const handleSearch = () => {
     const filtered = faqItems.filter(

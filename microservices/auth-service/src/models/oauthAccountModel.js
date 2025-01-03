@@ -1,6 +1,6 @@
 /**
- * @file MongoDB connection and OAuth account collection management
- * @description This module handles the connection to MongoDB, manages the OAuth account collection schema, and provides methods for interacting with the OAuth account data.
+ * @file oauthAccountModel.js
+ * @description MongoDB connection and OAuth account collection management
  * @module db
  */
 
@@ -61,7 +61,6 @@ const createUsersCollection = async () => {
       .listCollections({ name: "oauthAccount" })
       .toArray();
     if (collections.length === 0) {
-      // Collection does not exist, create it with validation
       await db.createCollection("oauthAccount", {
         validator: { $jsonSchema: oauthAccountSchema },
       });
@@ -92,6 +91,10 @@ const listCollections = async () => {
   }
 };
 
+/**
+ * OAuth Account operations object
+ * @type {Object}
+ */
 export const OauthAccount = {
   /**
    * Create a new OAuth account entry.

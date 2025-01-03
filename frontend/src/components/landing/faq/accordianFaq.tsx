@@ -1,3 +1,9 @@
+/**
+ * @file FAQ Component
+ * @module FAQ
+ * @description A React component that displays a list of frequently asked questions with expandable answers.
+ */
+
 import {
   Accordion,
   AccordionContent,
@@ -5,6 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+// Types and Interfaces
 type FAQItem = {
   question: string;
   answer: string;
@@ -40,11 +47,11 @@ const faqItems: FAQItem[] = [
 ];
 
 /**
- * FAQ component displays a list of frequently asked questions with expandable answers.
- *
- * @returns {JSX.Element} - The FAQ component.
+ * @function FAQ
+ * @description Renders a FAQ section with expandable questions and answers.
+ * @returns {JSX.Element} The FAQ component.
  */
-export default function FAQ() {
+export default function FAQ(): JSX.Element {
   return (
     <section className="bg-background py-20">
       <div className="container mx-auto px-4">

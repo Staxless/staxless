@@ -1,27 +1,20 @@
 /**
- * Hero Component
- *
- * This component renders a hero section with a central heading, description,
- * and a call-to-action button. It includes a visual representation of the platform
- * using a placeholder image, with a dynamic and visually appealing layout.
- *
+ * @file Hero Component
  * @module Hero
- * @returns {JSX.Element} The rendered Hero component
+ * @description Renders a hero section with a central heading, description,
+ * call-to-action button, and a visual representation of the platform.
  */
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 /**
- * Hero Component
- *
- * This component displays the hero section of a landing page, with text content that
- * highlights the platform's features and a call-to-action button. The section also
- * includes an image that enhances the visual appeal.
- *
+ * @function Hero
+ * @description Displays the hero section of a landing page, highlighting the platform's features
+ * with text content, a call-to-action button, and an enhancing image.
  * @returns {JSX.Element} The Hero section for the webpage
  */
-export default function Hero() {
+export default function Hero(): JSX.Element {
   return (
     <section className="relative overflow-hidden bg-background py-20 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

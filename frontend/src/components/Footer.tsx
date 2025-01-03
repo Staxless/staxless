@@ -1,10 +1,19 @@
+/**
+ * @file Footer Component
+ * @module Footer
+ * @description A React component that renders the footer section of the website.
+ */
+
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import BuildToScaleBadge from "./staxlessBadge";
 
-import { useState, useEffect } from "react";
-import BuildToScaleBadge from "./BuildToScaleBadge";
-
-export default function Footer() {
+/**
+ * @function Footer
+ * @description Renders the footer section with copyright information, a badge, and navigation links.
+ * @returns {JSX.Element} The Footer component
+ */
+export default function Footer(): JSX.Element {
   return (
     <footer className="bg-grey-200 py-6 text-sm text-muted-foreground">
       <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">

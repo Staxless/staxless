@@ -1,7 +1,19 @@
+/**
+ * @file MDX File Content Retrieval Utility
+ * @module getMDXFileContent
+ * @description A utility function to retrieve the content and metadata of an MDX file based on its slug.
+ */
+
 import fs from "fs/promises";
 import matter from "gray-matter";
 import findMDXFile from "./findMDXFile";
 
+/**
+ * @interface MDXFileContent
+ * @description Represents the content and metadata of an MDX file
+ * @property {string} content - The main content of the MDX file
+ * @property {Record<string, unknown>} data - The frontmatter metadata of the MDX file
+ */
 interface MDXFileContent {
   content: string;
   data: Record<string, unknown>;
@@ -13,9 +25,10 @@ interface MDXFileContent {
  * This function locates the MDX file using the provided slug and base directory,
  * then reads and parses the file to extract its content and frontmatter metadata.
  *
- * @param params - An object containing the slug of the MDX file to retrieve.
- * @param baseDir - The base directory where MDX files are located.
- * @returns A promise that resolves to an object containing the content and metadata of the MDX file.
+ * @param {Object} params - An object containing the parameters for file retrieval
+ * @param {string} params.params.slug - The slug of the MDX file to retrieve
+ * @param {string} params.baseDir - The base directory where MDX files are located
+ * @returns {Promise<MDXFileContent>} A promise that resolves to an object containing the content and metadata of the MDX file
  */
 export async function getMDXFileContent({
   params,

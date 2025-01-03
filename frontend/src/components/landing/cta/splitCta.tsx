@@ -1,14 +1,18 @@
+/**
+ * @file SplitCTAWithImage Component
+ * @module SplitCTAWithImage
+ * @description A React component that displays a call-to-action section with an image and text block.
+ */
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 /**
- * SplitCTAWithImage component displays a call-to-action section with an image
- * and a text block. The section is designed to showcase a product or service
- * with a clear call-to-action for users.
- *
- * @returns {JSX.Element} - The SplitCTAWithImage component.
+ * @function SplitCTAWithImage
+ * @description Renders a split layout CTA section with an image and text content.
+ * @returns {JSX.Element} The SplitCTAWithImage component.
  */
-export default function SplitCTAWithImage() {
+export default function SplitCTAWithImage(): JSX.Element {
   return (
     <section className="bg-background py-20">
       <div className="container mx-auto px-4">

@@ -1,9 +1,17 @@
+/**
+ * @file Features Component
+ * @module Features
+ * @description A React component that displays a list of product features with interactive tabs.
+ */
+
 "use client";
+
 import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 
+// Types and Interfaces
 type Feature = {
   title: string;
   description: string;
@@ -11,6 +19,7 @@ type Feature = {
   details: string[];
 };
 
+// Array of feature items
 const features: Feature[] = [
   {
     title: "Intuitive Dashboard",
@@ -49,9 +58,20 @@ const features: Feature[] = [
   },
 ];
 
-export default function Features() {
+/**
+ * @function Features
+ * @description Renders a section displaying product features with interactive tabs.
+ * @returns {JSX.Element} The Features component.
+ */
+export default function Features(): JSX.Element {
   const [activeFeature, setActiveFeature] = useState(0);
 
+  /**
+   * @function handleKeyDown
+   * @description Handles keyboard navigation for accessibility.
+   * @param {KeyboardEvent<HTMLDivElement>} event - The keyboard event.
+   * @param {number} index - The index of the feature.
+   */
   const handleKeyDown = (
     event: KeyboardEvent<HTMLDivElement>,
     index: number,

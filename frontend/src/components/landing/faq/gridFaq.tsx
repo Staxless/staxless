@@ -1,5 +1,12 @@
+/**
+ * @file FAQ Component
+ * @module FAQ
+ * @description A React component that displays a list of frequently asked questions in a card format.
+ */
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
+// Types and Interfaces
 type FAQItem = {
   question: string;
   answer: string;
@@ -40,11 +47,11 @@ const faqItems: FAQItem[] = [
 ];
 
 /**
- * FAQ component displays a list of frequently asked questions in a card format.
- *
- * @returns {JSX.Element} - The FAQ component.
+ * @function FAQ
+ * @description Renders a FAQ section with questions and answers in a card format.
+ * @returns {JSX.Element} The FAQ component.
  */
-export default function FAQ() {
+export default function FAQ(): JSX.Element {
   return (
     <section className="bg-background py-20">
       <div className="container mx-auto px-4">
