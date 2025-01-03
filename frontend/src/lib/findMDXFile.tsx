@@ -1,3 +1,9 @@
+/**
+ * @file MDX File Finder Utility
+ * @module findMDXFile
+ * @description A utility function to find an MDX file with a specific slug in a directory within the app directory.
+ */
+
 import path from "path";
 import { glob } from "glob";
 
@@ -6,21 +12,18 @@ import { glob } from "glob";
  *
  * This function searches for the MDX file in the specified directory, excluding directories named "components".
  *
- * @param slug - The slug of the MDX file to find (e.g., "my-article").
- * @param dirName - The name of the directory to search within (e.g., "posts").
- * @returns A promise that resolves to the path of the found MDX file or null if not found.
+ * @param {string} slug - The slug of the MDX file to find (e.g., "my-article").
+ * @param {string} dirName - The name of the directory to search within (e.g., "posts").
+ * @returns {Promise<string | null>} A promise that resolves to the path of the found MDX file or null if not found.
  */
 async function findMDXFile(
   slug: string,
   dirName: string,
 ): Promise<string | null> {
   const rootDir = process.cwd();
-
-  // Pattern to find the app directory
   const appDirPattern = path.join(rootDir, "**/app");
 
   try {
-    // Find app directories
     const appDirs = await glob(appDirPattern);
 
     if (appDirs.length === 0) {
@@ -33,10 +36,7 @@ async function findMDXFile(
     }
 
     const appDir = appDirs[0];
-
-    // Pattern to find the directory within the app directory
     const dirGlobPattern = path.join(appDir, "**", dirName);
-
     const dirs = await glob(dirGlobPattern);
 
     if (dirs.length === 0) {
@@ -44,7 +44,6 @@ async function findMDXFile(
       return null;
     }
 
-    // Select a suitable directory, excluding directories named "components"
     let selectedDir: string | null = null;
     for (const dir of dirs) {
       if (!dir.includes(path.join("components", dirName))) {
@@ -60,7 +59,6 @@ async function findMDXFile(
       return null;
     }
 
-    // Pattern to find the specific MDX file, excluding the "components" directory
     const mdxGlobPattern = path.join(
       selectedDir,
       "**",
@@ -68,7 +66,6 @@ async function findMDXFile(
       `${slug}.mdx`,
     );
 
-    // Find MDX files
     const files = await glob(mdxGlobPattern, { nodir: true });
 
     if (files.length === 0) {

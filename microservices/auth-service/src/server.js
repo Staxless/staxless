@@ -1,5 +1,8 @@
-// server.js
-// Description: Node.js server for CRUD operations with Supabase and MongoDB.
+/**
+ * @file server.js
+ * @description Node.js server for CRUD operations with Supabase and MongoDB.
+ * @module server
+ */
 
 import dotenv from "dotenv";
 import express from "express";
@@ -14,9 +17,15 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: "http://back-gate:8080/" }));
+app.use(cors("*"));
+// origin: "http://back-gate:8080/"
 
-// Log middleware
+/**
+ * Logging middleware
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 app.use((req, res, next) => {
   console.log(
     `Route: ${req.originalUrl} | Time: ${new Date().toLocaleString()}`,
@@ -30,6 +39,10 @@ app.use("/", authRoutes);
 
 // Start server
 const PORT = process.env.PORT;
+
+/**
+ * Starts the Express server
+ */
 app.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`),
 );

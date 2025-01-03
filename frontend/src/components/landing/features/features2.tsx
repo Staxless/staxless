@@ -1,22 +1,17 @@
 /**
- * Features Component
- *
- * This component displays a set of features for a product or service. It uses a tabbed interface to allow users
- * to switch between different features and view their details, including images and benefits.
- *
+ * @file Features Component
  * @module Features
- * @returns {JSX.Element} The rendered Features component
+ * @description Displays a set of features for a product or service using a tabbed interface.
  */
 
 "use client";
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-/**
- * Interface definition for a feature.
- */
+// Types and Interfaces
 interface Feature {
   title: string;
   description: string;
@@ -24,6 +19,7 @@ interface Feature {
   benefits: string[];
 }
 
+// Array of feature items
 const features: Feature[] = [
   {
     title: "Task Management",
@@ -63,12 +59,17 @@ const features: Feature[] = [
   },
 ];
 
-export default function Features() {
+/**
+ * @function Features
+ * @description Renders a section displaying product features with a tabbed interface.
+ * @returns {JSX.Element} The Features component.
+ */
+export default function Features(): JSX.Element {
   const [activeTab, setActiveTab] = useState(features[0].title);
 
   /**
-   * Handles tab change by updating the active tab state.
-   *
+   * @function handleTabChange
+   * @description Handles tab change by updating the active tab state.
    * @param {string} tab - The title of the selected tab.
    */
   const handleTabChange = (tab: string) => {
