@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { getBlogPosts } from "@/lib/getBlogPost";
+import { getBlogPosts } from "@/lib/get-blog-post";
 
 // Define the BlogPost interface here since it's not exported from getBlogPost
 interface BlogPost {

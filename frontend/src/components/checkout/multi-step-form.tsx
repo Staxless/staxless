@@ -17,8 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { createCheckoutSession } from "@/app/actions/checkout";
-import { getProducts } from "@/app/actions/getProducts";
+import { createCheckoutSession } from "@/app/server-actions/create-checkout-session";
+import { getProducts } from "@/app/server-actions/get-products";
 
 // Types and Interfaces
 export interface StripePrice {
