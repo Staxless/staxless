@@ -4,51 +4,28 @@
  * @description This component handles product selection, verification, and checkout initiation
  */
 
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check, AlertCircle, Loader2 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { createCheckoutSession } from "@/app/server-actions/create-checkout-session";
-import { getProducts } from "@/app/server-actions/get-products";
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Check, AlertCircle, Loader2 } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { createCheckoutSession } from "@/app/server-actions/create-checkout-session"
+import { getProducts, type Product, Price } from "@/app/server-actions/get-products"
 
 // Types and Interfaces
-export interface StripePrice {
-  id: string;
-  currency: string;
-  unit_amount: number;
-  recurring?: {
-    interval: string;
-  };
-}
-
-export interface StripeProduct {
-  id: string;
-  name: string;
-  description: string | null;
-  default_price: StripePrice;
-  features?: string[];
-}
-
 interface UserData {
-  product: string;
+  product: string
 }
 
 interface Errors extends Partial<UserData> {
-  submit?: string;
+  submit?: string
 }
 
 interface MultiStepFormProps {
-  initialTier?: string;
-  initialPriceId?: string;
+  initialTier?: string
+  initialPriceId?: string
 }
 
 /**
@@ -57,87 +34,84 @@ interface MultiStepFormProps {
  * @param {MultiStepFormProps} props - Component props
  * @returns {JSX.Element} Rendered form component
  */
-export default function MultiStepForm({
-  initialTier,
-  initialPriceId,
-}: MultiStepFormProps): JSX.Element {
-  const [step, setStep] = useState(1);
+export default function MultiStepForm({ initialTier, initialPriceId }: MultiStepFormProps): JSX.Element {
+  const [step, setStep] = useState(1)
   const [userData, setUserData] = useState<UserData>({
     product: initialTier || "",
-  });
-  const [errors, setErrors] = useState<Errors>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [products, setProducts] = useState<StripeProduct[]>([]);
-  const [isProductsLoading, setIsProductsLoading] = useState(true);
+  })
+  const [errors, setErrors] = useState<Errors>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
+  const [isProductsLoading, setIsProductsLoading] = useState(true)
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts);
+        const fetchedProducts = await getProducts()
+        setProducts(fetchedProducts)
       } catch (error) {
-        console.error("Failed to fetch products:", error);
-        setErrors({ submit: "Failed to load products. Please try again." });
+        console.error("Failed to fetch products:", error)
+        setErrors({ submit: "Failed to load products. Please try again." })
       } finally {
-        setIsProductsLoading(false);
+        setIsProductsLoading(false)
       }
-    };
+    }
 
-    fetchProducts();
-  }, []);
+    fetchProducts()
+  }, [])
 
   useEffect(() => {
     if (initialTier) {
-      setUserData((prevData) => ({ ...prevData, product: initialTier }));
+      setUserData((prevData) => ({ ...prevData, product: initialTier }))
     }
-  }, [initialTier]);
+  }, [initialTier])
 
   const handleProductSelect = (productId: string) => {
-    setUserData((prevData) => ({ ...prevData, product: productId }));
-    setErrors((prevErrors) => ({ ...prevErrors, product: "" }));
-  };
+    setUserData((prevData) => ({ ...prevData, product: productId }))
+    setErrors((prevErrors) => ({ ...prevErrors, product: "" }))
+  }
 
   const validateStep = (currentStep: number): boolean => {
-    const newErrors: Errors = {};
+    const newErrors: Errors = {}
 
     if (currentStep === 1 && !userData.product) {
-      newErrors.product = "Please select a product";
+      newErrors.product = "Please select a product"
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleNext = () => {
-    if (validateStep(step)) setStep(step + 1);
-  };
+    if (validateStep(step)) setStep(step + 1)
+  }
 
   const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
+    if (step > 1) setStep(step - 1)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (step === 2 && validateStep(step)) {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const { url } = await createCheckoutSession(userData.product);
-        window.location.href = url;
+        const { url } = await createCheckoutSession(userData.product)
+        window.location.href = url
       } catch (error) {
-        console.error("Error:", error);
-        setErrors({ submit: "An error occurred. Please try again." });
+        console.error("Error:", error)
+        setErrors({ submit: "An error occurred. Please try again." })
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-  };
+  }
 
   if (isProductsLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
@@ -151,10 +125,7 @@ export default function MultiStepForm({
           <CardDescription>Step {step} of 2</CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            onSubmit={step === 2 ? handleSubmit : (e) => e.preventDefault()}
-            className="space-y-4"
-          >
+          <form onSubmit={step === 2 ? handleSubmit : (e) => e.preventDefault()} className="space-y-4">
             {step === 1 && (
               <ProductSelectionStep
                 products={products}
@@ -163,9 +134,7 @@ export default function MultiStepForm({
                 handleProductSelect={handleProductSelect}
               />
             )}
-            {step === 2 && (
-              <VerificationStep userData={userData} products={products} />
-            )}
+            {step === 2 && <VerificationStep userData={userData} products={products} />}
             {errors.submit && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -184,15 +153,15 @@ export default function MultiStepForm({
         </CardContent>
       </Card>
     </main>
-  );
+  )
 }
 
 // Sub-components
 interface ProductSelectionStepProps {
-  products: StripeProduct[];
-  userData: UserData;
-  errors: Errors;
-  handleProductSelect: (productId: string) => void;
+  products: Product[]
+  userData: UserData
+  errors: Errors
+  handleProductSelect: (productId: string) => void
 }
 
 /**
@@ -211,9 +180,7 @@ function ProductSelectionStep({
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-2xl font-bold">Compare our plans</h3>
-        <p className="text-muted-foreground mt-2">
-          Find the perfect plan for your needs
-        </p>
+        <p className="text-muted-foreground mt-2">Find the perfect plan for your needs</p>
       </div>
       {errors.product && (
         <Alert variant="destructive">
@@ -246,8 +213,7 @@ function ProductSelectionStep({
                     minimumFractionDigits: 0,
                   }).format(product.default_price.unit_amount / 100)}
                 </span>
-                {product.default_price.recurring &&
-                  ` /${product.default_price.recurring.interval}`}
+                {product.default_price.recurring && ` /${product.default_price.recurring.interval}`}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -268,12 +234,12 @@ function ProductSelectionStep({
         ))}
       </div>
     </div>
-  );
+  )
 }
 
 interface VerificationStepProps {
-  userData: UserData;
-  products: StripeProduct[];
+  userData: UserData
+  products: Product[]
 }
 
 /**
@@ -282,13 +248,8 @@ interface VerificationStepProps {
  * @param {VerificationStepProps} props - Component props
  * @returns {JSX.Element} Rendered verification step
  */
-function VerificationStep({
-  userData,
-  products,
-}: VerificationStepProps): JSX.Element {
-  const selectedProduct = products.find(
-    (product) => product.id === userData.product,
-  );
+function VerificationStep({ userData, products }: VerificationStepProps): JSX.Element {
+  const selectedProduct = products.find((product) => product.id === userData.product)
 
   return (
     <div className="space-y-4">
@@ -305,8 +266,7 @@ function VerificationStep({
               currency: selectedProduct.default_price.currency,
               minimumFractionDigits: 0,
             }).format(selectedProduct.default_price.unit_amount / 100)}
-          {selectedProduct?.default_price.recurring &&
-            ` /${selectedProduct.default_price.recurring.interval}`}
+          {selectedProduct?.default_price.recurring && ` /${selectedProduct.default_price.recurring.interval}`}
         </p>
         {selectedProduct?.features && selectedProduct.features.length > 0 && (
           <div>
@@ -320,19 +280,18 @@ function VerificationStep({
         )}
       </div>
       <p className="text-sm text-muted-foreground">
-        Please review your selection above. If everything is correct, click
-        &quot;Proceed to Payment&quot; to continue.
+        Please review your selection above. If everything is correct, click &quot;Proceed to Payment&quot; to continue.
       </p>
     </div>
-  );
+  )
 }
 
 interface NavigationButtonsProps {
-  step: number;
-  handleBack: () => void;
-  handleNext: () => void;
-  isNextDisabled: boolean;
-  isLoading: boolean;
+  step: number
+  handleBack: () => void
+  handleNext: () => void
+  isNextDisabled: boolean
+  isLoading: boolean
 }
 
 /**
@@ -359,8 +318,8 @@ function NavigationButtons({
         <Button
           type="button"
           onClick={(e) => {
-            e.preventDefault();
-            handleNext();
+            e.preventDefault()
+            handleNext()
           }}
           disabled={isNextDisabled}
         >
@@ -372,5 +331,6 @@ function NavigationButtons({
         </Button>
       )}
     </div>
-  );
+  )
 }
+

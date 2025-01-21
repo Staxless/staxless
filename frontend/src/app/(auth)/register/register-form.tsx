@@ -94,7 +94,7 @@ export default function RegisterForm() {
       if (formData.tier && formData.priceId) {
         await storePlanSelection(formData.tier, formData.priceId);
       }
-      router.push("/checkout");
+      router.push("checkout");
     } catch (err) {
       console.error("Error during registration:", err);
       setError("Registration failed. Please try again.");
@@ -189,7 +189,7 @@ export default function RegisterForm() {
 
       <p className="text-center text-sm text-gray-500 mt-4">
         Already have an account?{" "}
-        <Link href="/auth/login" className="text-blue-500 hover:underline">
+        <Link href="/login" className="text-blue-500 hover:underline">
           Login here
         </Link>
       </p>

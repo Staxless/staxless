@@ -31,7 +31,7 @@ interface LogoutResult {
  * @returns {Promise<LogoutResult>} A promise that resolves to the result of the logout operation
  */
 export async function logout(): Promise<LogoutResult> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const authSession = cookieStore.get("auth_session");
 
   if (!authSession) {
@@ -41,7 +41,7 @@ export async function logout(): Promise<LogoutResult> {
 
   try {
     const response = await axios.post(
-      "http://auth-service:8000/auth/logout",
+      "http://front-gate:8000/auth/logout",
       {},
       {
         headers: {

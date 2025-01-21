@@ -46,8 +46,7 @@ export async function createCheckoutSession(
   }
 
   try {
-    console.log(productId);
-    const response = await fetch("http://stripe-service:8003/checkout", {
+    const response = await fetch("http://front-gate:8000/checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

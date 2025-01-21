@@ -2,7 +2,6 @@
  * @file app/hooks/useProviders.ts
  * @description Custom hook for fetching and caching OAuth providers
  */
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -25,28 +24,49 @@ export function useProviders() {
 
     const fetchProviders = async () => {
       try {
-        const cachedProviders = sessionStorage.getItem("oauthProviders");
-        if (cachedProviders && mounted) {
-          setProviders(JSON.parse(cachedProviders));
-          setIsLoading(false);
-          return;
+        console.log("Fetching providers from API...");
+        const response = await fetch("/api/auth/providers", {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        console.log("Response status:", response.status);
+        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const responseText = await response.text();
+        console.log("Raw response:", responseText);
+
+        if (responseText.trim() === "" || responseText.trim() === "undefined") {
+          throw new Error("Empty or 'undefined' response from server");
         }
 
-        const response = await fetch("/auth/providers");
-        const data = await response.json();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("JSON Parse error:", parseError);
+          throw new Error(`Invalid JSON response from server: ${responseText}`);
+        }
+
+        console.log("Parsed data:", data);
+
+        if (!Array.isArray(data)) {
+          throw new Error(`Unexpected data format. Expected array, got: ${typeof data}`);
+        }
 
         if (mounted) {
-          setProviders(data.providers);
-          sessionStorage.setItem(
-            "oauthProviders",
-            JSON.stringify(data.providers),
-          );
+          setProviders(data);
+          sessionStorage.setItem("oauthProviders", JSON.stringify(data));
         }
       } catch (err) {
         if (mounted) {
           console.error("Error fetching providers:", err);
           setError(
-            "Failed to load authentication providers. Please try again later.",
+            err instanceof Error ? err.message : "An unknown error occurred"
           );
         }
       } finally {
@@ -67,3 +87,4 @@ export function useProviders() {
 
   return { providers, isLoading, error };
 }
+

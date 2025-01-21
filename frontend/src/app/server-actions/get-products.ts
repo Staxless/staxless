@@ -2,63 +2,53 @@
  * @file app/actions/getProducts.ts
  * @description Server action for fetching and sorting products from the Stripe service
  */
+"use server"
+export interface RecurringPrice {
+  interval: "day" | "week" | "month" | "year"
+}
 
-"use server";
-
-import { cache } from "react";
-
-/**
- * Represents a price object for a product
- */
 export interface Price {
-  id: string;
-  currency: string;
-  unit_amount: number;
-  recurring?: {
-    interval: string;
-  };
+  id: string
+  unit_amount: number
+  currency: string
+  recurring?: RecurringPrice
 }
 
-/**
- * Represents a product object
- */
 export interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  default_price: Price;
-  features: string[];
+  id: string
+  name: string
+  description: string
+  default_price: Price
+  images: string[]
+  features?: string[] // Make features optional
 }
 
-/**
- * Fetches and sorts products from the Stripe service
- * @returns {Promise<Product[]>} A promise that resolves to an array of sorted products
- * @throws {Error} If there's an error fetching the products
- */
-export const getProducts = cache(async (): Promise<Product[]> => {
-  const apiUrl = process.env.API_URL || "http://stripe-service:8003";
-
+export const getProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch(`${apiUrl}/products`, {
+    const response = await fetch(`http://front-gate:8000/products`, {
       method: "GET",
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch products: ${response.statusText}`);
+      throw new Error(`Failed to fetch products: ${response.statusText}`)
     }
 
-    const products: Product[] = await response.json();
+    const products: Product[] = await response.json()
+
+    if (!Array.isArray(products)) {
+      throw new Error("Invalid response format: products data is not an array")
+    }
 
     // Sort products by price (ascending order)
     products.sort((a, b) => {
-      const priceA = a.default_price?.unit_amount ?? 0;
-      const priceB = b.default_price?.unit_amount ?? 0;
-      return priceA - priceB;
-    });
+      const priceA = a.default_price?.unit_amount ?? 0
+      const priceB = b.default_price?.unit_amount ?? 0
+      return priceA - priceB
+    })
 
-    return products;
+    return products
   } catch (error) {
-    console.error("Error fetching products:", error);
-    throw error;
+    console.error("Error fetching products:", error)
+    throw error
   }
-});
+}

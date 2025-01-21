@@ -12,8 +12,8 @@ import { cookies } from "next/headers";
  * @returns {Promise<{tier?: string, priceId?: string}>} An object containing the selected tier and price ID
  */
 export async function getStoredPlanSelection() {
-  const tier = cookies().get("selectedTier")?.value;
-  const priceId = cookies().get("selectedPriceId")?.value;
+  const tier = (await cookies()).get("selectedTier")?.value;
+  const priceId = (await cookies()).get("selectedPriceId")?.value;
 
   return { tier, priceId };
 }

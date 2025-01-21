@@ -75,6 +75,7 @@ export default function LoginForm() {
             required
           />
         </div>
+        
         <Button type="submit" className="w-full">
           Login
         </Button>
@@ -109,7 +110,7 @@ export default function LoginForm() {
 
       <p className="text-center text-sm text-gray-500 mt-4">
         Don&apos;t have an account?{" "}
-        <Link href="/auth/register" className="text-blue-500 hover:underline">
+        <Link href="/register" className="text-blue-500 hover:underline">
           Register here
         </Link>
       </p>
