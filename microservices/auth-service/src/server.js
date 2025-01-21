@@ -7,6 +7,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import healthCheckRoutes from "./src/routes/healthRouter.js"
 import oauthRoutes from "./src/routes/oauthRouter.js";
 import authRoutes from "./src/routes/authRouter.js";
 
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use("/", healthCheckRoutes);
 app.use("/", oauthRoutes);
 app.use("/", authRoutes);
 
