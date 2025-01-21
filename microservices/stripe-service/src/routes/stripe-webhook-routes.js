@@ -10,11 +10,7 @@ import axios from "axios";
 
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY);
-
-// Webhook secret should be in an environment variable
-const STRIPE_WEBHOOK_SECRET =
-  "";
-
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 /**
  * Handle Stripe webhooks.
  * @route POST /webhook
@@ -27,6 +23,8 @@ router.post(
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
     let event;
+
+    console.log(req.body,sig)
 
     try {
       event = stripe.webhooks.constructEvent(
@@ -98,7 +96,7 @@ async function updateUserSubscription(session) {
 
   try {
     const response = await axios.post(
-      `http://user-service:8002/update-subscription`,
+      `http://user-service:8082/update-subscription`,
       {
         id: userId,
         subscriptionType,

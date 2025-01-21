@@ -29,7 +29,8 @@ router.get("/products", async (req, res) => {
       expand: ["data.default_price"],
     });
 
-    const formattedProducts = products.data.map((product) => ({
+    const formattedProducts = {}
+    formattedProducts.data = products.data.map((product) => ({
       id: product.id,
       name: product.name,
       description: product.description,
@@ -39,8 +40,11 @@ router.get("/products", async (req, res) => {
         : [],
     }));
 
-    res.json(formattedProducts);
+
+
+    res.json(formattedProducts.data);
   } catch (error) {
+    console.log(error)
     console.error("Error fetching Stripe products:", error);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -68,10 +72,9 @@ router.get("/order/success", async (req, res) => {
  * @param {Object} res - Express response object
  */
 router.post("/checkout", bodyParser.json(), async (req, res) => {
-  console.log(req.body);
+
   const { productId, quantity } = req.body;
   const userInfoString = req.headers["x-user-info"];
-  console.log(userInfoString);
 
   if (!userInfoString) {
     return res.status(400).json({ error: "User information not found" });
@@ -104,6 +107,7 @@ router.post("/checkout", bodyParser.json(), async (req, res) => {
           quantity: quantity,
         },
       ],
+      //FIXME:Dynamic host needed
       success_url: `http://localhost:3000/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `http://localhost:3000/checkout`,
       metadata: {
