@@ -22,15 +22,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://front-gate:8080/:path*",
-      },
-      {
-        source: "/auth/:provider/:path*",
-        destination: "http://auth-service:8000/auth/:provider/:path*",
-      },
-      {
-        source: "/auth/logout",
-        destination: "http://auth-service:8000/auth/logout",
+        destination: "http://front-gate:8000/:path*",
       },
     ];
   },

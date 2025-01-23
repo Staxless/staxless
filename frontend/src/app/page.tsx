@@ -4,19 +4,14 @@
  */
 
 import { Metadata } from "next";
-import Footer from "@/components/Footer";
-import CTA from "@/components/landing/cta/simpleCta";
-import FAQ from "@/components/landing/faq/accordianFaq";
-import Features from "@/components/landing/features/features3";
-import Hero from "@/components/landing/hero/splitHero";
-import Pricing from "@/components/landing/pricing/oneTimePricing";
-import Pricing2 from "@/components/landing/pricing/togglePricing";
-import Navbar from "@/components/Navbar";
-
-export const metadata: Metadata = {
-  title: "Landing Page",
-  description: "Landing page built with Next.js and ShadCN",
-};
+import Footer from "@/components/shared/footer";
+import CTA from "@/components/cta/simple-cta";
+import FAQ from "@/components/faq/accordian-faq";
+import Features from "@/components/features/features-3";
+import Hero from "@/components/hero/split-hero";
+import Pricing from "@/components/pricing/one-time-pricing";
+import Pricing2 from "@/components/pricing/toggle-pricing";
+import Navbar from "@/components/shared/navbar";
 
 /**
  * Home - The main landing page of the application.

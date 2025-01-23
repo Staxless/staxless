@@ -53,7 +53,7 @@ router.post("/auth/validate-request", async (req, res, next) => {
     );
     return res.status(401).json({ message: "Session not found" });
   } catch (error) {
-    return res.status(500).send("Internal Server Error");
+    return res.status(500).send("Internal Server Error",error);
   }
 });
 
@@ -69,7 +69,6 @@ router.post("/auth/validate-request", async (req, res, next) => {
 router.post("/auth/logout", async (req, res) => {
   const sessionId =
     parseCookies(req.headers.cookie ?? "").get("auth_session") ?? null;
-
   if (!sessionId) {
     return res.status(401).send("Unauthorized");
   }
@@ -77,8 +76,10 @@ router.post("/auth/logout", async (req, res) => {
   await lucia.invalidateSession(sessionId);
 
   res.setHeader("Set-Cookie", lucia.createBlankSessionCookie());
-
-  return res.redirect("http://localhost:3000/");
+ 
+  return res
+  .status(200)
+  .redirect("http://frontend:3000/"); //FIXME: This need to be dynamic based on host.
 });
 
 export default router;

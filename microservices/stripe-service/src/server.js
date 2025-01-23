@@ -7,14 +7,16 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import stripeRoutes from "./src/stripe-routes.js";
-import webhookRoutes from "./src/stripe-webhook-routes.js";
+import webhookRoutes from "./src/routes/stripe-webhook-routes.js";
+import healthCheckRoutes from "./src/routes/healthRouter.js"
+import stripeRoutes from "./src/routes/stripe-routes.js";
+
 
 // Load environment variables
 dotenv.config({ path: "./secrets/.env" });
 
 const app = express();
-const PORT = process.env.PORT || 8003;
+const PORT = process.env.PORT || 8083;
 
 /**
  * Logging middleware
@@ -35,6 +37,7 @@ app.use("/", webhookRoutes);
 // Regular routes can use JSON parsing
 app.use(express.json());
 app.use(cors("*"));
+app.use("/", healthCheckRoutes);
 app.use("/", stripeRoutes);
 
 /**

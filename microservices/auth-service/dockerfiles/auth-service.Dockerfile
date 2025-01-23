@@ -1,5 +1,5 @@
 # Use the latest stable release of the Node.js image as the base image for the builder stage
-FROM node:lts as builder
+FROM node:lts AS builder
 
 # Set the user to 'node' for better security practices
 USER node
@@ -14,7 +14,8 @@ COPY --chown=node:node ["../package.json", "./"]
 RUN ["npm", "install"]
 
 # Copy the rest of the application files and change ownership to 'node' user
-COPY --chown=node:node ["../", "."] # Consider specifying specific files for better control
+COPY --chown=node:node ["../", "."] 
+# Consider specifying specific files for better control
 
 # Uncomment the following line if you need to clean up files, keeping only 'dist' and 'node_modules'
 #
@@ -33,7 +34,7 @@ EXPOSE 8002
 CMD ["npm", "run", "dev"]
 
 # Create a new stage for production
-FROM node:alpine as prod
+FROM node:alpine AS prod
 
 # Set the user to 'node' for better security practices
 USER node
