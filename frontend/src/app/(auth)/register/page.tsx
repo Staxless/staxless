@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import RegisterForm from "./register-form";
 
+export const metadata = {
+  title: 'Register',
+};
 /**
  * RegisterPage component
  * @returns {JSX.Element} The rendered registration page

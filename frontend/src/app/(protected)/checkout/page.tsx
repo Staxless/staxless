@@ -7,6 +7,11 @@ import { headers } from "next/headers";
 import MultiStepForm from "@/components/checkout/multi-step-form";
 import { getStoredPlanSelection } from "@/app/server-actions/get-stored-plan-selection";
 
+
+export const metadata = {
+  title: 'Checkout',
+};
+
 /**
  * CheckoutPage component
  * @returns {JSX.Element} The rendered checkout page

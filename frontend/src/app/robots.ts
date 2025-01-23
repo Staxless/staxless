@@ -4,6 +4,8 @@
  */
 
 import type { MetadataRoute } from "next";
+import { siteMetadata } from "../../config"
+
 
 /**
  * Generates the robots.txt configuration for the website.
@@ -16,6 +18,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/", // Allow all user agents to access the root
       disallow: "/dashboard/", // Disallow access to the /dashboard/ directory
     },
-    sitemap: "https://acme.com/sitemap.xml", // URL to the sitemap for search engines
+    sitemap: `${siteMetadata.siteUrl}/sitemap.xml`,
   };
 }

@@ -13,11 +13,6 @@ import Pricing from "@/components/pricing/one-time-pricing";
 import Pricing2 from "@/components/pricing/toggle-pricing";
 import Navbar from "@/components/shared/navbar";
 
-export const metadata: Metadata = {
-  title: "Landing Page",
-  description: "Landing page built with Next.js and ShadCN",
-};
-
 /**
  * Home - The main landing page of the application.
  * This component displays the landing page, which includes a Navbar, Hero section,

@@ -1,59 +1,37 @@
-import { MetadataRoute } from "next";
-import { getBlogPosts } from "@/lib/get-blog-post";
+import { siteConfig } from "../../config"
+import { siteMetadata } from "../../config"
 
-// Define the BlogPost interface here since it's not exported from getBlogPost
-interface BlogPost {
-  slug: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  authors: string[];
+const myFunction = () => {
+  const url = `${siteConfig.url}` 
+  console.log(`Accessing: ${url}`)
+  fetch(`${siteConfig.url}/api/data`)
+    .then((response) => response.json())
+    .then((data) => {
+      // Process the data
+      console.log(data)
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error)
+    })
 }
 
-interface Blogposts {
-  posts: BlogPost[];
+myFunction()
+
+export default function sitemap() {
+  return [
+    {
+      url: siteMetadata.siteUrl,
+      lastModified: new Date(),
+    },
+    {
+      url: `${siteMetadata.siteUrl}/about`,
+      lastModified: new Date(),
+    },
+    {
+      url: `${siteMetadata.siteUrl}/blog`,
+      lastModified: new Date(),
+    },
+    // Add more URLs as needed
+  ]
 }
 
-/**
- * Generates a sitemap for the website, including blog posts and static pages.
- * @returns {Promise<MetadataRoute.Sitemap>} A promise that resolves to a sitemap object.
- */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch blog posts
-  const blogposts: Blogposts = await getBlogPosts();
-
-  // Map blog posts to sitemap entries
-  const postEntries: MetadataRoute.Sitemap = blogposts.posts.map(
-    (post: BlogPost) => ({
-      url: `https://acme.com/blog/${post.slug}`,
-      lastModified: new Date(post.date),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }),
-  );
-
-  // Static pages
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: "https://acme.com/about",
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 1,
-    },
-    {
-      url: "https://acme.com/terms",
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 1,
-    },
-    {
-      url: "https://acme.com/privacy",
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 1,
-    },
-  ];
-
-  // Combine static pages and blog post entries
-  return [...staticPages, ...postEntries];
-}

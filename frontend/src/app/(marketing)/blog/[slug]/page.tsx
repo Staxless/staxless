@@ -11,8 +11,11 @@ import { notFound } from "next/navigation";
 import { getMDXFileContent } from "@/lib/get-mdx-file-content";
 import getAllMDXContent from "@/lib/get-all-mdx-content";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import type { Metadata } from "next";
+
 import CTA from "@/components/cta/simple-cta";
+
+import { generateCustomMetadata, MetadataProps } from '../../../../lib/generate-metadata'
+import type { Metadata } from "next";
 
 // Interface for BlogPost data
 interface BlogPost {
@@ -40,14 +43,16 @@ interface MDXData {
  * @param params - Page parameters containing the slug
  * @returns Metadata object with the blog post's title and description
  */
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
   const { data } = await getMDXFileContent({ params, baseDir: "blog" });
   const mdxData = data as MDXData;
 
-  return {
-    title: mdxData.title || "Blog Post",
-    description: mdxData.description || "No description available",
-  };
+  // Use our custom function to generate the metadata
+  return generateCustomMetadata({
+    title: `${mdxData.title} | Blog`, // This will be used in the template
+    description: `${mdxData.description}` || "No description available",
+    params,
+  })
 }
 
 /**

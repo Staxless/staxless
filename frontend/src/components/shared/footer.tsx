@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import StaxlessBadge from "./staxless-badge";
-
+import { siteMetadata } from "../../../config";
 /**
  * @function Footer
  * @description Renders the footer section with copyright information, a badge, and navigation links.
@@ -17,7 +17,7 @@ export default function Footer(): JSX.Element {
   return (
     <footer className="bg-grey-200 py-6 text-sm text-muted-foreground">
       <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">
-        <p>&copy; 2024 Acme Inc. All rights reserved.</p>
+      &copy; {new Date().getFullYear()} {siteMetadata.siteName}. All rights reserved.
         <StaxlessBadge />
         <nav className="flex items-center gap-4">
           <Link

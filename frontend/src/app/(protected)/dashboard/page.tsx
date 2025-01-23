@@ -8,6 +8,10 @@ import DashboardContent from "@/components/dashboard/dashboard-content";
 import Footer from "@/components/shared/footer";
 import Navbar from "@/components/shared/navbar";
 
+export const metadata = {
+  title: 'Dashboard',
+};
+
 /**
  * Dashboard component
  * @returns {Promise<JSX.Element>} The rendered dashboard page
@@ -15,7 +19,6 @@ import Navbar from "@/components/shared/navbar";
 export default async function Dashboard() {
   const headersList = await headers();
   const userInfoString = headersList.get("x-user-info");
-  const user = userInfoString ? JSON.parse(userInfoString) : null;
 
   return (
     <div className="flex flex-col min-h-screen">

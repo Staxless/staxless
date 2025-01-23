@@ -13,6 +13,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+export const metadata = {
+  title: 'Login',
+};
+
 /**
  * LoginPage component
  * @returns {JSX.Element} The rendered login page

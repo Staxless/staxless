@@ -8,15 +8,12 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { getMDXFileContent } from "@/lib/get-mdx-file-content";
 import getAllMDXContent from "@/lib/get-all-mdx-content";
 import type { Metadata } from "next";
+import { generateCustomMetadata, MetadataProps } from '../../../../lib/generate-metadata'
+
+
 
 const inter = Inter({ subsets: ["latin"] });
 
-/**
- * Props for the LegalPage component
- */
-interface Props {
-  params: { slug: string };
-}
 
 /**
  * MDXData interface for the title and description of the legal page
@@ -31,25 +28,15 @@ interface MDXData {
  * @param params - Contains the slug of the legal document
  * @returns Metadata object with title and description of the document
  */
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  try {
-    const { data } = await getMDXFileContent({
-      params,
-      baseDir: "legal",
-    });
-    const mdxData = data as MDXData;
 
-    return {
-      title: mdxData.title || "Legal Document",
-      description: mdxData.description || "Legal information",
-    };
-  } catch (error) {
-    console.error("Error generating metadata:", error);
-    return {
-      title: "Error",
-      description: "An error occurred while generating metadata",
-    };
-  }
+export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
+
+  // Use our custom function to generate the metadata
+  return generateCustomMetadata({
+    title: `Legal | ${params.slug}`, // This will be used in the template
+    description: `Legal Docs | ${params.slug}`,
+    params,
+  })
 }
 
 /**
@@ -67,11 +54,10 @@ export async function generateStaticParams() {
  * @param params - Contains the slug of the legal document
  * @returns JSX.Element for the legal page
  */
-export default async function LegalPage({ params }: Props) {
+export default async function LegalPage({ params }: MetadataProps) {
   try {
     const { content } = await getMDXFileContent({ params, baseDir: "legal" });
 
-    return (
       <div
         className={`min-h-screen bg-background flex flex-col ${inter.className}`}
       >
@@ -95,9 +81,8 @@ export default async function LegalPage({ params }: Props) {
           </div>
         </footer>
       </div>
-    );
   } catch (error) {
     console.error("Error rendering legal page:", error);
     return <div>An error occurred while loading the legal document.</div>;
   }
-}
+};

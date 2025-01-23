@@ -6,6 +6,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getBlogPosts } from "@/lib/get-blog-post";
+import type { Metadata } from "next";
+import { generateCustomMetadata , MetadataProps } from '../../../lib/generate-metadata'
 
 // BlogPost interface defines the structure of each blog post object
 interface BlogPost {
@@ -16,6 +18,15 @@ interface BlogPost {
   authors: string[];
 }
 
+export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
+
+  // Use our custom function to generate the metadata
+  return generateCustomMetadata({
+    title: `Legal: ${params.slug}`, // This will be used in the template
+    description: `Legal Docs: ${params.slug}`,
+    params,
+  })
+}
 /**
  * Component
  * @description Asynchronous function that fetches blog posts and displays them
