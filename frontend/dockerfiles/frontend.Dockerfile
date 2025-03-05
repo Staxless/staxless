@@ -10,10 +10,10 @@ WORKDIR /app
 COPY ["package.json", "./"]
 RUN ["npm", "install", "axios", "next@latest", "react@latest", "react-dom@latest", "react-cookie"]
 
-FROM base as dev
+FROM base AS dev
 WORKDIR /app
 COPY ["package.json", "./"]
-RUN ["npm", "install", "axios"]
+RUN ["npm", "install"]
 COPY ["../", "."]
 CMD ["npm","run","dev"]
 
