@@ -3,15 +3,18 @@
  * @description Main landing page component for the application
  */
 
-import { Metadata } from "next";
-import Footer from "@/components/shared/footer";
-import CTA from "@/components/cta/simple-cta";
-import FAQ from "@/components/faq/accordian-faq";
-import Features from "@/components/features/features-3";
-import Hero from "@/components/hero/split-hero";
-import Pricing from "@/components/pricing/one-time-pricing";
-import Pricing2 from "@/components/pricing/toggle-pricing";
-import Navbar from "@/components/shared/navbar";
+"use client"
+
+import { useTheme } from "../contexts/ThemeContext"
+import CTA from "@/components/cta/cta"
+import FAQ from "@/components/faq/accordian-faq"
+import Features from "@/components/features/features"
+import Hero from "@/components/hero/hero"
+import Pricing from "@/components/pricing/pricing"
+import Footer from "@/components/shared/footer"
+import Header , {HeaderProps } from "@/components/shared/header"
+
+
 
 /**
  * Home - The main landing page of the application.
@@ -20,19 +23,21 @@ import Navbar from "@/components/shared/navbar";
  *
  * @returns {JSX.Element} A landing page layout with all sections.
  */
-export default function Home(): JSX.Element {
+export default function Home({user}: HeaderProps): JSX.Element {
+  const colors = useTheme()
+
   return (
-    <div>
+    <div style={{ backgroundColor: colors.background, color: colors.text }}>
       <main>
-        <Navbar />
+        <Header user={user} />
         <Hero />
         <Features />
         <FAQ />
         <Pricing />
-        <Pricing2 />
         <CTA />
         <Footer />
       </main>
     </div>
-  );
+  )
 }
+

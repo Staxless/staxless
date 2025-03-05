@@ -26,7 +26,7 @@ import { SignOutButton } from "../auth/sign-out-button";
 interface MobileMenuProps {
   navItems: Array<{ name: string; href: string }>;
   user: {
-    username: string;
+    name: string;
   } | null;
 }
 
@@ -63,7 +63,7 @@ export default function MobileMenu({
           <>
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <span>{user.username}</span>
+              <span>{user.name}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <SignOutButton />

@@ -28,7 +28,6 @@ import { SignOutButton } from "../auth/sign-out-button";
  */
 interface UserMenuProps {
   user: {
-    username: string;
     name: string;
     avatar?: string;
   };
@@ -41,7 +40,6 @@ interface UserMenuProps {
  * @returns {JSX.Element} The UserMenu component
  */
 export default function UserMenu({ user }: UserMenuProps): JSX.Element {
-  console.log(user);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
