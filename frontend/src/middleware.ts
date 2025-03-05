@@ -49,15 +49,19 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   );
 
   // Redirect to dashboard if user is logged in and trying to access auth page
-  if (request.nextUrl.pathname.startsWith("/auth") && user) {
+  if (request.nextUrl.pathname.startsWith("/login") && user) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (request.nextUrl.pathname.startsWith("/register") && user) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   if (isProtectedRoute && !user) {
-    return NextResponse.redirect(new URL("/auth", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isProtectedRoute && user && user.subscription.type === "free") {
+  if (isProtectedRoute && user && user.subscription === "free") {
     return NextResponse.redirect(new URL("/checkout", request.url));
   }
 
