@@ -1,88 +1,96 @@
-/**
- * @file Legal Page
- * @description Displays legal documents rendered from MDX content.
- */
+import { notFound } from "next/navigation"
+import { MDXRemote } from "next-mdx-remote/rsc"
+import fs from "fs/promises"
+import path from "path"
+import matter from "gray-matter"
+import glob from "fast-glob"
+import Header from "@/components/shared/header"
+import Footer from "@/components/shared/footer"
 
-import { Inter } from "next/font/google";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import { getMDXFileContent } from "@/lib/get-mdx-file-content";
-import getAllMDXContent from "@/lib/get-all-mdx-content";
-import type { Metadata } from "next";
-import { generateCustomMetadata, MetadataProps } from '../../../../lib/generate-metadata'
+const CONTENT_DIRECTORY = "content/legal"
 
-
-
-const inter = Inter({ subsets: ["latin"] });
-
-
-/**
- * MDXData interface for the title and description of the legal page
- */
-interface MDXData {
-  title?: string;
-  description?: string;
-}
-
-/**
- * Generate metadata for the legal page
- * @param params - Contains the slug of the legal document
- * @returns Metadata object with title and description of the document
- */
-
-export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
-
-  // Use our custom function to generate the metadata
-  return generateCustomMetadata({
-    title: `Legal | ${params.slug}`, // This will be used in the template
-    description: `Legal Docs | ${params.slug}`,
-    params,
-  })
-}
-
-/**
- * Generate static params for dynamic legal document routes
- * @returns Array of params containing slugs for legal documents
- */
 export async function generateStaticParams() {
-  const mdx = await getAllMDXContent("legal");
-  return mdx.map(({ slug }) => ({ slug }));
+  const files = await glob(`${CONTENT_DIRECTORY}/*.mdx`, { cwd: process.cwd() })
+  console.log("Found files:", files)
+
+  return files.map((file) => ({
+    slug: path.basename(file, ".mdx"),
+  }))
 }
 
-/**
- * LegalPage component
- * @description Renders a legal document by fetching its content via MDX
- * @param params - Contains the slug of the legal document
- * @returns JSX.Element for the legal page
- */
-export default async function LegalPage({ params }: MetadataProps) {
-  try {
-    const { content } = await getMDXFileContent({ params, baseDir: "legal" });
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const { slug } = params
+  const content = await getContent(slug)
 
-      <div
-        className={`min-h-screen bg-background flex flex-col ${inter.className}`}
-      >
-        <header className="w-full py-6 border-b">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-2xl font-bold">Company Name</h1>
-          </div>
-        </header>
-        <main className="flex-grow container mx-auto px-4 py-8 max-w-3xl">
-          <article className="prose dark:prose-invert">
-            {/* Render MDX content */}
-            <MDXRemote source={content} />
-          </article>
-        </main>
-        <footer className="w-full py-4 border-t">
-          <div className="container mx-auto px-4 text-center">
-            <p>
-              &copy; {new Date().getFullYear()} Company Name. All rights
-              reserved.
-            </p>
-          </div>
-        </footer>
-      </div>
-  } catch (error) {
-    console.error("Error rendering legal page:", error);
-    return <div>An error occurred while loading the legal document.</div>;
+  if (!content) {
+    return {}
   }
-};
+
+  return {
+    title: `${content.frontmatter.title} | Minimal Docs Site`,
+    description: content.frontmatter.description,
+  }
+}
+
+async function getContent(slug: string) {
+  try {
+    console.log("Searching for slug:", slug)
+    console.log("Current working directory:", process.cwd())
+    const globPattern = `*/${CONTENT_DIRECTORY}/${slug}.mdx`
+    console.log("Glob pattern:", globPattern)
+
+    const files = await glob(globPattern, { cwd: process.cwd(), absolute: false })
+    console.log("Matching files:", files)
+
+    if (files.length === 0) {
+      console.log("No matching files found")
+      return null
+    }
+
+    // Find the file that contains the slug in its path
+    const filePath = files.find((file) => file.toLowerCase().includes(slug.toLowerCase()))
+
+    if (!filePath) {
+      console.log(`No file found for slug: ${slug}`)
+      return null
+    }
+
+    console.log("Reading file:", filePath)
+    const fileContent = await fs.readFile(filePath, "utf8")
+    const { data: frontmatter, content } = matter(fileContent)
+    
+
+
+    return {
+      frontmatter,
+      content,
+    }
+  } catch (error) {
+    console.error(`Error reading file for slug ${slug}:`, error)
+    return null
+  }
+}
+
+export default async function Page({ params }: { params: { slug: string } }) {
+  console.log("Rendering page for slug:", params.slug)
+  const content = await getContent(params.slug)
+  console.log("Content:", content ? content : "Not found")
+
+  if (!content) {
+    console.log("Content not found, redirecting to 404")
+    notFound()
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header user={null} />
+      <main className="flex-grow">
+        <article className="prose dark:prose-invert max-w-3xl mx-auto py-8 px-4 mt-20">
+          <MDXRemote source={content.content} />
+        </article>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+

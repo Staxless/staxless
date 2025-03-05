@@ -4,18 +4,16 @@
  * @description A React component that displays a list of frequently asked questions with expandable answers.
  */
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+"use client"
 
+import { useTheme } from "@/contexts/ThemeContext"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { motion } from "framer-motion"
 // Types and Interfaces
 type FAQItem = {
-  question: string;
-  answer: string;
-};
+  question: string
+  answer: string
+}
 
 // Array of frequently asked questions and their answers
 const faqItems: FAQItem[] = [
@@ -44,7 +42,7 @@ const faqItems: FAQItem[] = [
     answer:
       "We take data security very seriously. All data is encrypted in transit and at rest. We use industry-standard security measures and regularly undergo third-party security audits to ensure your data is protected.",
   },
-];
+]
 
 /**
  * @function FAQ
@@ -52,30 +50,43 @@ const faqItems: FAQItem[] = [
  * @returns {JSX.Element} The FAQ component.
  */
 export default function FAQ(): JSX.Element {
+  const colors = useTheme()
+
   return (
-    <section className="bg-background py-20">
+    <section className="py-20" style={{ backgroundColor: colors.background }}>
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
-          <p className="mt-4 text-xl text-muted-foreground">
+        <motion.div className="text-center mb-16"          
+        initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}>
+          <h2 className="text-3xl font-bold" style={{ color: colors.text }}>
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-4 text-xl" style={{ color: colors.muted }}>
             Find answers to common questions about our services
           </p>
-        </div>
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full max-w-3xl mx-auto"
-        >
+        </motion.div>
+
+        <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
+        <motion.div className="text-center mb-16"          
+        initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}>
           {faqItems.map((item, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left">
+            <AccordionItem key={index} value={`item-${index}`} style={{ borderColor: colors.muted }}>
+              <AccordionTrigger className="text-left" style={{ color: colors.text }}>
                 {item.question}
               </AccordionTrigger>
-              <AccordionContent>{item.answer}</AccordionContent>
+              <AccordionContent style={{ color: colors.muted }}>{item.answer}</AccordionContent>
             </AccordionItem>
           ))}
+        </motion.div>
         </Accordion>
+        
       </div>
     </section>
-  );
+  )
 }
+

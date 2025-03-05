@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export const metadata = {
   title: 'Login',
@@ -21,28 +22,18 @@ export const metadata = {
  * LoginPage component
  * @returns {JSX.Element} The rendered login page
  */
+
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Login to your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense
-              fallback={
-                <div className="flex justify-center items-center h-32">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-                </div>
-              }
-            >
-              <LoginForm />
-            </Suspense>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
-  );
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  )
 }
+

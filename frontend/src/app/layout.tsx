@@ -1,17 +1,26 @@
-/**
- * @file app/layout.tsx
- * @description Root layout component for the Next.js application
- */
-
-import "./globals.css";
-import type { Metadata } from "next";
+import "./globals.css"
+import type { Metadata } from "next"
 import { siteMetadata } from "../../config"
+import { ThemeProvider } from "@/contexts/ThemeContext"
+import { headers } from "next/headers"
+import Header from "@/components/shared/header"
+import Footer from "@/components/shared/footer"
+import { Space_Grotesk, Space_Mono } from 'next/font/google'
+import React from 'react'; // Import React
 
-/**
- * Metadata for the entire application.
- * This metadata will be used across all pages of the application.
- * It defines default title behavior, descriptions, and Open Graph/Twitter card settings.
- */
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+  weight: ["400", "500"], // Regular and Medium weights
+})
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+  weight: "400", // Regular weight
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: {
@@ -35,23 +44,25 @@ export const metadata: Metadata = {
 }
 
 interface RootLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
-/**
- * RootLayout - The root layout component for the entire application.
- * This layout is applied globally, wrapping all pages and preserving
- * metadata, layout structure, and styles.
- *
- * @param {RootLayoutProps} props - The component props
- * @param {React.ReactNode} props.children - The child components to render within the layout
- * @returns {JSX.Element} The root layout for the app
- */
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
+async function getUserInfo() {
+  const headersList = await headers()
+  const userInfoString = headersList.get("x-user-info")
+  return userInfoString ? JSON.parse(userInfoString) : null
+}
+
+export default async function RootLayout({ children }: RootLayoutProps): Promise<JSX.Element> {
+  const user = await getUserInfo()
+
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
+      <body className={`flex flex-col min-h-screen ${spaceGrotesk.className}`}>
+        <ThemeProvider>
+          <main className="flex-grow">{React.cloneElement(children as React.ReactElement, { user })}</main>
+        </ThemeProvider>
+      </body>
     </html>
-  );
+  )
 }
-

@@ -1,57 +1,37 @@
-import { ReactNode } from "react";
-import { DocNavigation } from "@/components/docs/doc-navigation";
-import { TableOfContents } from "@/components/docs/table-of-contents";
-import { getDocStructure } from "@/lib/get-doc-structure";
-import { getMDXFileContent } from "@/lib/get-mdx-file-content";
-import { Metadata } from "next";
+"use client"
 
-interface DocItem {
-  name: string;
-  path: string;
-  subItems?: DocItem[];
-}
+import type React from "react"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { DocSidebar } from "@/components/doc-sidebar"
+import { ThemeProvider } from "@/contexts/ThemeContext"
+import StaxlessBadge from "@/components/shared/staxless-badge"
 
-interface GenerateMetadataProps {
-  params: { slug: string };
-}
-
-interface MDXData {
-  title?: string;
-  description?: string;
-}
-
-export async function generateMetadata({
-  params,
-}: GenerateMetadataProps): Promise<Metadata> {
-  const { data } = await getMDXFileContent({ params, baseDir: "docs" });
-  const mdxData = data as MDXData;
-
-  return {
-    title: mdxData.title || "Documentation",
-    description: mdxData.description || "No description available",
-  };
-}
-
-interface DocsLayoutProps {
-  children: ReactNode;
-}
-
-export default async function DocsLayout({ children }: DocsLayoutProps) {
-  const docStructure = await getDocStructure(
-    "src/app/(marketing)/docs/content",
-  );
+export default function DocsLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  // Mock user for demonstration - replace with your auth logic
+  const user = null
 
   return (
-    <div className="flex flex-1 min-h-screen">
-      <aside className="w-64 border-r border-gray-200 overflow-y-auto">
-        <DocNavigation docStructure={docStructure} />
-      </aside>
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <article>{children}</article>
+    <ThemeProvider>
+      <div className="flex flex-col min-h-screen [--header-height:5rem] [--footer-height:4rem]">
+        <SidebarProvider>
+          <div className="flex flex-1 pt-[--header-height]">
+            <DocSidebar />
+            <SidebarInset className="flex flex-col min-h-[calc(100vh-var(--header-height))]">
+              <main className="flex-1 p-6">{children}</main>
+            </SidebarInset>
+          </div>
+        </SidebarProvider>
+
+        {/* Fixed position badge in the bottom right corner */}
+        <div className="fixed bottom-4 right-4 z-50">
+          <StaxlessBadge />
         </div>
-      </main>
-      <TableOfContents />
-    </div>
-  );
+      </div>
+    </ThemeProvider>
+  )
 }
+

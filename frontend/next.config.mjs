@@ -4,6 +4,7 @@ import rehypeHighlight from "rehype-highlight";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['next-mdx-remote'],
   experimental: {
     serverActions: true,
   },
