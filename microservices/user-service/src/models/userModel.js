@@ -85,9 +85,9 @@ const connectToMongoDB = async () => {
  */
 const createUserCollection = async () => {
   try {
-    const collections = await db.listCollections({ name: "user" }).toArray();
+    const collections = await db.listCollections({ name: "users" }).toArray();
     if (collections.length === 0) {
-      await db.createCollection("user", {
+      await db.createCollection("users", {
         validator: {
           $jsonSchema: {
             bsonType: "object",
@@ -174,7 +174,7 @@ const User = {
   async updateLastActive(id) {
     try {
       return await db
-        .collection("user")
+        .collection("users")
         .updateOne({ _id: id }, { $set: { lastActive: new Date() } });
     } catch (error) {
       console.error("Error updating last active:", error);
