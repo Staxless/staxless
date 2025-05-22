@@ -16,11 +16,6 @@ dotenv.config({ path: "./secrets/.env" });
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(cors("*"));
-// origin: "http://back-gate:8080/"
-
 /**
  * Logging middleware
  * @param {Object} req - Express request object
@@ -34,13 +29,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware
+app.use(express.json());
+app.use(cors("*"));
+// origin: "http://back-gate:8080/"
+
 // Routes
 app.use("/", healthCheckRoutes);
 app.use("/", oauthRoutes);
 app.use("/", authRoutes);
 
 // Start server
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 
 /**
  * Starts the Express server
