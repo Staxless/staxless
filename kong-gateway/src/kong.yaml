@@ -91,26 +91,46 @@ services:
         paths: [/products]
         strip_path: false 
 
-plugins:
-  - name: cors
-    config:
-      origins:
-        - "*"
-      methods:
-        - GET
-        - POST
-        - OPTIONS
-      headers:
-        - Origin
-        - Authorization
-        - Content-Type
-      exposed_headers:
-        - Content-Length
-        - Content-Type
-        - Set-Cookie
-        - Location
-      credentials: true
-      max_age: 3600
+  - name: mailgun
+    url: http://mailgun:8084
+    routes:
+      - name: send-email
+        methods: [POST]
+        paths: [/send-email]
+        strip_path: false   
+
+  - name: cms
+    url: http://cms:8085
+    routes:
+    routes:
+      - name: cms-admin-route
+        paths:
+          - /admin
+        strip_path: true
+        preserve_host: true
+
+
+
+# plugins:
+#   - name: cors
+#     config:
+#       origins:
+#         - "*"
+#       methods:
+#         - GET
+#         - POST
+#         - OPTIONS
+#       headers:
+#         - Origin
+#         - Authorization
+#         - Content-Type
+#       exposed_headers:
+#         - Content-Length
+#         - Content-Type
+#         - Set-Cookie
+#         - Location
+#       credentials: true
+#       max_age: 3600
 
 upstreams:
   - name: auth-upstream
@@ -120,6 +140,7 @@ upstreams:
       active:
         type: http
         http_path: /health
+        headers: {}
         healthy:
           interval: 10
           successes: 1
@@ -134,6 +155,22 @@ upstreams:
       active:
         type: http
         http_path: /health
+        headers: {}
+        healthy:
+          interval: 10
+          successes: 1
+        unhealthy:
+          interval: 10
+          http_failures: 5
+  
+  - name: mailgun-upstream
+    targets:
+      - target: mailgun:8084
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        headers: {}
         healthy:
           interval: 10
           successes: 1
