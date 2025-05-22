@@ -14,6 +14,8 @@ volumes:
     driver_opts:
       type: tmpfs
       device: tmpfs
+  kong_gateway: {}
+  mongo_data: {}
 
 services:
   frontend:
@@ -21,17 +23,15 @@ services:
     container_name: frontend
     build:
       context: ../frontend/
-      dockerfile: ./dockerfiles/frontend.Dockerfile
-      target: dev
-    ports:
-      - "3000:3000"
+      dockerfile: ../config/dockerfiles/frontend.Dockerfile
+      target: prod
+    expose:
+      - "3000"
     restart: always
-    volumes:
-      - ../frontend/src/:/app/src
-      - /app/node_modules
-      - /app/.next
+    env_file:
+      - ../../secrets/prod/frontend.env
     environment:
-      - "NEXT_WEBPACK_USEPOLLING=1"
+      - NODE_ENV=production
     networks:
       frontend:
         aliases:
@@ -44,6 +44,8 @@ services:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     user: "${KONG_USER:-kong}"
     container_name: kong
+    env_file:
+      - ../../secrets/prod/kong.env
     environment:
       <<: *kong-env
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -55,14 +57,12 @@ services:
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
       KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
-    ports:
-      - "${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp"
-      - "${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp"
-      - "8001:8001/tcp"
-      - "8444:8444/tcp"
-      - "8002:8002/tcp"
+    expose:
+      - "8001"
+      - "8002"
+      - "8444"
     healthcheck:
-      test: [ "CMD", "kong", "health" ]
+      test: ["CMD", "kong", "health"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -71,7 +71,7 @@ services:
     volumes:
       - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
       - kong_tmp_vol:/tmp
-      - ../kong-gateway/:/opt/kong
+      - kong_gateway:/opt/kong
     security_opt:
       - no-new-privileges
     networks:
@@ -85,9 +85,13 @@ services:
   mongodb-service:
     image: mongo:latest
     container_name: mongodb-service
-    ports:
-      - "27017:27017"
+    env_file:
+      - ../../secrets/prod/mongodb.env
+    expose:
+      - "27017"
     restart: always
+    volumes:
+      - mongo_data:/data/db
     logging:
       options:
         max-size: 1g
@@ -102,15 +106,15 @@ services:
     container_name: auth-service
     build:
       context: ../microservices/auth-service/
-      dockerfile: ./dockerfiles/auth-service.Dockerfile
-      target: dev
+      dockerfile: ../../config/dockerfiles/auth-service.Dockerfile
+      target: prod
     env_file:
-      - ../microservices/auth-service/secrets/.env
-    ports:
-      - "8080:8080"
-    volumes:
-      - ../microservices/auth-service/src:/home/node/src
-      - ../microservices/auth-service/src/server.js:/home/node/server.js
+      - ../../secrets/prod/auth-service.env
+    expose:
+      - "8080"
+    restart: always
+    environment:
+      - NODE_ENV=production
     networks:
       backend:
         aliases:
@@ -121,17 +125,15 @@ services:
     container_name: user-service
     build:
       context: ../microservices/user-service/
-      dockerfile: ./dockerfiles/user-service.Dockerfile
-      target: dev
+      dockerfile: ../../config/dockerfiles/user-service.Dockerfile
+      target: prod
     env_file:
-      - ../microservices/user-service/secrets/.env
-    ports:
-      - "8082:8082"
-    volumes:
-      - ../microservices/user-service/src:/home/node/src
-      - ../microservices/user-service/src/server.js:/home/node/server.js
+      - ../../secrets/prod/user-service.env
     expose:
       - "8082"
+    restart: always
+    environment:
+      - NODE_ENV=production
     networks:
       backend:
         aliases:
@@ -141,19 +143,55 @@ services:
     container_name: stripe-service
     build:
       context: ../microservices/stripe-service/
-      dockerfile: ./dockerfiles/stripe-service.Dockerfile
-      target: dev
-    ports:
-      - "8083:8083"
+      dockerfile: ../../config/dockerfiles/stripe-service.Dockerfile
+      target: prod
     env_file:
-      - ../microservices/stripe-service/secrets/.env
-    volumes:
-      - ../microservices/stripe-service/src:/home/node/src
-      - ../microservices/stripe-service/src/server.js:/home/node/server.js
+      - ../../secrets/prod/stripe-service.env
+    expose:
+      - "8083"
+    restart: always
+    environment:
+      - NODE_ENV=production
     networks:
       backend:
         aliases:
           - "stripe"
+
+  mailgun-service:
+    image: app_mailgun_service
+    container_name: mailgun-service
+    build:
+      context: ../microservices/mailgun-service/
+      dockerfile: ../../config/dockerfiles/mailgun-service.Dockerfile
+      target: prod
+    env_file:
+      - ../../secrets/prod/mailgun-service.env
+    expose:
+      - "8084"
+    restart: always
+    environment:
+      - NODE_ENV=production
+    networks:
+      backend:
+        aliases:
+          - "mailgun"
+
+  cms-service:
+    image: node:18-alpine
+    container_name: cms-service
+    env_file:
+      - ../../secrets/prod/cms-service.env
+    expose:
+      - "8085"
+    restart: always
+    environment:
+      - NODE_ENV=production
+    working_dir: /home/node/app/
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm start"
+    networks:
+      backend:
+        aliases:
+          - "cms"
 
 networks:
   backend:

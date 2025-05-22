@@ -28,7 +28,7 @@ FROM builder AS dev
 RUN ["npm", "install","nodemon", "--save-dev"]
 
 # Expose port 8003 for development
-EXPOSE 8002
+EXPOSE 8083
 
 # Start the application in development mode using nodemon
 CMD ["npm", "run", "dev"]
