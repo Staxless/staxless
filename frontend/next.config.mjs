@@ -22,6 +22,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/admin/:path*',
+        destination: 'http://front-gate:8085/admin/:path*',
+      }, 
+      {
         source: "/api/:path*",
         destination: "http://front-gate:8000/:path*",
       },
