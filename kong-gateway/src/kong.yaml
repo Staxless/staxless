@@ -1,0 +1,179 @@
+_format_version: "2.1"
+
+services:
+  - name: auth
+    url: http://auth:8080
+    routes:
+      - name: auth-providers
+        methods: [GET]
+        paths: [/auth/providers]
+        strip_path: false        
+
+      - name: auth-register
+        methods: [GET]
+        paths: [/auth/register/(.+)]
+        strip_path: false        
+
+      - name: auth-login
+        methods: [GET]
+        paths: [/auth/login/(.+)]
+        strip_path: false        
+        plugins:
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - Cookie:${request.headers.cookie}
+                  - x-user-info:${request.headers.x-user-info}
+
+      - name: auth-callback
+        methods: [GET]
+        paths: [/auth/(.+)/callback]
+        strip_path: false        
+
+      - name: auth-logout
+        methods: [POST]
+        paths: [/auth/logout]
+        strip_path: false
+
+      - name: auth-validate-request
+        methods: [POST]
+        paths: [/auth/validate-request]
+        strip_path: false
+
+  - name: stripe
+    url: http://stripe:8083
+    routes:
+      - name: checkout
+        methods: [POST]
+        paths: [/checkout]
+        strip_path: false
+        plugins:
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - Content-Type:application/json
+                  - x-user-info:${request.headers.x-user-info}
+
+      - name: webhook
+        methods: [POST, GET]
+        paths: [/webhook]
+        strip_path: false
+        plugins:
+          - name: request-transformer
+            config:
+              http_method: null
+              add:
+                headers:
+                  - x-user-info:${request.headers.x-user-info}
+                  - stripe-signature:${request.headers.stripe-signature}
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+              headers:
+                - Content-Type
+                - x-user-info
+                - stripe-signature
+              exposed_headers:
+                - Content-Type
+                - x-user-info
+                - stripe-signature
+              credentials: true
+              max_age: 3600
+
+      - name: products
+        methods: [GET]
+        paths: [/products]
+        strip_path: false 
+
+  - name: mailgun
+    url: http://mailgun:8084
+    routes:
+      - name: send-email
+        methods: [POST]
+        paths: [/send-email]
+        strip_path: false   
+
+  - name: cms
+    url: http://cms:8085
+    routes:
+    routes:
+      - name: cms-admin-route
+        paths:
+          - /admin
+        strip_path: true
+        preserve_host: true
+
+
+
+# plugins:
+#   - name: cors
+#     config:
+#       origins:
+#         - "*"
+#       methods:
+#         - GET
+#         - POST
+#         - OPTIONS
+#       headers:
+#         - Origin
+#         - Authorization
+#         - Content-Type
+#       exposed_headers:
+#         - Content-Length
+#         - Content-Type
+#         - Set-Cookie
+#         - Location
+#       credentials: true
+#       max_age: 3600
+
+upstreams:
+  - name: auth-upstream
+    targets:
+      - target: auth:8080
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        headers: {}
+        healthy:
+          interval: 10
+          successes: 1
+        unhealthy:
+          interval: 10
+          http_failures: 5
+
+  - name: stripe-upstream
+    targets:
+      - target: stripe:8083
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        headers: {}
+        healthy:
+          interval: 10
+          successes: 1
+        unhealthy:
+          interval: 10
+          http_failures: 5
+  
+  - name: mailgun-upstream
+    targets:
+      - target: mailgun:8084
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        headers: {}
+        healthy:
+          interval: 10
+          successes: 1
+        unhealthy:
+          interval: 10
+          http_failures: 5

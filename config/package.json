@@ -1,29 +1,31 @@
 {
-  "name": "top",
+  "name": "staxless",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-
-    "react-dom": "^18.2.0"
   },
   "scripts": {
-    "dev-up-build": "docker-compose -f docker-compose.dev.yml up --build",
-    "dev-up": "docker-compose -f docker-compose.dev.yml up",
-    "dev-down": "docker-compose -f docker-compose.dev.yml down"
+    "staxless-dev-build": "docker compose -f docker-compose.dev.yml up --build",
+    "staxless-dev-up": "docker compose -f docker-compose.dev.yml up",
+    "staxless-dev-down": "docker compose -f docker-compose.dev.yml down"
   },
   "eslintConfig": {
-    "extends": ["react-app", "react-app/jest"]
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "tailwindcss": "^3.4.3"
   },
   "main": "index.js",
   "keywords": [],

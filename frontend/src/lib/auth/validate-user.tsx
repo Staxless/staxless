@@ -15,6 +15,7 @@ export interface User {
   id: string;
   email: string;
   subscription: string;
+  roles: string[];
   // Add any other properties that your user object might have
 }
 

@@ -1,9 +1,3 @@
-/**
- * @file oauthRouter.tsx
- * @description Express router for handling OAuth authentication flows, including registration, login, and callback processing.
- * @module authRouter
- */
-
 import express from "express";
 import axios from "axios";
 import { OAuth2RequestError } from "arctic";
@@ -46,13 +40,13 @@ const initializeOAuthFlow = (action) => async (req, res) => {
   const providerName = req.params.provider;
   const provider = providers[providerName];
 
-  if (!provider) {
+  if (!provider || !provider.instance) {
     return res.status(400).json({ error: "Provider not supported" });
   }
 
   try {
     const state = crypto.randomBytes(16).toString("hex");
-    const url = await provider.createAuthorizationURL(state, provider.scopes);
+    const url = await provider.instance.createAuthorizationURL(state, provider.scopes);
 
     const cookieOptions = {
       path: "/",
@@ -64,12 +58,12 @@ const initializeOAuthFlow = (action) => async (req, res) => {
 
     const csrfToken = generateCSRFToken();
 
-   res.cookie("oauth_state", state, cookieOptions)
-       .cookie("oauth_action", action, cookieOptions)
-       .cookie("csrf_token", csrfToken, { ...cookieOptions, httpOnly: false })
-       .status(300)
-       .redirect(url.href)
-  
+    res
+      .cookie("oauth_state", state, cookieOptions)
+      .cookie("oauth_action", action, cookieOptions)
+      .cookie("csrf_token", csrfToken, { ...cookieOptions, httpOnly: false })
+      .status(300)
+      .redirect(url.href);
   } catch (error) {
     console.error(`OAuth ${action} error:`, error);
     res
@@ -87,27 +81,20 @@ router.get("/auth/register/:provider", initializeOAuthFlow("register"));
 
 router.get("/auth/login/:provider", initializeOAuthFlow("login"));
 
-router.post(
-  "/auth/register/:provider",
-  initializeOAuthFlow("register"),
-);
-router.post(
-  "/auth/login/:provider",
-  initializeOAuthFlow("login"),
-);
+router.post("/auth/register/:provider", initializeOAuthFlow("register"));
+
+router.post("/auth/login/:provider", initializeOAuthFlow("login"));
 
 /**
  * Handles the OAuth callback after user authorization.
  * @route GET /auth/:provider/callback
  */
 router.get("/auth/:provider/callback", async (req, res) => {
-
   const providerName = req.params.provider;
   const provider = providers[providerName];
-  provider.id = providerName;
 
-  if (!provider) {
-    res.redirect("/auth/login?error=Invalid provider");
+  if (!provider || !provider.instance) {
+    return res.redirect(`${process.env.FRONTEND_URL || "http://frontend:3000"}/login?error=Invalid provider`);
   }
 
   const code = req.query.code?.toString() ?? null;
@@ -116,31 +103,27 @@ router.get("/auth/:provider/callback", async (req, res) => {
   const storedState = cookies.get("oauth_state") ?? null;
   const oauthAction = cookies.get("oauth_action") ?? null;
 
-
   if (!code || !state || state !== storedState) {
-    return res.redirect("http://frontend:3000/login?error=Invalid state");
+    return res.redirect(`${process.env.FRONTEND_URL || "http://frontend:3000"}/login?error=Invalid state`);
   }
 
   try {
-
     const oauthUser = await getUserInfo(provider, code);
-    oauthUser.fname = oauthUser.name.split(" ")[0];
-    oauthUser.lname = oauthUser.name.split(" ")[1];
+    oauthUser.fname = oauthUser.name?.split(" ")[0] || oauthUser.given_name || "";
+    oauthUser.lname = oauthUser.name?.split(" ")[1] || oauthUser.family_name || "";
 
     const result = await handleOAuthAction(oauthAction, oauthUser, provider);
 
-    const sessionCookie = lucia
-      .createSessionCookie(result.sessionId)
-      .serialize();
+    const sessionCookie = lucia.createSessionCookie(result.sessionId).serialize();
     res.setHeader("Set-Cookie", [
       sessionCookie,
       serializeCookie("oauth_state", "", { maxAge: 0 }),
       serializeCookie("oauth_action", "", { maxAge: 0 }),
       serializeCookie("csrf_token", "", { maxAge: 0 }),
     ]);
-    
-    console.log(result.redirectUrl)
-    return res.redirect(`/${result.redirectUrl}`); //FIXME: This needs to be dynamic based on host
+
+    const redirectUrl = `${process.env.FRONTEND_URL || "http://frontend:3000"}/${result.redirectUrl}`;
+    return res.redirect(redirectUrl);
   } catch (error) {
     handleError(error, res);
   }
@@ -148,20 +131,27 @@ router.get("/auth/:provider/callback", async (req, res) => {
 
 /**
  * Retrieves user information from the OAuth provider.
- * @param {Object} provider - The OAuth provider object.
+ * @param {Object} provider - The OAuth provider configuration.
  * @param {string} code - The authorization code.
- * @returns {Promise<Object>} The user information.
+ * @returns {Promise<Object Patent Response Object} The user information.
  */
 async function getUserInfo(provider, code) {
-  const tokens = await provider.validateAuthorizationCode(code);
-  const oauthUserResponse = await axios.get(provider.userInfoUrl, {
-    headers: {
-      Authorization: `Bearer ${tokens.accessToken}`,
-    },
-    scopes: "user:email",
-  });
+  if (!code) throw new Error("Authorization code missing");
+  if (!provider.instance) throw new Error("Provider instance not configured");
 
-  return oauthUserResponse.data;
+  try {
+    const tokens = await provider.instance.validateAuthorizationCode(code);
+    const userResponse = await axios.get(provider.userInfoUrl, {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+      },
+    });
+
+    return userResponse.data;
+  } catch (error) {
+    console.error(`Failed to fetch user info from ${provider.name}:`, error);
+    throw error instanceof OAuth2RequestError ? error : new Error("Failed to retrieve user information");
+  }
 }
 
 /**
@@ -172,6 +162,7 @@ async function getUserInfo(provider, code) {
  * @returns {Promise<Object>} The result of the action.
  */
 async function handleOAuthAction(action, oauthUser, provider) {
+  
   switch (action) {
     case "register":
       return handleRegistration(oauthUser, provider);
@@ -189,10 +180,12 @@ async function handleOAuthAction(action, oauthUser, provider) {
  * @returns {Promise<Object>} The registration result.
  */
 async function handleRegistration(oauthUser, provider) {
-  const existingUser = await findOAuthAccount(oauthUser.id, provider.id);
+  const existingUser = await findOAuthAccount(oauthUser.id || oauthUser.sub, provider.name);
   if (existingUser) {
-    throw new Error("Oauth Account already in use. Please login.");
+    throw new Error("OAuth account already in use. Please login.");
   }
+  console.log("Creating new user");
+  console.log("provider", provider);
 
   const userId = crypto.randomUUID();
   const newUser = {
@@ -200,20 +193,20 @@ async function handleRegistration(oauthUser, provider) {
     first_name: oauthUser.fname || "",
     last_name: oauthUser.lname || "",
     email: oauthUser.email || "",
+    avatar: oauthUser.picture || "",
     created_at: new Date(),
     subscription: {
-          type: "free",
-          startDate: new Date(),
-          },
+      type: "free",
+      startDate: new Date(),
+    },
     roles: ["user"],
   };
 
-  console.log(newUser)
   await lucia.adapter.User.insertOne(newUser);
-  await createOAuthAccount(userId, oauthUser.id, provider.id);
+  await createOAuthAccount(userId, oauthUser.id || oauthUser.sub, provider.name);
 
   const session = await lucia.createSession(userId, {});
-  return { sessionId: session.id, redirectUrl: "/checkout" };
+  return { sessionId: session.id, redirectUrl: "http://frontend:3000/checkout" };
 }
 
 /**
@@ -223,7 +216,7 @@ async function handleRegistration(oauthUser, provider) {
  * @returns {Promise<Object>} The login result.
  */
 async function handleLogin(oauthUser, provider) {
-  const oauthAccount = await findOAuthAccount(oauthUser.id, provider.id);
+  const oauthAccount = await findOAuthAccount(oauthUser.id || oauthUser.sub, provider.name);
   if (!oauthAccount) {
     throw new Error("No account found. Please register.");
   }
@@ -266,17 +259,14 @@ async function findOAuthAccount(providerUserId, providerId) {
  * @param {Object} res - Express response object.
  */
 const handleError = (error, res) => {
-  if (
-    error instanceof OAuth2RequestError &&
-    error.message === "bad_verification_code"
-  ) {
-    return res.redirect("/login/?error=Bad verification code");
+  const redirectBase = process.env.FRONTEND_URL || "http://frontend:3000";
+  if (error instanceof OAuth2RequestError && error.message === "bad_verification_code") {
+    return res.redirect(`${redirectBase}/login?error=Bad verification code`);
   }
 
   console.error("OAuth error:", error);
-
   return res.redirect(
-    `/login/?error=${encodeURIComponent(error.message || "An unexpected error occurred")}`,
+    `${redirectBase}/login?error=${encodeURIComponent(error.message || "An unexpected error occurred")}`,
   );
 };
 
@@ -287,13 +277,12 @@ const handleError = (error, res) => {
 router.get("/auth/providers", (req, res) => {
   try {
     const configuredProviders = getConfiguredProviders();
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader("Content-Type", "application/json");
     res.json(configuredProviders);
   } catch (error) {
     console.error("Error getting configured providers:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 export default router;

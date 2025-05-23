@@ -18,7 +18,13 @@ const ROUTES_TO_RELOAD = ["/login", "/register", "/dashboard"];
  * Protected routes that require authentication
  * @constant {string[]}
  */
-const PROTECTED_ROUTES = ["/dashboard"];
+const PROTECTED_ROUTES = ["/dashboard", "/checkout"];
+
+/**
+ * Protected routes that require admin access
+ * @constant {string[]}
+ */
+const ADMIN_ROUTES = ["/admin"];
 
 /**
  * Middleware function to handle various checks and modifications for incoming requests
@@ -42,6 +48,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   const user: User | null = await getUser();
+
+  // Check if the user is an admin and trying to access admin routes
+  // If the user is an admin, redirect them to the admin dashboard
+  // If the user is not an admin, redirect them to the login page
+  const isAdminRoute = ADMIN_ROUTES.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  );
+
+  if (isAdminRoute && user && user?.roles.includes("admin")) {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
 
   // Check if the route is protected
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>

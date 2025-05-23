@@ -21,17 +21,22 @@ services:
     container_name: frontend
     build:
       context: ../frontend/
-      dockerfile: ./dockerfiles/frontend.Dockerfile
+      dockerfile: ../config/dockerfiles/frontend.Dockerfile
       target: dev
     ports:
       - "3000:3000"
+    expose:
+      - "3000"
     restart: always
     volumes:
       - ../frontend/src/:/app/src
       - /app/node_modules
       - /app/.next
+    env_file:
+      - ../config/secrets/dev/staxless.dev.env
     environment:
-      - "NEXT_WEBPACK_USEPOLLING=1"
+      - NODE_ENV=development
+      - NEXT_WEBPACK_USEPOLLING=1
     networks:
       frontend:
         aliases:
@@ -44,6 +49,8 @@ services:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     user: "${KONG_USER:-kong}"
     container_name: kong
+    env_file:
+      - ../config/secrets/dev/staxless.dev.env
     environment:
       <<: *kong-env
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -54,15 +61,19 @@ services:
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
-      KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
+      KONG_DECLARATIVE_CONFIG: "/opt/kong/src/kong.yaml"
     ports:
-      - "${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp"
-      - "${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp"
-      - "8001:8001/tcp"
-      - "8444:8444/tcp"
-      - "8002:8002/tcp"
+      - '${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp'
+      - '${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp'
+      - '8001:8001/tcp'
+      - '8444:8444/tcp'
+      - '8002:8002/tcp'
+    expose:
+      - "8001"
+      - "8002"
+      - "8444"
     healthcheck:
-      test: [ "CMD", "kong", "health" ]
+      test: ["CMD", "kong", "health"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -85,8 +96,12 @@ services:
   mongodb-service:
     image: mongo:latest
     container_name: mongodb-service
+    env_file:
+      - ../config/secrets/dev/staxless.dev.env
     ports:
       - "27017:27017"
+    expose:
+      - "27017"
     restart: always
     logging:
       options:
@@ -102,15 +117,19 @@ services:
     container_name: auth-service
     build:
       context: ../microservices/auth-service/
-      dockerfile: ./dockerfiles/auth-service.Dockerfile
+      dockerfile: ../../config/dockerfiles/auth-service.Dockerfile
       target: dev
     env_file:
-      - ../microservices/auth-service/secrets/.env
+      - ../config/secrets/dev/staxless.dev.env
     ports:
       - "8080:8080"
+    expose:
+      - "8080"
     volumes:
       - ../microservices/auth-service/src:/home/node/src
       - ../microservices/auth-service/src/server.js:/home/node/server.js
+    environment:
+      - NODE_ENV=development
     networks:
       backend:
         aliases:
@@ -121,17 +140,19 @@ services:
     container_name: user-service
     build:
       context: ../microservices/user-service/
-      dockerfile: ./dockerfiles/user-service.Dockerfile
+      dockerfile: ../../config/dockerfiles/user-service.Dockerfile
       target: dev
     env_file:
-      - ../microservices/user-service/secrets/.env
+      - ../config/secrets/dev/staxless.dev.env
     ports:
       - "8082:8082"
+    expose:
+      - "8082"
     volumes:
       - ../microservices/user-service/src:/home/node/src
       - ../microservices/user-service/src/server.js:/home/node/server.js
-    expose:
-      - "8082"
+    environment:
+      - NODE_ENV=development
     networks:
       backend:
         aliases:
@@ -141,19 +162,69 @@ services:
     container_name: stripe-service
     build:
       context: ../microservices/stripe-service/
-      dockerfile: ./dockerfiles/stripe-service.Dockerfile
+      dockerfile: ../../config/dockerfiles/stripe-service.Dockerfile
       target: dev
+    env_file:
+      - ../config/secrets/dev/staxless.dev.env
     ports:
       - "8083:8083"
-    env_file:
-      - ../microservices/stripe-service/secrets/.env
+    expose:
+      - "8083"
     volumes:
       - ../microservices/stripe-service/src:/home/node/src
       - ../microservices/stripe-service/src/server.js:/home/node/server.js
+    environment:
+      - NODE_ENV=development
     networks:
       backend:
         aliases:
           - "stripe"
+
+  mailgun-service:
+    image: app_mailgun_service
+    container_name: mailgun-service
+    build:
+      context: ../microservices/mailgun-service/
+      dockerfile: ../../config/dockerfiles/mailgun-service.Dockerfile
+      target: dev
+    env_file:
+      - ../config/secrets/dev/staxless.dev.env
+    ports:
+      - "8084:8084"
+    expose:
+      - "8084"
+    volumes:
+      - ../microservices/mailgun-service/src:/home/node/src
+      - ../microservices/mailgun-service/src/server.js:/home/node/server.js
+    environment:
+      - NODE_ENV=development
+    networks:
+      backend:
+        aliases:
+          - "mailgun"
+
+  cms-service:
+    image: node:18-alpine
+    container_name: cms-service
+    env_file:
+      - ../config/secrets/dev/staxless.dev.env
+    ports:
+      - "8085:8085"
+    expose:
+      - "8085"
+    volumes:
+      - ../microservices/cms-service:/home/node/app
+      - ../microservices/cms-service/node_modules:/home/node/app/node_modules
+    working_dir: /home/node/app/
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+    depends_on:
+      - mongodb-service
+    environment:
+      - PORT=8085
+    networks:
+      backend:
+        aliases:
+          - "cms"
 
 networks:
   backend:
