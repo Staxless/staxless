@@ -5,7 +5,7 @@ import { CollectionConfig } from "payload";
 
 export const User: CollectionConfig = {
   slug: "user", // Matches MongoDB collection 'user'
-  dbName: "user", // Matches MongoDB collection 'user'
+  dbName: "users", // Matches MongoDB collection 'user'
   admin: {
     group: "General",
     useAsTitle: "first_name",
