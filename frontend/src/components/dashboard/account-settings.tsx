@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface AccountSettingsProps {
@@ -17,9 +18,14 @@ export function AccountSettings({ user }: AccountSettingsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground">
-          {user.avatar}
-        </div>
+       
+          <Avatar className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground">
+            <AvatarImage src={user.avatar} alt={user.name || "User"} />
+            <AvatarFallback>
+              {(user.name || "U").charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
         <div>
           <h2 className="text-xl font-semibold">{user.name}</h2>
           <p className="text-sm text-muted-foreground">{user.email}</p>
