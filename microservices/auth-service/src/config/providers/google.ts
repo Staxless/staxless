@@ -29,7 +29,7 @@ export class GoogleProvider extends Provider {
       clientId: this.config.clientId,
       clientSecret: this.config.clientSecret ? "[REDACTED]" : undefined,
       scopes: this.config.scopes,
-      redirectUri: "http://localhost:8000/auth/google/callback",
+      redirectUri: "http://localhost:8000/oauth/google/callback",
     });
   }
 
@@ -45,7 +45,7 @@ export class GoogleProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("Google requires GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/auth/google/callback";
+    const redirectUri = "http://localhost:8000/oauth/google/callback";
     console.log("Google Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
     return new arctic.Google(clientId, clientSecret, redirectUri);
   }
