@@ -4,7 +4,7 @@
  * 
  * @description
  * This module connects to a MongoDB database and initializes the Lucia authentication system.
- * It configures the MongoDB adapter with session, user, and OAuth account collections.
+ * It configures the MongoDB adapter with session, user, OAuth account, and magic link collections.
  * It also sets session cookie security based on the environment and maps user/session attributes.
  * 
  * @usage
@@ -14,7 +14,7 @@
  * @notes
  * - Uses the MongoDB service hostname: "mongodb-service".
  * - Session cookies are secure only in production.
- * - Collections used: "session", "users", and "oauthAccount".
+ * - Collections used: "session", "users", "oauthAccount", and "magicLinks".
  * 
  * @requires mongodb
  * @requires @lucia-auth/adapter-mongodb
@@ -49,8 +49,9 @@ export const initializeLucia = async (): Promise<Lucia> => {
       db.collection("users"),
     );
 
-    // Attach OAuth account collection to adapter
+    // Attach OAuth account and magic link collections to adapter
     (adapter as any).OauthAccount = db.collection("oauthAccount");
+    (adapter as any).MagicLink = db.collection("magicLinks");
 
     // Initialize Lucia with adapter and session/user attribute mapping
     const lucia = new Lucia(adapter, {

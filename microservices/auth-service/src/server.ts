@@ -9,6 +9,7 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 
 import healthCheckRoutes from "./routes/healthRouter";
+import magicLinkRoutes from "./routes/magicLinkRouter";
 import oauthRoutes  from "./routes/oauthRouter";
 import authRoutes from "./routes/authRouter";
 
@@ -53,7 +54,12 @@ app.use("/", healthCheckRoutes);
 /**
  * Mounts OAuth-related routes at /auth.
  */
-app.use("/auth/", oauthRoutes);
+app.use("/oauth/", oauthRoutes);
+
+/**
+ * Mounts OAuth-related routes at /auth.
+ */
+app.use("/auth", magicLinkRoutes);
 
 /**
  * Mounts authentication routes at the root path.
