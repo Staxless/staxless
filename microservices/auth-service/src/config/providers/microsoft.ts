@@ -30,7 +30,7 @@ export class MicrosoftProvider extends Provider {
       clientId: this.config.clientId,
       clientSecret: this.config.clientSecret ? "[REDACTED]" : undefined,
       scopes: this.config.scopes,
-      redirectUri: "http://localhost:8000/auth/microsoft/callback",
+      redirectUri: "http://localhost:8000/oauth/microsoft/callback",
     });
   }
 
@@ -46,7 +46,7 @@ export class MicrosoftProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("Microsoft requires MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/auth/microsoft/callback";
+    const redirectUri = "http://localhost:8000/oauth/microsoft/callback";
     console.log("Microsoft Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
     return new arctic.MicrosoftEntraId(clientId, clientSecret, redirectUri, { tenantId: "common" });
   }

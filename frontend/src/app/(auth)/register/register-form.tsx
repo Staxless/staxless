@@ -1,6 +1,6 @@
 /**
  * @file app/register/register-form.tsx
- * @description Client-side registration form component with OAuth provider support and plan selection
+ * @description Client-side registration form component with OAuth and magic link support
  */
 
 "use client";
@@ -15,8 +15,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
-import { storePlanSelection } from "@/app/server-actions/store-plan-selection";
 import { useProviders } from "@/app/hooks/use-provider";
+import axios from "axios";
 
 interface FormData {
   firstName: string;
@@ -26,6 +26,10 @@ interface FormData {
   priceId?: string;
 }
 
+interface Provider {
+  name: string;
+}
+
 /**
  * RegisterForm component
  * @returns {JSX.Element} The rendered registration form
@@ -33,6 +37,7 @@ interface FormData {
 export default function RegisterForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -42,6 +47,9 @@ export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { providers, isLoading, error: providersError } = useProviders();
+
+  // Generate CSRF token
+  const csrfToken = crypto.randomUUID();
 
   useEffect(() => {
     const tier = searchParams.get("tier");
@@ -53,28 +61,30 @@ export default function RegisterForm() {
         tier: tier || undefined,
         priceId: priceId || undefined,
       }));
+      // Clean up URL parameters
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("tier");
+      newUrl.searchParams.delete("price");
+      window.history.replaceState({}, document.title, newUrl.toString());
     }
   }, [searchParams]);
 
   /**
    * Handle redirection to OAuth provider
-   * @param {string} url - The URL to redirect to
+   * @param url - The URL to redirect to
    */
   const handleRedirect = async (url: string) => {
     setIsRedirecting(true);
     if (url === "https://localhost:3000/session") {
       console.warn(url);
     } else {
-      if (formData.tier && formData.priceId) {
-        await storePlanSelection(formData.tier, formData.priceId);
-      }
       router.push(url);
     }
   };
 
   /**
    * Handle input change
-   * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event
+   * @param e - The input change event
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -85,19 +95,24 @@ export default function RegisterForm() {
   };
 
   /**
-   * Handle form submission
-   * @param {FormEvent} e - The form event
+   * Handle magic link submission
+   * @param e - The form event
    */
-  const handleSubmit = async (e: FormEvent) => {
+  const handleMagicLinkSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
     try {
-      if (formData.tier && formData.priceId) {
-        await storePlanSelection(formData.tier, formData.priceId);
-      }
-      router.push("checkout");
-    } catch (err) {
-      console.error("Error during registration:", err);
-      setError("Registration failed. Please try again.");
+      const response = await axios.post(
+       "http://localhost:3000/api/auth/magic-link/register",
+        formData,
+        { headers: { "X-CSRF-Token": csrfToken } }
+      );
+      setSuccess(response.data.message);
+      document.cookie = `csrf_token=${csrfToken}; path=/; max-age=900; samesite=lax`;
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to send magic link");
     }
   };
 
@@ -111,7 +126,7 @@ export default function RegisterForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="first-name">First name</Label>
@@ -155,7 +170,7 @@ export default function RegisterForm() {
           </div>
         )}
         <Button type="submit" className="w-full">
-          Register
+          Register with Email
         </Button>
       </form>
 
@@ -164,6 +179,12 @@ export default function RegisterForm() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error || providersError}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert variant="default" className="mt-4">
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

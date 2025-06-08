@@ -25,7 +25,7 @@ export function useProviders() {
     const fetchProviders = async () => {
       try {
         console.log("Fetching providers from API...");
-        const response = await fetch("/api/auth/providers", {
+        const response = await fetch("/api/oauth/providers", {
           headers: {
             'Accept': 'application/json'
           }

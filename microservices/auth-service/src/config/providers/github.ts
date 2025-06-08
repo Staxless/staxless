@@ -31,7 +31,7 @@ export class GitHubProvider extends Provider {
       scopes: this.config.scopes,
       userInfoUrl: this.config.userInfoUrl,
       usePKCE: this.config.usePKCE,
-      redirectUri: "http://localhost:8000/auth/github/callback",
+      redirectUri: "http://localhost:8000/oauth/github/callback",
     });
   }
 
@@ -47,7 +47,7 @@ export class GitHubProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("GitHub requires GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/auth/github/callback";
+    const redirectUri = "http://localhost:8000/oauth/github/callback";
     console.log("GitHub Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
     return new arctic.GitHub(clientId, clientSecret, { redirectURI: redirectUri });
   }

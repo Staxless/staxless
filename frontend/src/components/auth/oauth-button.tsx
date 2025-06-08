@@ -103,7 +103,7 @@ export default function OAuthButton({
     try {
 
       
-      const endpoint = `http://localhost:8000/auth/${action}/${provider}`;
+      const endpoint = `http://localhost:8000/oauth/${action}/${provider}`;
       window.location.href = endpoint;
       
       setIsLoading(false);

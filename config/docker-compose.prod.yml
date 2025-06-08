@@ -20,7 +20,6 @@ volumes:
 services:
   frontend:
     image: app_frontend
-    container_name: frontend
     build:
       context: ../frontend/
       dockerfile: ../config/dockerfiles/frontend.Dockerfile
@@ -43,7 +42,6 @@ services:
   kong-api-gateway:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     user: "${KONG_USER:-kong}"
-    container_name: kong
     env_file:
       - ../../secrets/prod/kong.env
     environment:
@@ -84,7 +82,6 @@ services:
 
   mongodb-service:
     image: mongo:latest
-    container_name: mongodb-service
     env_file:
       - ../../secrets/prod/mongodb.env
     expose:
@@ -103,7 +100,6 @@ services:
 
   auth-service:
     image: app_auth_service
-    container_name: auth-service
     build:
       context: ../microservices/auth-service/
       dockerfile: ../../config/dockerfiles/auth-service.Dockerfile
@@ -122,7 +118,6 @@ services:
 
   user-service:
     image: app_user_service
-    container_name: user-service
     build:
       context: ../microservices/user-service/
       dockerfile: ../../config/dockerfiles/user-service.Dockerfile
@@ -140,7 +135,6 @@ services:
           - "user"
 
   stripe-service:
-    container_name: stripe-service
     build:
       context: ../microservices/stripe-service/
       dockerfile: ../../config/dockerfiles/stripe-service.Dockerfile
@@ -159,7 +153,6 @@ services:
 
   mailgun-service:
     image: app_mailgun_service
-    container_name: mailgun-service
     build:
       context: ../microservices/mailgun-service/
       dockerfile: ../../config/dockerfiles/mailgun-service.Dockerfile
@@ -178,7 +171,6 @@ services:
 
   cms-service:
     image: node:18-alpine
-    container_name: cms-service
     env_file:
       - ../../secrets/prod/cms-service.env
     expose:

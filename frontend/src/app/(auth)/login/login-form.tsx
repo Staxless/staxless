@@ -1,6 +1,6 @@
 /**
  * @file app/login/login-form.tsx
- * @description Client-side login form component with OAuth provider support
+ * @description Client-side login form component with OAuth and magic link support
  */
 
 "use client";
@@ -16,6 +16,7 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
 import { useProviders } from "@/app/hooks/use-provider";
+import axios from "axios";
 
 interface Provider {
   name: string;
@@ -28,13 +29,18 @@ interface Provider {
 export default function LoginForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { providers, isLoading, error: providersError } = useProviders();
 
+  // Generate CSRF token
+  const csrfToken = crypto.randomUUID();
+
   /**
    * Handle redirection to OAuth provider
-   * @param {string} url - The URL to redirect to
+   * @param url - The URL to redirect to
    */
   const handleRedirect = async (url: string) => {
     setIsRedirecting(true);
@@ -46,12 +52,25 @@ export default function LoginForm() {
   };
 
   /**
-   * Handle form submission
-   * @param {FormEvent} e - The form event
+   * Handle magic link submission
+   * @param e - The form event
    */
-  const handleSubmit = (e: FormEvent) => {
+  const handleMagicLinkSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/magic-link/login",
+        { email },
+        { headers: { "X-CSRF-Token": csrfToken } }
+      );
+      setSuccess(response.data.message);
+      document.cookie = `csrf_token=${csrfToken}; path=/; max-age=900; samesite=lax`;
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to send magic link");
+    }
   };
 
   if (isLoading) {
@@ -64,7 +83,7 @@ export default function LoginForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -73,11 +92,12 @@ export default function LoginForm() {
             type="email"
             placeholder="m@example.com"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        
         <Button type="submit" className="w-full">
-          Login
+          Login with Email
         </Button>
       </form>
 
@@ -86,6 +106,12 @@ export default function LoginForm() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error || providersError}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert variant="default" className="mt-4">
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 
@@ -109,7 +135,7 @@ export default function LoginForm() {
       )}
 
       <p className="text-center text-sm text-gray-500 mt-4">
-        Don&apos;t have an account?{" "}
+        Dont have an account?{" "}
         <Link href="/register" className="text-blue-500 hover:underline">
           Register here
         </Link>
