@@ -17,7 +17,7 @@ import emailRoutes from "./routes/emailRouter.ts";
 dotenv.config({ path: "./secrets/.env" });
 
 const app = express();
-const PORT = process.env.PORT || 8083;
+const PORT = process.env.PORT || 8084;
 
 /**
  * Logging middleware
