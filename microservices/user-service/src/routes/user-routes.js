@@ -22,8 +22,9 @@ const router = express.Router();
  */
 router.post("/", async (req, res) => {
   try {
-    const { firstname, lastname, email, id, avatar } = req.body;
-    if (!firstname || !lastname || !email || !id) {
+    const { firstname, lastname, email} = req.body;
+    console.log("Creating user with data:", req.body);
+    if (!firstname || !lastname || !email) {
       return res
         .status(400)
         .send("First name, last name, email, and ID are required");
@@ -33,13 +34,13 @@ router.post("/", async (req, res) => {
     if (existingUser) {
       return res.status(200).json(existingUser);
     }
-
+   const userid = crypto.randomUUID();
     const userData = {
-      _id: id,
-      firstname,
-      lastname,
-      email,
-      avatar,
+      _id: userid,
+      firstname: firstname,
+      lastname:lastname,
+      email: email.toLowerCase(),
+      avatar: avatar || "",
       created_at: new Date(),
       roles: ["user"],
       subscription: { type: "free", startDate: new Date() },
@@ -69,7 +70,7 @@ router.get("/", async (req, res) => {
     if (email) query.email = email;
 
     const user = await User.findOne(query);
-    if (!user) return res.status(404).send("User not found");
+    // if (!user) return res.status(404).send("User not found");
     res.json(user);
   } catch (error) {
     console.log(error);

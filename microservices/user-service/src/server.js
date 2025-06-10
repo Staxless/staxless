@@ -11,9 +11,10 @@ import userRoutes from "./src/routes/user-routes.js";
 
 // Load environment variables
 dotenv.config({ path: "./secrets/.env" });
+const PORT = process.env.PORT || 8082;
 
 const app = express();
-const PORT = process.env.PORT;
+
 
 // Middleware
 app.use(express.json());
