@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const DATABASE_NAME = "database";
 
-function connectDB() {
+export function connectDB() {
   const url = `mongodb://mongodb-service:27017/${DATABASE_NAME}`;
 
   try {
@@ -22,4 +22,6 @@ function connectDB() {
   return;
 }
 
-module.exports = connectDB;
+export default {
+  connectDB,
+};
