@@ -4,8 +4,7 @@
  */
 
 import type { MetadataRoute } from "next";
-import { siteMetadata } from "../../config"
-
+import { BRAND_CONFIG } from "@/lib/brand-config"
 
 /**
  * Generates the robots.txt configuration for the website.
@@ -18,6 +17,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/", // Allow all user agents to access the root
       disallow: "/dashboard/", // Disallow access to the /dashboard/ directory
     },
-    sitemap: `${siteMetadata.siteUrl}/sitemap.xml`,
+    sitemap: `${BRAND_CONFIG.company.website}/sitemap.xml`,
   };
 }

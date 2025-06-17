@@ -4,19 +4,19 @@ services:
   - name: auth
     url: http://auth:8080
     routes:
-      - name: auth-providers
+      - name: oauth-providers
         methods: [GET]
-        paths: [/auth/providers]
+        paths: [/oauth/providers]
         strip_path: false        
 
-      - name: auth-register
+      - name: oauth-register
         methods: [GET]
-        paths: [/auth/register/(.+)]
+        paths: [/oauth/register/(.+)]
         strip_path: false        
 
-      - name: auth-login
+      - name: oauth-login
         methods: [GET]
-        paths: [/auth/login/(.+)]
+        paths: [/oauth/login/(.+)]
         strip_path: false        
         plugins:
           - name: request-transformer
@@ -26,10 +26,25 @@ services:
                   - Cookie:${request.headers.cookie}
                   - x-user-info:${request.headers.x-user-info}
 
-      - name: auth-callback
+      - name: oauth-callback
         methods: [GET]
-        paths: [/auth/(.+)/callback]
+        paths: [/oauth/(.+)/callback]
         strip_path: false        
+
+      - name: magicLink-register
+        methods: [POST]
+        paths: [/auth/magic-link/register]
+        strip_path: false        
+
+      - name: magicLink-login
+        methods: [POST]
+        paths: [/auth/magic-link/login]
+        strip_path: false 
+
+      - name: magicLink-callback
+        methods: [GET]
+        paths: [/auth/magic-link/callback]
+        strip_path: false    
 
       - name: auth-logout
         methods: [POST]

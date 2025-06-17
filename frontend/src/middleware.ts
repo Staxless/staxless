@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getUser, User } from "./lib/auth/validate-user";
+import { getUser, User } from "./lib/validate-user";
 
 /**
  * Routes that should force a reload when navigating back
@@ -78,7 +78,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isProtectedRoute && user && user.subscription === "free") {
+  if (isProtectedRoute && user && user.subscription.type === "free" 
+    && request.nextUrl.pathname.startsWith("/checkout") === false
+  ) {
     return NextResponse.redirect(new URL("/checkout", request.url));
   }
 

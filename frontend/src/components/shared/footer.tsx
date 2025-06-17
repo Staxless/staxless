@@ -1,8 +1,10 @@
 "use client"
+
 import Link from "next/link"
-import {X, Github } from "lucide-react"
-import StaxlessBadge from "@/components/shared/staxless-badge"
-import { siteConfig } from "../../../config"
+import { X, Github } from "lucide-react"
+import Logo from "@/components/shared/logo"
+import { BRAND_CONFIG } from "@/lib/brand-config"
+import StaxlessBadge from "./staxless-badge"
 
 /**
  * Footer - The footer component for the application.
@@ -20,18 +22,26 @@ export default function Footer() {
           {/* Company Info */}
           <div className="flex flex-col items-center space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold">{siteConfig.name}</span>
+              <Logo size="medium" />
+              <span className="text-xl font-bold">{BRAND_CONFIG.company.name}</span>
             </Link>
-            <p className="text-sm text-muted-foreground">Creating innovative solutions for a better tomorrow.</p>
+            <p className="text-sm text-muted-foreground">{BRAND_CONFIG.company.description}</p>
             <div className="flex justify-center space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-                <span className="sr-only">X</span>
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Github className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
-              </Link>
+              {BRAND_CONFIG.social.twitter && (
+                <Link
+                  href={`https://twitter.com/${BRAND_CONFIG.social.twitter.replace("@", "")}`}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">X</span>
+                </Link>
+              )}
+              {BRAND_CONFIG.social.github && (
+                <Link href={BRAND_CONFIG.social.github} className="text-muted-foreground hover:text-foreground">
+                  <Github className="h-5 w-5" />
+                  <span className="sr-only">GitHub</span>
+                </Link>
+              )}
             </div>
           </div>
 
@@ -45,13 +55,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/legal/about" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
-                  About Us
+                <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
+                  Features
                 </Link>
               </li>
               <li>
-                <Link href="/legal/contact" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
-                  Contact
+                <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
+                  Pricing
                 </Link>
               </li>
             </ul>
@@ -67,12 +77,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
-                  Help
+                <Link
+                  href="/docs/quick-start"
+                  className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  Quick Start
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
+                <Link href="#faq" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
                   FAQ
                 </Link>
               </li>
@@ -83,21 +96,16 @@ export default function Footer() {
           <div className="flex flex-col items-center space-y-4">
             <h3 className="text-lg font-bold">Legal</h3>
             <ul className="space-y-2">
-              <li>
-                <Link href="/legal/privacy" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/legal/terms" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/legal/license" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
-                  Licenses
-                </Link>
-              </li>
+              {BRAND_CONFIG.navigation.footer.legal.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -106,10 +114,9 @@ export default function Footer() {
       {/* Bottom Footer */}
       <div className="border-t border-border">
         <div className="container px-4 py-6 max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center">
-          <StaxlessBadge />
-        </div>
+         <StaxlessBadge />
+         </div>
       </div>
     </footer>
   )
 }
-

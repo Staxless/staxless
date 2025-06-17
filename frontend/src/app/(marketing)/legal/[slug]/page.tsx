@@ -1,96 +1,174 @@
-import { notFound } from "next/navigation"
-import { MDXRemote } from "next-mdx-remote/rsc"
-import fs from "fs/promises"
-import path from "path"
-import matter from "gray-matter"
-import glob from "fast-glob"
+"use client"
+
+import { Card, CardContent } from "@/components/ui/card"
+import { BRAND_CONFIG } from "@/lib/brand-config"
 import Header from "@/components/shared/header"
 import Footer from "@/components/shared/footer"
+import { ArrowLeft, FileText, Calendar, Clock } from "lucide-react"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { getPolicyContent } from "@/content/policy-content"
 
-const CONTENT_DIRECTORY = "content/legal"
+export default function PolicyPage() {
+  const params = useParams()
+  const slug = params.slug as string
+  const policy = getPolicyContent(slug)
 
-export async function generateStaticParams() {
-  const files = await glob(`${CONTENT_DIRECTORY}/*.mdx`, { cwd: process.cwd() })
-  console.log("Found files:", files)
-
-  return files.map((file) => ({
-    slug: path.basename(file, ".mdx"),
-  }))
-}
-
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = params
-  const content = await getContent(slug)
-
-  if (!content) {
-    return {}
-  }
-
-  return {
-    title: `${content.frontmatter.title} | Minimal Docs Site`,
-    description: content.frontmatter.description,
-  }
-}
-
-async function getContent(slug: string) {
-  try {
-    console.log("Searching for slug:", slug)
-    console.log("Current working directory:", process.cwd())
-    const globPattern = `*/${CONTENT_DIRECTORY}/${slug}.mdx`
-    console.log("Glob pattern:", globPattern)
-
-    const files = await glob(globPattern, { cwd: process.cwd(), absolute: false })
-    console.log("Matching files:", files)
-
-    if (files.length === 0) {
-      console.log("No matching files found")
-      return null
-    }
-
-    // Find the file that contains the slug in its path
-    const filePath = files.find((file) => file.toLowerCase().includes(slug.toLowerCase()))
-
-    if (!filePath) {
-      console.log(`No file found for slug: ${slug}`)
-      return null
-    }
-
-    console.log("Reading file:", filePath)
-    const fileContent = await fs.readFile(filePath, "utf8")
-    const { data: frontmatter, content } = matter(fileContent)
-    
-
-
-    return {
-      frontmatter,
-      content,
-    }
-  } catch (error) {
-    console.error(`Error reading file for slug ${slug}:`, error)
-    return null
-  }
-}
-
-export default async function Page({ params }: { params: { slug: string } }) {
-  console.log("Rendering page for slug:", params.slug)
-  const content = await getContent(params.slug)
-  console.log("Content:", content ? content : "Not found")
-
-  if (!content) {
-    console.log("Content not found, redirecting to 404")
-    notFound()
+  if (!policy) {
+    return (
+      <div style={{ backgroundColor: BRAND_CONFIG.brand.colors.background, minHeight: "100vh" }}>
+        <Header user={null} />
+        <div className="pt-20">
+          <div className="container mx-auto px-4 py-12 text-center">
+            <h1 className="text-4xl font-bold mb-4" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+              Policy Not Found
+            </h1>
+            <p className="mb-8" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+              The requested policy page could not be found.
+            </p>
+            <Link
+              href="/legal"
+              className="inline-flex items-center space-x-2 hover:underline"
+              style={{ color: BRAND_CONFIG.brand.colors.primary }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Legal</span>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div style={{ backgroundColor: BRAND_CONFIG.brand.colors.background, minHeight: "100vh" }}>
       <Header user={null} />
-      <main className="flex-grow">
-        <article className="prose dark:prose-invert max-w-3xl mx-auto py-8 px-4 mt-20">
-          <MDXRemote source={content.content} />
-        </article>
-      </main>
+
+      <div className="pt-20">
+        <div className="container mx-auto px-4 py-12 max-w-4xl">
+          {/* Breadcrumb */}
+          <div className="flex items-center space-x-2 mb-8">
+            <Link
+              href="/legal"
+              className="flex items-center space-x-1 hover:underline"
+              style={{ color: BRAND_CONFIG.brand.colors.primary }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Legal</span>
+            </Link>
+            <span style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>/</span>
+            <span style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>{policy.title}</span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center space-x-3 mb-4">
+              <div
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary }}
+              >
+                <FileText className="h-6 w-6" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
+              </div>
+              <h1 className="text-4xl font-bold" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                {policy.title}
+              </h1>
+            </div>
+
+            <div className="flex items-center space-x-6 text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4" />
+                <span>Effective: {policy.effectiveDate}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4" />
+                <span>Last updated: {policy.lastUpdated}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <Card
+            className="border"
+            style={{
+              backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+              borderColor: BRAND_CONFIG.brand.colors.border,
+            }}
+          >
+            <CardContent className="p-8">
+              <div className="prose prose-invert max-w-none" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                {policy.content.map((section, index) => (
+                  <div key={index} className="mb-8">
+                    {section.type === "heading" && (
+                      <h2
+                        className="text-2xl font-bold mb-4 mt-8 first:mt-0"
+                        style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                      >
+                        {section.content}
+                      </h2>
+                    )}
+                    {section.type === "subheading" && (
+                      <h3
+                        className="text-xl font-semibold mb-3 mt-6"
+                        style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                      >
+                        {section.content}
+                      </h3>
+                    )}
+                    {section.type === "paragraph" && (
+                      <p className="mb-4 leading-relaxed" style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                        {section.content}
+                      </p>
+                    )}
+                    {section.type === "list" && (
+                      <ul className="list-disc pl-6 mb-4 space-y-2">
+                        {section.items?.map((item, itemIndex) => (
+                          <li key={itemIndex} style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {section.type === "numbered-list" && (
+                      <ol className="list-decimal pl-6 mb-4 space-y-2">
+                        {section.items?.map((item, itemIndex) => (
+                          <li key={itemIndex} style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                            {item}
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <Card
+            className="mt-8 border"
+            style={{
+              backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+              borderColor: BRAND_CONFIG.brand.colors.border,
+            }}
+          >
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-3" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                Questions about this policy?
+              </h3>
+              <p className="mb-4" style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                If you have any questions about this {policy.title.toLowerCase()}, please contact us:
+              </p>
+              <div className="space-y-2 text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                <p>Email: {BRAND_CONFIG.company.email}</p>
+                <p>Address: {BRAND_CONFIG.company.address}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       <Footer />
     </div>
   )
 }
-

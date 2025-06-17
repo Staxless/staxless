@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 // Internal imports
 import { Button } from "@/components/ui/button";
-import { logout } from "@/lib/auth/signout-user";
+import { logout } from "@/lib/signout-user";
 
 /**
  * @description SignOutButton component for handling user sign out
