@@ -1,66 +1,60 @@
-/**
- * @file UserMenu Component
- * @module UserMenu
- * @description A React component that renders a dropdown menu for authenticated users.
- */
-
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+"use client"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { User } from "lucide-react";
-import Link from "next/link";
-import { SignOutButton } from "../auth/sign-out-button";
+} from "@/components/ui/dropdown-menu"
+import { Settings, LogOut } from "lucide-react"
+import { LucideUser } from "lucide-react"
+import { SignOutButton } from "../auth/sign-out-button"
 
-/**
- * @interface UserMenuProps
- * @description Props for the UserMenu component
- * @property {Object} user - User object containing user information
- * @property {string} user.username - The username of the user
- * @property {string} user.name - The full name of the user
- * @property {string} [user.avatar] - The URL of the user's avatar image (optional)
- */
-interface UserMenuProps {
-  user: {
-    name: string;
-    avatar?: string;
-  };
+interface User {
+  name: string
+  email: string
 }
 
-/**
- * @function UserMenu
- * @description Renders a dropdown menu for authenticated users with avatar and user actions
- * @param {UserMenuProps} props - The props for the UserMenu component
- * @returns {JSX.Element} The UserMenu component
- */
-export default function UserMenu({ user }: UserMenuProps): JSX.Element {
+interface UserMenuProps {
+  user: User
+}
+
+export default function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar} alt={user.name || "User"} />
-            <AvatarFallback>
-              {(user.name || "U").charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        <Button variant="ghost" className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+          <span className="hidden sm:block">{user.name}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <Link href="/dashboard">{user.name || "User"}</Link>
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="px-2 py-1.5">
+          <p className="text-sm font-medium">{user.name}</p>
+          <p className="text-xs text-gray-500">{user.email}</p>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard" className="flex items-center">
+            <LucideUser className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/settings" className="flex items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="flex items-center text-red-600">
           <SignOutButton />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

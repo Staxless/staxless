@@ -1,10 +1,9 @@
-import { siteConfig } from "../../config"
-import { siteMetadata } from "../../config"
+import { BRAND_CONFIG } from "@/lib/brand-config"
 
 const myFunction = () => {
-  const url = `${siteConfig.url}` 
+  const url = `${BRAND_CONFIG.company.website}` 
   console.log(`Accessing: ${url}`)
-  fetch(`${siteConfig.url}/api/data`)
+  fetch(`${BRAND_CONFIG.company.website}/api/data`)
     .then((response) => response.json())
     .then((data) => {
       // Process the data
@@ -20,18 +19,17 @@ myFunction()
 export default function sitemap() {
   return [
     {
-      url: siteMetadata.siteUrl,
+      url: BRAND_CONFIG.company.website,
       lastModified: new Date(),
     },
     {
-      url: `${siteMetadata.siteUrl}/about`,
+      url: `${BRAND_CONFIG.company.website}/about`,
       lastModified: new Date(),
     },
     {
-      url: `${siteMetadata.siteUrl}/blog`,
+      url: `${BRAND_CONFIG.company.website}/blog`,
       lastModified: new Date(),
     },
     // Add more URLs as needed
   ]
 }
-

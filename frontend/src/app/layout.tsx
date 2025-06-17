@@ -1,68 +1,61 @@
-import "./globals.css"
+import type React from "react"
 import type { Metadata } from "next"
-import { siteMetadata } from "../../config"
-import { ThemeProvider } from "@/contexts/ThemeContext"
-import { headers } from "next/headers"
-import Header from "@/components/shared/header"
-import Footer from "@/components/shared/footer"
-import { Space_Grotesk, Space_Mono } from 'next/font/google'
-import React from 'react'; // Import React
+import { Inter } from "next/font/google"
+import "@/styles/globals.css"
+import { BRAND_CONFIG } from "@/lib/brand-config"
+import Script from "next/script"
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-  weight: ["400", "500"], // Regular and Medium weights
-})
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  variable: "--font-space-mono",
-  weight: "400", // Regular weight
   display: "swap",
 })
 
 export const metadata: Metadata = {
-  title: {
-    default: `Home | ${siteMetadata.title}`,
-    template: `%s | ${siteMetadata.title}`,
-  },
-  description: siteMetadata.description,
-  authors: [{ name: siteMetadata.author }],
+  title: `Home | ${BRAND_CONFIG.seo.title}`,
+  description: BRAND_CONFIG.seo.description,
+  keywords: BRAND_CONFIG.seo.keywords,
+  authors: [{ name: BRAND_CONFIG.company.name }],
+  creator: BRAND_CONFIG.company.name,
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: siteMetadata.siteUrl,
-    title: siteMetadata.title,
-    description: siteMetadata.description,
-    siteName: siteMetadata.siteName,
+    url: BRAND_CONFIG.company.website,
+    title: BRAND_CONFIG.seo.title,
+    description: BRAND_CONFIG.seo.description,
+    siteName: BRAND_CONFIG.company.name,
+    images: [
+      {
+        url: BRAND_CONFIG.seo.ogImage,
+        width: 1200,
+        height: 630,
+        alt: BRAND_CONFIG.company.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    site: siteMetadata.social.twitter,
+    title: BRAND_CONFIG.seo.title,
+    description: BRAND_CONFIG.seo.description,
+    images: [BRAND_CONFIG.seo.ogImage],
+    creator: BRAND_CONFIG.social.twitter,
   },
+    generator: 'v0.dev'
 }
 
-interface RootLayoutProps {
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode
-}
-
-async function getUserInfo() {
-  const headersList = await headers()
-  const userInfoString = headersList.get("x-user-info")
-  return userInfoString ? JSON.parse(userInfoString) : null
-}
-
-export default async function RootLayout({ children }: RootLayoutProps): Promise<JSX.Element> {
-  const user = await getUserInfo()
-
+}) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
-      <body className={`flex flex-col min-h-screen ${spaceGrotesk.className}`}>
-        <ThemeProvider>
-          <main className="flex-grow">{React.cloneElement(children as React.ReactElement, { user })}</main>
-        </ThemeProvider>
-      </body>
+    <html lang="en">
+      <head>
+        <Script
+          src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"
+          strategy="beforeInteractive"
+        />
+      </head>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }

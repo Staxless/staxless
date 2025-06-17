@@ -47,7 +47,7 @@ export function ProjectSettings() {
       <div className="space-y-4">
         {projects.map((project) => (
           <div key={project.id} className="flex items-center justify-between space-x-4">
-            <div className="flex-grow space-y-1">
+            <div className="grow space-y-1">
               <p className="font-medium">{project.name}</p>
               <p className="text-sm text-muted-foreground">{project.url}</p>
             </div>

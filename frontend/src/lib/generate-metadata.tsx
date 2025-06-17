@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { siteMetadata } from "../../config"
+import { BRAND_CONFIG } from "./brand-config"
 
 export type MetadataProps = {
   title?: string
@@ -10,33 +10,46 @@ export type MetadataProps = {
 export function generateCustomMetadata({ title, description, params }: MetadataProps): Metadata {
   // Use params to create dynamic title or description if needed
   const dynamicTitle = params?.slug
-    ? `${params.slug} | ${siteMetadata.title}`
+    ? `${params.slug} | ${BRAND_CONFIG.seo.title}`
     : title
-      ? `${title} | ${siteMetadata.title}`
-      : siteMetadata.title
+      ? `${title} | ${BRAND_CONFIG.seo.title}`
+      : BRAND_CONFIG.seo.title
 
-  const dynamicDescription = params?.slug ? `Page about ${params.slug}` : description || siteMetadata.description
+  const dynamicDescription = params?.slug ? `Page about ${params.slug}` : description || BRAND_CONFIG.seo.description
 
   return {
     title: {
-      default: siteMetadata.title,
-      template: `%s | ${siteMetadata.title}`,
+      default: BRAND_CONFIG.seo.title,
+      template: `%s | ${BRAND_CONFIG.seo.title}`,
     },
     description: dynamicDescription,
-    authors: [{ name: siteMetadata.author }],
+    authors: [{ name: BRAND_CONFIG.company.name }], // Using company name as author
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: siteMetadata.siteUrl,
+      url: BRAND_CONFIG.company.website,
       title: dynamicTitle,
       description: dynamicDescription,
-      siteName: siteMetadata.title, // Assuming siteName is the same as title
+      siteName: BRAND_CONFIG.seo.title,
     },
     twitter: {
-      card: "summary_large_image",
-      site: siteMetadata.social.twitter,
+      card: BRAND_CONFIG.seo.twitterCard,
+      site: BRAND_CONFIG.social.twitter,
     },
-    // You can add more metadata properties here if needed
+    keywords: BRAND_CONFIG.seo.keywords,
+    metadataBase: new URL(BRAND_CONFIG.company.website),
+    // Add ogImage if available in BRAND_CONFIG
+    ...(BRAND_CONFIG.seo.ogImage && {
+      openGraph: {
+        images: [
+          {
+            url: BRAND_CONFIG.seo.ogImage,
+            width: 1200,
+            height: 630,
+            alt: `${BRAND_CONFIG.seo.title} Open Graph Image`,
+          },
+        ],
+      },
+    }),
   }
 }
-
