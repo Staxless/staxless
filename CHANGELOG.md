@@ -1,3 +1,11 @@
+# [1.39.0](https://github.com/Staxless/staxless/compare/v1.38.0...v1.39.0) (2025-06-17)
+
+
+### Features
+
+* Add brand utilities and style presets for enhanced theming ([88af6f3](https://github.com/Staxless/staxless/commit/88af6f36235a0126d37f823975076a75b5ba9dc0))
+* add magic link routes to gateway ([bc0729f](https://github.com/Staxless/staxless/commit/bc0729f8c23b3b35b0fa1bf986bb4e384c1c4ad0))
+
 # [1.38.0](https://github.com/Staxless/staxless/compare/v1.37.2...v1.38.0) (2025-06-12)
 
 
