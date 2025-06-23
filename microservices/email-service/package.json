@@ -1,5 +1,5 @@
 {
-    "name": "mailgun-service",
+    "name": "email-service",
     "version": "1.0.0",
     "private": true,
   "scripts": {

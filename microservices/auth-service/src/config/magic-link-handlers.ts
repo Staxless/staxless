@@ -110,7 +110,8 @@ export async function handleLogin(email: string, res: Response, state: string): 
   console.log('Generated magic link for login:', magicLink);
   await magicLinkProvider.sendMagicLink(user._id, magicLink);
   console.log('Magic link sent for login');
-  return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
+  // res.status(200).json({ message: "Magic link sent to your email." });
+  return res.status(200).json({ message: "Magic link sent to your email." }).redirect(`${FRONTEND_URL}/magic-link-sent`);
 }
 
 /**
