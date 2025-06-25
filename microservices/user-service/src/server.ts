@@ -9,6 +9,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import healthCheckRoutes from "./routes/healthRouter.ts"
 import userRoutes from "./routes/user-routes.ts";
+import { startUserConsumer } from './consumers';
 
 
 // Load environment variables
@@ -61,4 +62,7 @@ app.use("/", userRoutes);
  * Starts the Express server on the specified port.
  * @remarks Logs a message when the server is running.
  */
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`User service is running on http://localhost:${PORT}`);
+  startUserConsumer().catch(console.error);
+});

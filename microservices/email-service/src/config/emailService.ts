@@ -4,6 +4,8 @@
  */
 
 import { templateConfig, TemplateConfigMap } from './emailConfig';
+import { mailgunClient } from './mailgunClient';
+const { sendEmail } = createEmailService(mailgunClient);
 
 /**
  * Interface defining the parameters required to send an email
@@ -77,9 +79,9 @@ export function createEmailService(emailClient: {
       from: `Your App <no-reply@${process.env.MAILGUN_DOMAIN}>`,
       to: email,
       subject: config.subject,
-      template: config.template,
+      template: config.templateName,
       "h:X-Mailgun-Variables": JSON.stringify({
-        ...Object.entries(variables).reduce((acc: Record<string, any>, {}[key, value]) => ({
+        ...Object.entries(variables).reduce((acc: Record<string, any>, [key, value]) => ({
           ...acc,
           [`${key}`]: value
         }), {})

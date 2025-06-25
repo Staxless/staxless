@@ -30,12 +30,13 @@ router.get("/products", async (_req: Request, res: Response) => {
 router.post("/checkout", async (req: Request<{}, {}, CheckoutRequest>, res: Response) => {
   const { productId, quantity } = req.body;
   const userInfoString = req.headers["x-user-info"] as string;
+  console.log("User Info String:", userInfoString);
 
   if (!userInfoString) {
     return res.status(400).json({ error: "User information not found" });
   }
 
-  let userInfo: { id: string };
+  let userInfo: { user_id: string };
   try {
     userInfo = JSON.parse(userInfoString);
   } catch (error) {
@@ -43,6 +44,7 @@ router.post("/checkout", async (req: Request<{}, {}, CheckoutRequest>, res: Resp
     return res.status(400).json({ error: "Invalid user information" });
   }
 
+  console.log("Parsed User Info:", userInfo);
   try {
     const product = await stripe.products.retrieve(productId);
     const price = await stripe.prices.retrieve(product.default_price as string);
@@ -53,8 +55,10 @@ router.post("/checkout", async (req: Request<{}, {}, CheckoutRequest>, res: Resp
       line_items: [{ price: price.id, quantity }],
       success_url: `${FRONTEND_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/checkout`,
-      metadata: { userId: userInfo.id },
+      metadata: { userId: userInfo.user_id },
     });
+
+    console.log("Stripe session metadata:", session.metadata);
 
     res.json({ url: session.url });
   } catch (error) {

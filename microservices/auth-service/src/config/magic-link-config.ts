@@ -15,12 +15,13 @@
  */
 
 import crypto from 'crypto';
-import axios from 'axios';
 import { auth } from './lucia-config';
+import { createProducer } from './kafka-client';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080'; // Use backend URL for callback
-const EMAIL_SERVICE_URL = process.env.EMAIL_SERVICE_URL || 'http://email-service:8084'; // URL of the email service
-const TOKEN_EXPIRY_MINUTES = 15; // Magic link expires in 15 minutes
+const producer = createProducer();
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000/api';
+const TOKEN_EXPIRY_MINUTES = 15;
+
 // Define types for Lucia adapter (assuming MongoDB or similar)
 interface User {
   _id: string;
@@ -76,7 +77,7 @@ export class MagicLinkProvider {
   }
 
   /**
-   * Sends a magic link to the user's email via the email service.
+   * Sends a magic link to the user's email via Kafka event.
    * @param userId - The ID of the user.
    * @param magicLink - The generated magic link URL.
    */
@@ -92,23 +93,31 @@ export class MagicLinkProvider {
     }
 
     try {
+      await producer.connect();
       const token = new URL(magicLink).searchParams.get('token') || '';
-      await axios.post(`${EMAIL_SERVICE_URL}/magic-link`, {
-        email: user.email,
-        variables: {
-          token,
-          link: magicLink,
-          expiryMinutes: TOKEN_EXPIRY_MINUTES
-        }
+      await producer.send({
+        topic: 'email-events',
+        messages: [{
+          key: 'send.magic-link.email',
+          value: JSON.stringify({
+            email: user.email,
+            variables: {
+              token,
+              link: magicLink,
+              expiryMinutes: TOKEN_EXPIRY_MINUTES,
+            },
+          }),
+        }],
       });
+      console.log(`Produced magic link event for ${user.email}`);
     } catch (error: any) {
-      console.error('Error sending magic link via email service:', {
+      console.error('Error producing magic link event:', {
         message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-        stack: error.stack
+        stack: error.stack,
       });
-      throw new Error(`Failed to send magic link: ${error.response?.data?.message || error.message}`);
+      throw new Error(`Failed to send magic link: ${error.message}`);
+    } finally {
+      await producer.disconnect();
     }
   }
 

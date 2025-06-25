@@ -13,6 +13,8 @@ import magicLinkRoutes from "./routes/magicLinkRouter";
 import oauthRoutes  from "./routes/oauthRouter";
 import authRoutes from "./routes/authRouter";
 
+import { startAuthConsumer } from './consumers';
+
 // Load environment variables
 dotenv.config({ path: "./secrets/.env" });
 
@@ -76,4 +78,7 @@ const PORT = process.env.PORT || 8080;
  * Starts the Express server on the specified port.
  * @remarks Logs a message when the server is running.
  */
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Auth service running on http://localhost:${PORT}`);
+  startAuthConsumer().catch(console.error);
+});

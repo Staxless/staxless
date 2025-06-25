@@ -1,20 +1,22 @@
-
 /**
  * Magic Link Handlers
  * 
  * This module provides utility functions for handling magic link authentication flows,
- * including token generation, validation, and user registration/login processes.
- * 
+ * including token generation, handling, and user registration/login processes.
  */
 
 import express, { Request, Response, NextFunction } from "express";
-import { auth } from "../config/lucia-config";
-import { magicLinkProvider } from "../config/magic-link-config";
+import { auth } from "../config/lucia-config.ts";
+import { createProducer } from "../config/kafka-client.ts";
 import { parseCookies, serializeCookie } from "oslo/cookie";
 import crypto from "crypto";
+import { magicLinkProvider } from "../config/magic-link-config.ts";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000/api";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8081/auth-service";
+
+const producer = createProducer();
+const TOKEN_EXPIRY_MINUTES = 15;
 
 /**
  * Generates a random state token for security.
@@ -27,9 +29,9 @@ export const generateStateToken = (): string => {
 
 /**
  * Middleware for state protection, validates state token from cookie and query.
- * @param req - Express request object.
- * @param res - Express response object.
- * @param next - Express next function.
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function
  */
 export const stateProtection = (req: Request, res: Response, next: NextFunction): void => {
   const stateCookie = parseCookies(req.headers.cookie ?? "").get("magic_state");
@@ -43,13 +45,13 @@ export const stateProtection = (req: Request, res: Response, next: NextFunction)
 
 /**
  * Handles user registration with magic link.
- * @param email - User's email address.
- * @param firstName - User's first name.
- * @param lastName - User's last name.
- * @param res - Express response object.
- * @param state - State token for the magic link.
- * @returns Session ID and redirect URL.
- * @throws Error if user already exists or registration fails.
+ * @param email - User's email address
+ * @param firstName - User's first name
+ * @param lastName - User's last name
+ * @param res - Express response object
+ * @param state - State token for the magic link
+ * @returns Session ID and redirect URL
+ * @throws Error if user already exists or registration fails
  */
 export async function handleRegistration(
   email: string,
@@ -77,44 +79,95 @@ export async function handleRegistration(
 
   await auth.adapter.User.insertOne(newUser);
   const magicLink = await magicLinkProvider.generateMagicLink(userId, state);
-  await magicLinkProvider.sendMagicLink(userId, magicLink);
+
+  // NEW: Produce Kafka event instead of direct send
+  try {
+    await producer.connect();
+    const token = new URL(magicLink).searchParams.get("token") || "";
+    await producer.send({
+      topic: "email-events",
+      messages: [{
+        key: "send.magic-link.email",
+        value: JSON.stringify({
+          email,
+          variables: {
+            token,
+            link: magicLink,
+            expiryMinutes: TOKEN_EXPIRY_MINUTES,
+          },
+        }),
+      }],
+    });
+    console.log(`Produced magic link event for ${email}`);
+  } catch (error: any) {
+    console.error("Error producing magic link event:", error);
+    throw new Error(`Failed to send magic link: ${error.message}`);
+  } finally {
+    await producer.disconnect();
+  }
+
   return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
 }
 
 /**
  * Handles user login with magic link.
- * @param email - User's email address.
- * @param res - Express response object.
- * @param state - State token for the magic link.
- * @returns Session ID and redirect URL.
- * @throws Error if no account is found.
+ * @param email - User's email address
+ * @param res - Express response object
+ * @param state - State token for the magic link
+ * @returns Session ID and redirect URL
+ * @throws Error if no account is found
  */
-export async function handleLogin(email: string, res: Response, state: string): Promise<{ sessionId: string; redirectUrl: string }> {
-
+export async function handleLogin(
+  email: string,
+  res: Response,
+  state: string
+): Promise<{ sessionId: string; redirectUrl: string }> {
   const user = await auth.adapter.User.findOne({ email });
   if (!user) {
-
     throw new Error("No account found. Please register.");
   }
 
   const magicLink = await magicLinkProvider.generateMagicLink(user._id, state);
 
-  await magicLinkProvider.sendMagicLink(user._id, magicLink);
+  // NEW: Produce Kafka event instead of direct send
+  try {
+    await producer.connect();
+    const token = new URL(magicLink).searchParams.get("token") || "";
+    await producer.send({
+      topic: "email-events",
+      messages: [{
+        key: "send.magic-link.email",
+        value: JSON.stringify({
+          email,
+          variables: {
+            token,
+            link: magicLink,
+            expiryMinutes: TOKEN_EXPIRY_MINUTES,
+          },
+        }),
+      }],
+    });
+    console.log(`Produced magic link event for ${email}`);
+  } catch (error: any) {
+    console.error("Error producing magic link event:", error);
+    throw new Error(`Failed to send magic link: ${error.message}`);
+  } finally {
+    await producer.disconnect();
+  }
 
-  // res.status(200).json({ message: "Magic link sent to your email." });
-  return res.status(200).json({ message: "Magic link sent to your email." }).redirect(`${FRONTEND_URL}/magic-link-sent`);
+  return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
 }
 
 /**
  * Processes magic link actions (register or login).
- * @param action - Magic link action ("register" or "login").
- * @param email - User's email address.
- * @param firstName - User's first name (for registration).
- * @param lastName - User's last name (for registration).
- * @param res - Express response object.
- * @param state - State token for the magic link.
- * @returns Session ID and redirect URL.
- * @throws Error if action is invalid.
+ * @param action - Magic link action ("register" or "login")
+ * @param email - User's email address
+ * @param firstName - User's first name (for registration)
+ * @param lastName - User's last name (for registration)
+ * @param res - Express response object
+ * @param state - State token for the magic link
+ * @returns Session ID and redirect URL
+ * @throws Error if action is invalid
  */
 export async function handleMagicLinkAction(
   action: string | null,
@@ -124,46 +177,39 @@ export async function handleMagicLinkAction(
   res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  
   switch (action) {
     case "register":
       if (!firstName || !lastName) {
-        ('Missing firstName or lastName for registration');
+        console.error("Missing firstName or lastName for registration");
         throw new Error("First name and last name are required for registration");
       }
       return handleRegistration(email, firstName, lastName, res, state);
     case "login":
       return handleLogin(email, res, state);
     default:
-       
       throw new Error("Invalid magic link action");
   }
 }
 
 /**
  * Handles magic link errors and redirects with appropriate error messages.
- * @param error - Error object from magic link process.
- * @param res - Express response object.
+ * @param error - Error object from magic link process
+ * @param res - Express response object
  */
 export const handleError = (error: any, res: Response): void => {
   const errorMessage = encodeURIComponent(error.message || "An unexpected error occurred");
-  console.error('Magic link error:', error);
+  console.error("Magic link error:", error);
   res.redirect(`${FRONTEND_URL}/login?error=${errorMessage}`);
 };
 
 /**
  * Initializes magic link flow for login or registration.
- * @param action - Magic link action ("register" or "login").
- * @returns Express middleware function to handle magic link flow initialization.
+ * @param action - Magic link action ("register" or "login")
+ * @returns Express middleware function to handle magic link flow initialization
  */
 export const initializeMagicLinkFlow = (action: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-     
-     
-     
-
     if (!["login", "register"].includes(action)) {
-       
       res.redirect(`${FRONTEND_URL}/login?error=Invalid action`);
       return;
     }
@@ -175,12 +221,10 @@ export const initializeMagicLinkFlow = (action: string) => {
         lastName?: string;
       };
       if (!email || typeof email !== "string") {
-         
         res.redirect(`${FRONTEND_URL}/login?error=Email is required`);
         return;
       }
       if (action === "register" && (!firstName || !lastName || typeof firstName !== "string" || typeof lastName !== "string")) {
-         
         res.redirect(`${FRONTEND_URL}/register?error=First name and last name are required`);
         return;
       }
@@ -199,16 +243,12 @@ export const initializeMagicLinkFlow = (action: string) => {
         serializeCookie("magic_action", action, cookieOptions),
       ];
 
-       
       res.setHeader("Set-Cookie", cookies);
 
-       
       const { sessionId, redirectUrl } = await handleMagicLinkAction(action, email, firstName, lastName, res, state);
-       
-       
       res.redirect(redirectUrl);
     } catch (error) {
-      console.error('Error in initializeMagicLinkFlow:', error);
+      console.error("Error in initializeMagicLinkFlow:", error);
       handleError(error, res);
     }
   };
@@ -216,7 +256,7 @@ export const initializeMagicLinkFlow = (action: string) => {
 
 /**
  * Validates and processes a magic link token.
- * @returns Express middleware function to handle magic link validation and login.
+ * @returns Express middleware function to handle magic link validation and login
  */
 export const validateMagicLink = () => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -225,29 +265,22 @@ export const validateMagicLink = () => {
     const storedState = cookies.get("magic_state") ?? null;
     const magicAction = cookies.get("magic_action") ?? null;
 
-     
-     
-
     if (!token || !state || state !== storedState || !magicAction) {
-       
       return res.redirect(`${FRONTEND_URL}/login?error=Invalid token or state`);
     }
 
     try {
       const sessionId = await magicLinkProvider.validateMagicLink(token.toString());
-       
       const sessionCookie = auth.createSessionCookie(sessionId).serialize();
       const clearCookies = [
         serializeCookie("magic_state", "", { maxAge: 0, path: "/" }),
         serializeCookie("magic_action", "", { maxAge: 0, path: "/" }),
       ];
 
-       
       res.setHeader("Set-Cookie", [sessionCookie, ...clearCookies]);
-       
       res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
-      console.error('Error in validateMagicLink:', error);
+      console.error("Error in validateMagicLink:", error);
       handleError(error, res);
     }
   };
