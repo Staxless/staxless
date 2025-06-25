@@ -49,15 +49,14 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   const user: User | null = await getUser();
 
-  // Check if the user is an admin and trying to access admin routes
-  // If the user is an admin, redirect them to the admin dashboard
-  // If the user is not an admin, redirect them to the login page
+  // Check if the user is trying to access admin routes
   const isAdminRoute = ADMIN_ROUTES.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
-  if (isAdminRoute && user && user?.roles.includes("admin")) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+  // Redirect non-admin users to login when accessing admin routes
+  if (isAdminRoute && (!user || !user.roles.includes("admin"))) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // Check if the route is protected
@@ -78,8 +77,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isProtectedRoute && user && user.subscription.type === "free" 
-    && request.nextUrl.pathname.startsWith("/checkout") === false
+  if (
+    isProtectedRoute &&
+    user &&
+    user.subscription.type === "free" &&
+    !request.nextUrl.pathname.startsWith("/checkout")
   ) {
     return NextResponse.redirect(new URL("/checkout", request.url));
   }
