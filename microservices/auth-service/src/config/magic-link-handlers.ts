@@ -22,7 +22,6 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000/api";
  */
 export const generateStateToken = (): string => {
   const state = crypto.randomBytes(32).toString("hex");
-  console.log('Generated state token:', state);
   return state;
 };
 
@@ -35,10 +34,8 @@ export const generateStateToken = (): string => {
 export const stateProtection = (req: Request, res: Response, next: NextFunction): void => {
   const stateCookie = parseCookies(req.headers.cookie ?? "").get("magic_state");
   const stateQuery = req.query.state?.toString();
-  console.log('State protection - Cookie state:', stateCookie, 'Query state:', stateQuery);
-
+  
   if (!stateCookie || !stateQuery || stateCookie !== stateQuery) {
-    console.log('State validation failed');
     return res.status(403).json({ error: "State token validation failed" });
   }
   next();
@@ -61,15 +58,12 @@ export async function handleRegistration(
   res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  console.log('handleRegistration called with email:', email, 'firstName:', firstName, 'lastName:', lastName, 'state:', state);
   const existingUser = await auth.adapter.User.findOne({ email });
   if (existingUser) {
-    console.log('User already exists:', email);
     throw new Error("Email already registered. Please log in.");
   }
 
   const userId = crypto.randomUUID();
-  console.log('Generated userId:', userId);
   const newUser = {
     _id: userId,
     email,
@@ -82,11 +76,8 @@ export async function handleRegistration(
   };
 
   await auth.adapter.User.insertOne(newUser);
-  console.log('User inserted:', email);
   const magicLink = await magicLinkProvider.generateMagicLink(userId, state);
-  console.log('Generated magic link for registration:', magicLink);
   await magicLinkProvider.sendMagicLink(userId, magicLink);
-  console.log('Magic link sent for registration');
   return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
 }
 
@@ -99,18 +90,19 @@ export async function handleRegistration(
  * @throws Error if no account is found.
  */
 export async function handleLogin(email: string, res: Response, state: string): Promise<{ sessionId: string; redirectUrl: string }> {
-  console.log('handleLogin called with email:', email, 'state:', state);
+
   const user = await auth.adapter.User.findOne({ email });
   if (!user) {
-    console.log('No user found:', email);
+
     throw new Error("No account found. Please register.");
   }
 
   const magicLink = await magicLinkProvider.generateMagicLink(user._id, state);
-  console.log('Generated magic link for login:', magicLink);
+
   await magicLinkProvider.sendMagicLink(user._id, magicLink);
-  console.log('Magic link sent for login');
-  return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
+
+  // res.status(200).json({ message: "Magic link sent to your email." });
+  return res.status(200).json({ message: "Magic link sent to your email." }).redirect(`${FRONTEND_URL}/magic-link-sent`);
 }
 
 /**
@@ -132,18 +124,18 @@ export async function handleMagicLinkAction(
   res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  console.log('handleMagicLinkAction called with action:', action, 'email:', email, 'firstName:', firstName, 'lastName:', lastName, 'state:', state);
+  
   switch (action) {
     case "register":
       if (!firstName || !lastName) {
-        console.log('Missing firstName or lastName for registration');
+        ('Missing firstName or lastName for registration');
         throw new Error("First name and last name are required for registration");
       }
       return handleRegistration(email, firstName, lastName, res, state);
     case "login":
       return handleLogin(email, res, state);
     default:
-      console.log('Invalid action:', action);
+       
       throw new Error("Invalid magic link action");
   }
 }
@@ -166,12 +158,12 @@ export const handleError = (error: any, res: Response): void => {
  */
 export const initializeMagicLinkFlow = (action: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log(`Initializing magic link flow for action: ${action}`);
-    console.log('Received res object:', res ? 'Yes' : 'No');
-    console.log('Request body:', req.body);
+     
+     
+     
 
     if (!["login", "register"].includes(action)) {
-      console.log('Invalid action:', action);
+       
       res.redirect(`${FRONTEND_URL}/login?error=Invalid action`);
       return;
     }
@@ -183,12 +175,12 @@ export const initializeMagicLinkFlow = (action: string) => {
         lastName?: string;
       };
       if (!email || typeof email !== "string") {
-        console.log('Missing or invalid email:', email);
+         
         res.redirect(`${FRONTEND_URL}/login?error=Email is required`);
         return;
       }
       if (action === "register" && (!firstName || !lastName || typeof firstName !== "string" || typeof lastName !== "string")) {
-        console.log('Missing or invalid firstName or lastName:', { firstName, lastName });
+         
         res.redirect(`${FRONTEND_URL}/register?error=First name and last name are required`);
         return;
       }
@@ -207,13 +199,13 @@ export const initializeMagicLinkFlow = (action: string) => {
         serializeCookie("magic_action", action, cookieOptions),
       ];
 
-      console.log('Setting cookies:', cookies);
+       
       res.setHeader("Set-Cookie", cookies);
 
-      console.log('Calling handleMagicLinkAction with email:', email, 'firstName:', firstName, 'lastName:', lastName, 'state:', state);
+       
       const { sessionId, redirectUrl } = await handleMagicLinkAction(action, email, firstName, lastName, res, state);
-      console.log('handleMagicLinkAction result:', { sessionId, redirectUrl });
-      console.log('Redirecting to:', redirectUrl);
+       
+       
       res.redirect(redirectUrl);
     } catch (error) {
       console.error('Error in initializeMagicLinkFlow:', error);
@@ -233,26 +225,26 @@ export const validateMagicLink = () => {
     const storedState = cookies.get("magic_state") ?? null;
     const magicAction = cookies.get("magic_action") ?? null;
 
-    console.log('validateMagicLink - Query:', { token, state });
-    console.log('validateMagicLink - Cookies:', { magic_state: storedState, magic_action: magicAction });
+     
+     
 
     if (!token || !state || state !== storedState || !magicAction) {
-      console.log('Validation failed: token, state, or magic_action missing or mismatched');
+       
       return res.redirect(`${FRONTEND_URL}/login?error=Invalid token or state`);
     }
 
     try {
       const sessionId = await magicLinkProvider.validateMagicLink(token.toString());
-      console.log('Token validated, sessionId:', sessionId);
+       
       const sessionCookie = auth.createSessionCookie(sessionId).serialize();
       const clearCookies = [
         serializeCookie("magic_state", "", { maxAge: 0, path: "/" }),
         serializeCookie("magic_action", "", { maxAge: 0, path: "/" }),
       ];
 
-      console.log('Setting session cookie and clearing state/action cookies');
+       
       res.setHeader("Set-Cookie", [sessionCookie, ...clearCookies]);
-      console.log('Redirecting to dashboard:', `${FRONTEND_URL}/dashboard`);
+       
       res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error('Error in validateMagicLink:', error);

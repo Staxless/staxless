@@ -46,7 +46,7 @@ export class DiscordProvider extends Provider {
       throw new Error("Discord requires DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET");
     }
     const redirectUri = "http://localhost:8000/oauth/discord/callback";
-    console.log("Discord Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
+     
     return new arctic.Discord(clientId, clientSecret, redirectUri);
   }
 

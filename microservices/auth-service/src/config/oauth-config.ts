@@ -12,7 +12,7 @@
  * 
  * // Get list of configured providers for UI display
  * const providerList = getConfiguredProviders();
- * console.log(providerList);
+ *  
  * // Output: [{ name: 'github', displayName: 'Github' }, { name: 'google', displayName: 'Google' }]
  * 
  * // Use a specific provider instance for OAuth operations

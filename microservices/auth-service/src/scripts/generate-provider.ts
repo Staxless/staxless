@@ -64,7 +64,7 @@ async function generateProvider() {
   }
 
   await fs.writeFile(newProviderPath, template);
-  console.log(`Created provider file: src/config/providers/${providerName}.ts`);
+   
 
   /**
    * Path to the OAuth configuration file to be updated.
@@ -107,7 +107,7 @@ async function generateProvider() {
   oauthConfig = oauthConfig.slice(0, providersIndex) + "\n" + providerEntry + oauthConfig.slice(providersIndex);
 
   await fs.writeFile(oauthConfigPath, oauthConfig);
-  console.log(`Updated oauth-config.ts with ${providerName} provider`);
+   
 }
 
 /**

@@ -46,7 +46,7 @@ export class GoogleProvider extends Provider {
       throw new Error("Google requires GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET");
     }
     const redirectUri = "http://localhost:8000/oauth/google/callback";
-    console.log("Google Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
+     
     return new arctic.Google(clientId, clientSecret, redirectUri);
   }
 

@@ -62,7 +62,7 @@ const connectToMongoDB = async (): Promise<Db> => {
       useUnifiedTopology: true,
     } as any);
     db = client.db(DATABASE_NAME);
-    console.log(`Connected to MongoDB database: ${DATABASE_NAME}`);
+     
     return db;
   } catch (error) {
     console.error("MongoDB connection error:", error);
@@ -82,9 +82,9 @@ const createSessionCollection = async (): Promise<Collection<SessionSchema>> => 
       await db.createCollection(SESSION_COLLECTION_NAME, {
         validator: { $jsonSchema: sessionSchemaValidator },
       });
-      console.log("Session collection created.");
+       
     } else {
-      console.log("Session collection already exists.");
+       
     }
     sessionCollection = db.collection<SessionSchema>(SESSION_COLLECTION_NAME);
     return sessionCollection;
@@ -101,7 +101,7 @@ const createSessionCollection = async (): Promise<Collection<SessionSchema>> => 
 const listCollections = async (): Promise<void> => {
   try {
     const collections = await db.listCollections().toArray();
-    console.log("Collections in database:", collections.map((col) => col.name));
+      => col.name));
   } catch (error) {
     console.error("Error listing collections:", error);
   }
@@ -157,7 +157,7 @@ const initializeDatabase = async (): Promise<void> => {
 
 // Start initialization
 initializeDatabase()
-  .then(() => console.log("MongoDB session model initialized."))
+  .then(() =>  )
   .catch((error) => console.error("Failed to initialize MongoDB session model:", error));
 
 export default Session;

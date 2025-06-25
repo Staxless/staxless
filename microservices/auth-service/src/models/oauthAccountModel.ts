@@ -52,7 +52,7 @@ const connectToMongoDB = async (): Promise<Db> => {
       useUnifiedTopology: true,
     } as any); // `as any` to handle deprecated options in TypeScript
     db = client.db(DATABASE_NAME);
-    console.log(`Connected to database: ${DATABASE_NAME}`);
+     
     return db;
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
@@ -72,9 +72,9 @@ const createUsersCollection = async (): Promise<Collection> => {
       await db.createCollection("oauthAccount", {
         validator: { $jsonSchema: oauthAccountSchema },
       });
-      console.log("Collection created!");
+       
     } else {
-      console.log("Collection already exists.");
+       
     }
     return db.collection("oauthAccount");
   } catch (error) {
@@ -91,7 +91,7 @@ const createUsersCollection = async (): Promise<Collection> => {
 const listCollections = async (): Promise<void> => {
   try {
     const collections = await db.listCollections().toArray();
-    console.log("Registered collections:", collections.map((col) => col.name));
+      => col.name));
   } catch (error) {
     console.error("Error listing collections:", error);
   }
@@ -160,7 +160,7 @@ const initializeDatabase = async (): Promise<void> => {
 
 // Initialize the database
 initializeDatabase()
-  .then(() => console.log("Database initialization completed."))
+  .then(() =>  )
   .catch((error) => console.error("Database initialization failed:", error));
 
 export default OauthAccount;

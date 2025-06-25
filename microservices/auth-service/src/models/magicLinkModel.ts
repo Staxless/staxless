@@ -52,7 +52,7 @@ const connectToMongoDB = async (): Promise<Db> => {
       useUnifiedTopology: true,
     } as any);
     db = client.db(DATABASE_NAME);
-    console.log(`Connected to database: ${DATABASE_NAME}`);
+     
     return db;
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
@@ -72,9 +72,9 @@ const createMagicLinksCollection = async (): Promise<Collection> => {
       await db.createCollection("magicLinks", {
         validator: { $jsonSchema: magicLinkSchema },
       });
-      console.log("MagicLinks collection created!");
+       
     } else {
-      console.log("MagicLinks collection already exists.");
+       
     }
     return db.collection("magicLinks");
   } catch (error) {
@@ -91,7 +91,7 @@ const createMagicLinksCollection = async (): Promise<Collection> => {
 const listCollections = async (): Promise<void> => {
   try {
     const collections = await db.listCollections().toArray();
-    console.log("Registered collections:", collections.map((col) => col.name));
+      => col.name));
   } catch (error) {
     console.error("Error listing collections:", error);
   }
@@ -142,7 +142,7 @@ const initializeDatabase = async (): Promise<void> => {
 
 // Initialize the database
 initializeDatabase()
-  .then(() => console.log("MagicLinks database initialization completed."))
+  .then(() =>  )
   .catch((error) => console.error("MagicLinks database initialization failed:", error));
 
 export default MagicLink;

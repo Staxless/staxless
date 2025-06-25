@@ -24,21 +24,17 @@ export function useProviders() {
 
     const fetchProviders = async () => {
       try {
-        console.log("Fetching providers from API...");
+
         const response = await fetch("/api/oauth/providers", {
           headers: {
             'Accept': 'application/json'
           }
         });
-        console.log("Response status:", response.status);
-        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const responseText = await response.text();
-        console.log("Raw response:", responseText);
 
         if (responseText.trim() === "" || responseText.trim() === "undefined") {
           throw new Error("Empty or 'undefined' response from server");
@@ -51,8 +47,6 @@ export function useProviders() {
           console.error("JSON Parse error:", parseError);
           throw new Error(`Invalid JSON response from server: ${responseText}`);
         }
-
-        console.log("Parsed data:", data);
 
         if (!Array.isArray(data)) {
           throw new Error(`Unexpected data format. Expected array, got: ${typeof data}`);

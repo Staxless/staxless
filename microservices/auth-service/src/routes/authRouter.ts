@@ -30,20 +30,19 @@ export const router = express.Router();
 router.post("/auth/validate-request", async (req: Request, res: Response): Promise<void> => {
   try {
     const sessionId = parseCookies(req.headers.cookie ?? "").get("auth_session") ?? null;
-    console.log("Session ID from cookie:", sessionId);
+     
     if (!sessionId) {
       res.status(401).send("Unauthorized");
       return;
     }
 
     const { user, session } = await auth.validateSession(sessionId);
-    console.log("Session validation result:", { user, session });
+     
 
     if (session) {
       const sessionCookie = auth.createSessionCookie(session.id);
       res.cookie(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
       res.status(200).json({ message: "Session refreshed", user, session });
-      console.log("Session validated and refreshed for user:", user);
       return;
     }
 

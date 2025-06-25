@@ -30,7 +30,7 @@ export default function WaitlistHeroSimple(): JSX.Element {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Here you would typically send the email to your API
-    console.log("Submitted email:", email)
+     
     toast({
       title: "You're on the list!",
       description: "We'll notify you when we launch. Stay tuned!",
