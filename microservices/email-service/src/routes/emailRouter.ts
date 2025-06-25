@@ -21,7 +21,7 @@ const validateInput = (req: Request, res: Response, next: NextFunction): void =>
 
 router.post('/magic-link', validateInput, async (req: EmailRequest, res: Response) => {
   const { email, variables } = req.body;
-  console.log('Sending magic link to:', email, 'with variables:', variables);
+   
   try {
     await sendEmail({ templateKey: 'magic-link', email, variables });
     res.send('Magic link sent');

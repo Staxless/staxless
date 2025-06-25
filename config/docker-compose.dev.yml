@@ -44,52 +44,56 @@ services:
         aliases:
           - "frontend"
 
+
   kong-api-gateway:
-    image: "${KONG_DOCKER_TAG:-kong:latest}"
-    user: "${KONG_USER:-kong}"
-    env_file:
-      - ../config/secrets/dev/staxless.dev.env
-    environment:
-      <<: *kong-env
-      KONG_ADMIN_ACCESS_LOG: /dev/stdout
-      KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_PROXY_LISTEN: "${KONG_PROXY_LISTEN:-0.0.0.0:8000}"
-      KONG_ADMIN_LISTEN: "${KONG_ADMIN_LISTEN:-0.0.0.0:8001}"
-      KONG_ADMIN_GUI_LISTEN: "${KONG_ADMIN_GUI_LISTEN:-0.0.0.0:8002}"
-      KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_ERROR_LOG: /dev/stderr
-      KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
-      KONG_DECLARATIVE_CONFIG: "/opt/kong/src/kong.yaml"
-    ports:
-      - '${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp'
-      - '${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp'
-      - '8001:8001/tcp'
-      - '8444:8444/tcp'
-      - '8002:8002/tcp'
-    expose:
-      - "8001"
-      - "8002"
-      - "8444"
-    healthcheck:
-      test: ["CMD", "kong", "health"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    restart: on-failure:5
-    read_only: true
-    volumes:
-      - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
-      - kong_tmp_vol:/tmp
-      - ../kong-gateway/:/opt/kong
-    security_opt:
-      - no-new-privileges
-    networks:
-      frontend:
-        aliases:
-          - "front-gate"
-      backend:
-        aliases:
-          - "back-gate"
+      image: "${KONG_DOCKER_TAG:-kong:latest}"
+      user: "${KONG_USER:-kong}"
+      env_file:
+        - ../config/secrets/dev/staxless.dev.env
+      environment:
+        <<: *kong-env
+        KONG_ADMIN_ACCESS_LOG: /dev/stdout
+        KONG_ADMIN_ERROR_LOG: /dev/stderr
+        KONG_PROXY_LISTEN: "${KONG_PROXY_LISTEN:-0.0.0.0:8000}"
+        KONG_ADMIN_LISTEN: "${KONG_ADMIN_LISTEN:-0.0.0.0:8001}"
+        KONG_ADMIN_GUI_LISTEN: "${KONG_ADMIN_GUI_LISTEN:-0.0.0.0:8002}"
+        KONG_PROXY_ACCESS_LOG: /dev/stdout
+        KONG_PROXY_ERROR_LOG: /dev/stderr
+        KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
+        KONG_DECLARATIVE_CONFIG: "/opt/kong/src/kong.yaml"
+        KONG_PLUGINS: "bundled,rbac-auth"                    
+        KONG_LUA_PACKAGE_PATH: "/opt/kong/plugins/?.lua;;"    
+      ports:
+        - '${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp'
+        - '${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp'
+        - '8001:8001/tcp'
+        - '8444:8444/tcp'
+        - '8002:8002/tcp'
+      expose:
+        - "8001"
+        - "8002"
+        - "8444"
+      healthcheck:
+        test: ["CMD", "kong", "health"]
+        interval: 10s
+        timeout: 10s
+        retries: 10
+      restart: on-failure:5
+      read_only: true
+      volumes:
+        - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
+        - kong_tmp_vol:/tmp
+        - ../kong-gateway/src/kong.yaml:/opt/kong/src/kong.yaml
+        - ../kong-gateway/plugins/rbac-auth:/usr/local/share/lua/5.1/kong/plugins/rbac-auth                   
+      security_opt:
+        - no-new-privileges
+      networks:
+        frontend:
+          aliases:
+            - "front-gate"
+        backend:
+          aliases:
+            - "back-gate"
 
   mongodb-service:
     image: mongo:latest
@@ -174,12 +178,12 @@ services:
         aliases:
           - "stripe"
 
-  mailgun-service:
-    image: app_mailgun_service
+  email-service:
+    image: app_email_service
 
     build:
-      context: ../microservices/mailgun-service/
-      dockerfile: ../../config/dockerfiles/mailgun-service.Dockerfile
+      context: ../microservices/email-service/
+      dockerfile: ../../config/dockerfiles/email-service.Dockerfile
       target: dev
     env_file:
       - ../config/secrets/dev/staxless.dev.env
@@ -188,14 +192,14 @@ services:
     expose:
       - "8084"
     volumes:
-      - ../microservices/mailgun-service/src:/home/node/src
-      - ../microservices/mailgun-service/src/server.js:/home/node/server.js
+      - ../microservices/email-service/src:/home/node/src
+      - ../microservices/email-service/src/server.js:/home/node/server.js
     environment:
       - NODE_ENV=development
     networks:
       backend:
         aliases:
-          - "mailgun"
+          - "email"
 
   cms-service:
     image: node:18-alpine

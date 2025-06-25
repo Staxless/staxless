@@ -151,14 +151,14 @@ services:
         aliases:
           - "stripe"
 
-  mailgun-service:
-    image: app_mailgun_service
+  email-service:
+    image: app_email_service
     build:
-      context: ../microservices/mailgun-service/
-      dockerfile: ../../config/dockerfiles/mailgun-service.Dockerfile
+      context: ../microservices/email-service/
+      dockerfile: ../../config/dockerfiles/email-service.Dockerfile
       target: prod
     env_file:
-      - ../../secrets/prod/mailgun-service.env
+      - ../../secrets/prod/email-service.env
     expose:
       - "8084"
     restart: always
@@ -167,7 +167,7 @@ services:
     networks:
       backend:
         aliases:
-          - "mailgun"
+          - "email"
 
   cms-service:
     image: node:18-alpine
