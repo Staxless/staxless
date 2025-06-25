@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId, Db } from "mongodb";
-import  getDbConnection  from "../config/db-config.js";
+import  { connectDB }  from "../config/db-config.js";
 
 interface User {
   _id: string;
@@ -42,14 +42,14 @@ const userSchema = {
 let db: Db;
 
 const initializeDatabase = async () => {
-  const connection = await getDbConnection();
+  const connection = await connectDB();
   db = connection.db(process.env.DATABASE_NAME);
   const collections = await db.listCollections({ name: "users" }).toArray();
   if (collections.length === 0) {
     await db.createCollection("users", {
       validator: { $jsonSchema: userSchema },
     });
-    console.log("User collection created!");
+     
   }
 };
 
@@ -57,6 +57,7 @@ initializeDatabase().catch((error) => console.error("Database initialization fai
 
 export const User = {
   async create(userData: User) {
+     
     userData.created_at = userData.created_at || new Date();
     userData.subscription = userData.subscription || { type: "free", startDate: new Date() };
     const result = await db.collection("users").insertOne(userData);
