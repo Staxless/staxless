@@ -1,23 +1,51 @@
 _format_version: "2.1"
+plugins:
+  - name: cors
+    config:
+      origins:
+        - ${FRONTEND_DOMAIN:http://localhost:3000}
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      headers:
+        - Content-Type
+        - x-user-info
+        - Authorization
+      credentials: true
+      max_age: 3600
 
 services:
   - name: auth
     url: http://auth:8080
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+          policy: local
+          limit_by: consumer
+      - name: proxy-cache
+        config:
+          strategy: memory
+          cache_ttl: 300
+    read_timeout: 10000
+    write_timeout: 10000
+    connect_timeout: 5000
     routes:
       - name: oauth-providers
         methods: [GET]
         paths: [/oauth/providers]
-        strip_path: false        
-
+        strip_path: false
       - name: oauth-register
         methods: [GET]
         paths: [/oauth/register/(.+)]
-        strip_path: false        
-
+        strip_path: false
       - name: oauth-login
         methods: [GET]
         paths: [/oauth/login/(.+)]
-        strip_path: false        
+        strip_path: false
         plugins:
           - name: request-transformer
             config:
@@ -25,32 +53,26 @@ services:
                 headers:
                   - Cookie:${request.headers.cookie}
                   - x-user-info:${request.headers.x-user-info}
-
       - name: oauth-callback
         methods: [GET]
         paths: [/oauth/(.+)/callback]
-        strip_path: false        
-
+        strip_path: false
       - name: magicLink-register
         methods: [POST]
         paths: [/auth/magic-link/register]
-        strip_path: false        
-
+        strip_path: false
       - name: magicLink-login
         methods: [POST]
         paths: [/auth/magic-link/login]
-        strip_path: false 
-
+        strip_path: false
       - name: magicLink-callback
         methods: [GET]
         paths: [/auth/magic-link/callback]
-        strip_path: false    
-
+        strip_path: false
       - name: auth-logout
         methods: [POST]
         paths: [/auth/logout]
         strip_path: false
-
       - name: auth-validate-request
         methods: [POST]
         paths: [/auth/validate-request]
@@ -58,35 +80,48 @@ services:
 
   - name: stripe
     url: http://stripe:8083
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 50
+          hour: 500
+          policy: local
+          limit_by: consumer
+      - name: proxy-cache
+        config:
+          strategy: memory
+          cache_ttl: 300
+    read_timeout: 15000
+    write_timeout: 15000
+    connect_timeout: 5000
     routes:
       - name: checkout
         methods: [POST]
         paths: [/checkout]
         strip_path: false
         plugins:
+          - name: rbac-auth
+            config:
+              auth_service_url: http://auth:8080
+              required_roles:
+                - user
           - name: request-transformer
             config:
               add:
                 headers:
                   - Content-Type:application/json
                   - x-user-info:${request.headers.x-user-info}
-
+                  - cookie:auth_session=${request.headers.cookie.auth_session}
       - name: webhook
         methods: [POST, GET]
         paths: [/webhook]
         strip_path: false
         plugins:
-          - name: request-transformer
-            config:
-              http_method: null
-              add:
-                headers:
-                  - x-user-info:${request.headers.x-user-info}
-                  - stripe-signature:${request.headers.stripe-signature}
           - name: cors
             config:
               origins:
-                - "*"
+                - ${FRONTEND_DOMAIN:http://localhost:3000}
+                - https://stripe.com
               methods:
                 - GET
                 - POST
@@ -100,52 +135,54 @@ services:
                 - stripe-signature
               credentials: true
               max_age: 3600
-
+          - name: pre-function
+            config:
+              access:
+                - |
+                  local headers = kong.request.get_headers()
+                  if not headers["stripe-signature"] then
+                    return kong.response.exit(400, { error = "Missing stripe-signature header" })
+                  end
+          - name: request-transformer
+            config:
+              http_method: null
+              add:
+                headers:
+                  - x-user-info:${request.headers.x-user-info}
+                  - stripe-signature:${request.headers.stripe-signature}
       - name: products
         methods: [GET]
         paths: [/products]
-        strip_path: false 
-
-  - name: mailgun
-    url: http://mailgun:8084
-    routes:
-      - name: send-email
-        methods: [POST]
-        paths: [/send-email]
-        strip_path: false   
+        strip_path: false
 
   - name: cms
     url: http://cms:8085
-    routes:
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 20
+          hour: 200
+          policy: local
+          limit_by: consumer
+      - name: proxy-cache
+        config:
+          strategy: memory
+          cache_ttl: 300
+    read_timeout: 10000
+    write_timeout: 10000
+    connect_timeout: 5000
     routes:
       - name: cms-admin-route
-        paths:
-          - /admin
-        strip_path: true
+        methods: [GET, POST, PUT, DELETE]
+        paths: [/admin/(/.+)?]
+        strip_path: false
         preserve_host: true
-
-
-
-# plugins:
-#   - name: cors
-#     config:
-#       origins:
-#         - "*"
-#       methods:
-#         - GET
-#         - POST
-#         - OPTIONS
-#       headers:
-#         - Origin
-#         - Authorization
-#         - Content-Type
-#       exposed_headers:
-#         - Content-Length
-#         - Content-Type
-#         - Set-Cookie
-#         - Location
-#       credentials: true
-#       max_age: 3600
+        plugins:
+          - name: rbac-auth
+            config:
+              auth_service_url: http://auth:8080
+              required_roles:
+                - admin
 
 upstreams:
   - name: auth-upstream
@@ -177,10 +214,10 @@ upstreams:
         unhealthy:
           interval: 10
           http_failures: 5
-  
-  - name: mailgun-upstream
+
+  - name: email-upstream
     targets:
-      - target: mailgun:8084
+      - target: email:8084
     healthchecks:
       active:
         type: http
