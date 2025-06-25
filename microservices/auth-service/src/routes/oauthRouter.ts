@@ -15,8 +15,8 @@ import express, { Request, Response } from "express";
 import { auth } from "../config/lucia-config";
 import { providers, getConfiguredProviders } from "../config/oauth-config";
 import { parseCookies, serializeCookie } from "oslo/cookie";
-import { initializeOAuthFlow, getUserInfo, handleOAuthAction, handleError } from "../config/oauth-handlers";
-import { Provider } from "../config/providerTypes";
+import { initializeOAuthFlow, getUserInfo, handleOAuthAction, handleError } from "../handlers/oauth-handlers";
+import { Provider } from "../lib/providers/providerTypes";
 
 const router = express.Router();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";

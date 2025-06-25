@@ -13,9 +13,9 @@ import axios from "axios";
 import crypto from "crypto";
 import { parseCookies, serializeCookie } from "oslo/cookie";
 import { OAuth2RequestError } from "arctic";
-import { auth } from "./lucia-config";
-import { Provider } from "./providerTypes";
-import { providers } from "./oauth-config";
+import { auth } from "../config/lucia-config";
+import { Provider } from "../lib/providers/providerTypes";
+import { providers } from "../config/oauth-config";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 

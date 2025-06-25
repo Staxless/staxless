@@ -8,8 +8,8 @@
  */
 
 import express, { Request, Response, NextFunction } from "express";
-import { auth } from "./lucia-config";
-import { magicLinkProvider } from "./magic-link-config";
+import { auth } from "../config/lucia-config";
+import { magicLinkProvider } from "../config/magic-link-config";
 import { parseCookies, serializeCookie } from "oslo/cookie";
 import crypto from "crypto";
 

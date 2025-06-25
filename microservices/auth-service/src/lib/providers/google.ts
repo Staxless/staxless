@@ -5,7 +5,7 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "../providerTypes";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./providerTypes";
 
 const config: ProviderConfig = {
   clientId: process.env.GOOGLE_CLIENT_ID ?? "",

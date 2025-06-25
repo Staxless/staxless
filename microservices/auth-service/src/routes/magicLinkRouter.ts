@@ -11,7 +11,7 @@
  */
 
 import express, { NextFunction, Request, Response } from "express";
-import { initializeMagicLinkFlow, validateMagicLink, handleError } from "../config/magic-link-handlers";
+import { initializeMagicLinkFlow, validateMagicLink, handleError } from "../handlers/magic-link-handlers";
 import { parseCookies, serializeCookie } from "oslo/cookie";
 import { magicLinkProvider } from "../config/magic-link-config";
 import { auth } from "../config/lucia-config";
