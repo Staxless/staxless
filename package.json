@@ -1,6 +1,6 @@
 {
   "name": "staxless",
-  "version": "1.39.0",
+  "version": "1.40.0",
   "private": true,
   "scripts": {
     "staxless-dev-build": "docker compose -f ./config/docker-compose.dev.yml up --build",
