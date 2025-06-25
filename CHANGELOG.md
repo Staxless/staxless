@@ -1,3 +1,11 @@
+# [1.40.0](https://github.com/Staxless/staxless/compare/v1.39.0...v1.40.0) (2025-06-25)
+
+
+### Features
+
+* implement email service with templated email support and Mailgun client integration ([ec644b7](https://github.com/Staxless/staxless/commit/ec644b72aa83e1c3aec966715ecc927d08d444da))
+* implement RBAC with Kong plugin, add rate limiting, timeout, and CORS configuration ([0bbcf7d](https://github.com/Staxless/staxless/commit/0bbcf7d962cf9c145408017e2222d372ad033d4b))
+
 # [1.39.0](https://github.com/Staxless/staxless/compare/v1.38.0...v1.39.0) (2025-06-17)
 
 
