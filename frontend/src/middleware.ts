@@ -49,13 +49,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   const user: User | null = await getUser();
 
-  // Check if the user is trying to access admin routes
   const isAdminRoute = ADMIN_ROUTES.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
   // Redirect non-admin users to login when accessing admin routes
   if (isAdminRoute && (!user || !user.roles.includes("admin"))) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Redirect non-admin users trying to access admin routes to login
+  if (isAdminRoute && (!user || !user?.roles.includes("admin"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
