@@ -23,7 +23,7 @@ const nextConfig = {
     return [
       {
         source: '/admin/:path*',
-        destination: 'http://front-gate:8085/admin/:path*',
+        destination: 'http://front-gate:8000/admin/:path*',
       }, 
       {
         source: "/api/:path*",
