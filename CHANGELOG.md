@@ -1,3 +1,18 @@
+# [2.0.0](https://github.com/Staxless/staxless/compare/v1.40.0...v2.0.0) (2025-06-25)
+
+
+* feat!: transition backend services to event-based architecture ([2a3b6d4](https://github.com/Staxless/staxless/commit/2a3b6d45e937044c67017ad0521614c4f6806156))
+
+
+### Bug Fixes
+
+* update admin route destination to correct port ([43cef73](https://github.com/Staxless/staxless/commit/43cef73383d4616d8a91a9084368be3334068797))
+
+
+### BREAKING CHANGES
+
+* Replaced direct API calls with Kafka-based event-driven communication, requiring updates to client integrations and service configurations.
+
 # [1.40.0](https://github.com/Staxless/staxless/compare/v1.39.0...v1.40.0) (2025-06-25)
 
 
