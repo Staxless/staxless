@@ -2,12 +2,12 @@ import { BRAND_CONFIG } from "@/lib/brand-config"
 
 const myFunction = () => {
   const url = `${BRAND_CONFIG.company.website}` 
-  console.log(`Accessing: ${url}`)
+   
   fetch(`${BRAND_CONFIG.company.website}/api/data`)
     .then((response) => response.json())
     .then((data) => {
       // Process the data
-      console.log(data)
+       
     })
     .catch((error) => {
       console.error("Error fetching data:", error)

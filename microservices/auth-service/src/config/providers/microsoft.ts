@@ -47,7 +47,7 @@ export class MicrosoftProvider extends Provider {
       throw new Error("Microsoft requires MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET");
     }
     const redirectUri = "http://localhost:8000/oauth/microsoft/callback";
-    console.log("Microsoft Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
+     
     return new arctic.MicrosoftEntraId(clientId, clientSecret, redirectUri, { tenantId: "common" });
   }
 

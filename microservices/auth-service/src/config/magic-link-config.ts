@@ -72,7 +72,6 @@ export class MagicLinkProvider {
     });
 
     const magicLink = `${BACKEND_URL}/auth/magic-link/callback?token=${token}&state=${state}`;
-    console.log('Generated magic link:', magicLink);
     return magicLink;
   }
 
@@ -102,7 +101,6 @@ export class MagicLinkProvider {
           expiryMinutes: TOKEN_EXPIRY_MINUTES
         }
       });
-      console.log(`Magic link sent to ${user.email}`);
     } catch (error: any) {
       console.error('Error sending magic link via email service:', {
         message: error.message,

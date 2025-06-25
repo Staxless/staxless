@@ -68,7 +68,7 @@ export const logoutEndpoint: Endpoint = {
 
         // Check if auth service already cleared the cookie
         const authServiceSetCookie = fetchResponse.headers.get('Set-Cookie');
-        console.log('Auth service Set-Cookie header:', authServiceSetCookie);
+         
         if (!authServiceSetCookie?.includes('auth_session')) {
           // Clear the auth_session cookie locally if not handled by auth service
           res.setHeader('Set-Cookie', 'auth_session=; Path=/; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');

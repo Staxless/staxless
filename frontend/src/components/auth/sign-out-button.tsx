@@ -31,7 +31,7 @@ export function SignOutButton(): JSX.Element {
       const result = await logout();
       console.warn(result);
       if (result.success) {
-        console.log("Successfully signed out");
+         
         router.push("/");
         router.refresh(); // Refresh the current route to update the UI
       } else {

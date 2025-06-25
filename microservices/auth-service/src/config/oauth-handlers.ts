@@ -60,7 +60,7 @@ export async function getUserInfo(provider: Provider, code: string, req?: Reques
       if (!codeVerifier) {
         throw new Error("Code verifier missing for PKCE flow");
       }
-      console.log(`Code Verifier for ${provider.name}:`, codeVerifier);
+       
     }
 
     const tokens = provider.usePKCE && codeVerifier
@@ -70,7 +70,7 @@ export async function getUserInfo(provider: Provider, code: string, req?: Reques
     const userResponse = await axios.get(provider.userInfoUrl, {
       headers: { Authorization: `Bearer ${tokens.accessToken}` },
     });
-    console.log(`User info fetched from ${provider.name}:`, JSON.stringify(userResponse.data, null, 2));
+
 
     return provider.normalizeUserInfo(userResponse.data); // Use provider's normalizeUserInfo
   } catch (error) {
@@ -201,7 +201,7 @@ export const handleError = (error: any, res: Response): void => {
  */
 export const initializeOAuthFlow = (action: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log(`Initializing OAuth flow for action: ${action}`);
+     
 
     const providerName = req.params.providerName.toLowerCase();
     const provider: Provider = providers[providerName];
@@ -228,7 +228,7 @@ export const initializeOAuthFlow = (action: string) => {
         sameSite: "lax" as const,
       };
 
-      console.log("Scopes:", provider.scopes);
+       
       const authUrl = provider.usePKCE && codeVerifier
         ? await provider.instance.createAuthorizationURL(state, codeVerifier, { scopes: provider.scopes })
         : await provider.instance.createAuthorizationURL(state, { scopes: provider.scopes });
@@ -243,8 +243,6 @@ export const initializeOAuthFlow = (action: string) => {
         cookies.push(serializeCookie("code_verifier", codeVerifier, cookieOptions));
       }
 
-      console.log("Authorization URL:", authUrl.toString());
-      console.log("Code Verifier:", codeVerifier || "Not used (PKCE disabled)");
 
       res.setHeader("Set-Cookie", cookies);
       res.redirect(authUrl.toString());

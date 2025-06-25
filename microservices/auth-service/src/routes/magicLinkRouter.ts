@@ -57,26 +57,26 @@ router.get("/magic-link/callback", async (req: Request, res: Response, next: Nex
     const storedState = cookies.get("magic_state") ?? null;
     const magicAction = cookies.get("magic_action") ?? null;
 
-    console.log('validateMagicLink - Query:', { token, state });
-    console.log('validateMagicLink - Cookies:', { magic_state: storedState, magic_action: magicAction });
+     
+     
 
     if (!token || !state || state !== storedState || !magicAction) {
-      console.log('Validation failed: token, state, or magic_action missing or mismatched');
+       
       return res.redirect(`${FRONTEND_URL}/login?error=Invalid token or state`);
     }
 
     try {
       const sessionId = await magicLinkProvider.validateMagicLink(token.toString());
-      console.log('Token validated, sessionId:', sessionId);
+       
       const sessionCookie = auth.createSessionCookie(sessionId).serialize();
       const clearCookies = [
         serializeCookie("magic_state", "", { maxAge: 0, path: "/" }),
         serializeCookie("magic_action", "", { maxAge: 0, path: "/" }),
       ];
 
-      console.log('Setting session cookie and clearing state/action cookies');
+       
       res.setHeader("Set-Cookie", [sessionCookie, ...clearCookies]);
-      console.log('Redirecting to dashboard:', `${FRONTEND_URL}/dashboard`);
+       
       res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error('Error in validateMagicLink:', error);

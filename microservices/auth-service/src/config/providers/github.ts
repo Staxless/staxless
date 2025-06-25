@@ -48,7 +48,7 @@ export class GitHubProvider extends Provider {
       throw new Error("GitHub requires GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET");
     }
     const redirectUri = "http://localhost:8000/oauth/github/callback";
-    console.log("GitHub Provider Instance Created with Redirect URI:", redirectUri, "Scopes:", this.config.scopes);
+     
     return new arctic.GitHub(clientId, clientSecret, { redirectURI: redirectUri });
   }
 
