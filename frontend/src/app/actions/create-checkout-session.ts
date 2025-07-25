@@ -3,10 +3,9 @@
  * @description Server action for creating a Stripe checkout session
  */
 
-"use server";
+'use server';
 
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { headers } from 'next/headers';
 
 interface User {
   id: string;
@@ -24,50 +23,50 @@ interface CheckoutResponse {
  * @throws {Error} If user information is not found or if checkout session creation fails
  */
 export async function createCheckoutSession(
-  productId: string,
+  productId: string
 ): Promise<CheckoutResponse> {
   const headersList = await headers();
-  const userInfoString = headersList.get("x-user-info");
+  const userInfoString = headersList.get('x-user-info');
+  const cookie = headersList.get('cookie')?.split('; ');
+  const auth_session = cookie?.find((c) => c.startsWith('auth_session='));
 
   if (!userInfoString) {
-    throw new Error("User information not found");
+    throw new Error('User information not found');
   }
 
   let user: User;
   try {
     user = JSON.parse(userInfoString);
-  } catch (error) {
-    console.error("Error parsing user info:", error);
-    throw new Error("Invalid user information");
+  } catch (_error) {
+    throw new Error('Invalid user information');
   }
 
   if (!user.id) {
-    throw new Error("User ID not found");
+    throw new Error('User ID not found');
   }
 
   try {
-    const response = await fetch("http://front-gate:8000/checkout", {
-      method: "POST",
+    const response = await fetch('http://front-gate:8000/checkout', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "x-user-info": JSON.stringify({ id: user.id }),
+        'Content-Type': 'application/json',
+        'x-user-info': JSON.stringify({ id: user.id }),
+        Cookie: `${auth_session}`,
       },
       body: JSON.stringify({
-        productId: productId,
+        productId,
         quantity: 1,
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Stripe service error:", errorData);
+      const _errorData = await response.text();
       throw new Error(`Stripe service error: ${response.status}`);
     }
 
     const data: CheckoutResponse = await response.json();
     return data;
-  } catch (error) {
-    console.error("Error creating checkout session:", error);
-    throw new Error("Failed to create checkout session");
+  } catch (_error) {
+    throw new Error('Failed to create checkout session');
   }
 }
