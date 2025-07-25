@@ -34,16 +34,16 @@ export const templateConfig: TemplateConfigMap = {
   'magic-link': {
     templateName: 'magic-link',
     requiredVariables: ['token', 'link'],
-    subject: 'Your Magic Link'
+    subject: 'Your Magic Link',
   },
-  'welcome': {
+  welcome: {
     templateName: 'welcome-template',
     requiredVariables: ['name'],
-    subject: 'Welcome to Our App!'
+    subject: 'Welcome to Our App!',
   },
   'purchase-confirmation': {
     templateName: 'purchase-confirmation-template',
     requiredVariables: ['orderId', 'items'],
-    subject: 'Purchase Confirmation'
-  }
+    subject: 'Purchase Confirmation',
+  },
 };

@@ -1,19 +1,20 @@
 /**
  * Magic Link Handlers
- * 
+ *
  * This module provides utility functions for handling magic link authentication flows,
  * including token generation, handling, and user registration/login processes.
  */
 
-import express, { Request, Response, NextFunction } from "express";
-import { auth } from "../config/lucia-config.ts";
-import { createProducer } from "../config/kafka-client.ts";
-import { parseCookies, serializeCookie } from "oslo/cookie";
-import crypto from "crypto";
-import { magicLinkProvider } from "../config/magic-link-config.ts";
+import crypto from 'node:crypto';
+import type { NextFunction, Request, Response } from 'express';
+import { parseCookies, serializeCookie } from 'oslo/cookie';
+import { createProducer } from '../config/kafka-client';
+import { auth } from '../config/lucia-config';
+import { magicLinkProvider } from '../config/magic-link-config';
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8081/auth-service";
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const _BACKEND_URL =
+  process.env.BACKEND_URL || 'http://localhost:8081/auth-service';
 
 const producer = createProducer();
 const TOKEN_EXPIRY_MINUTES = 15;
@@ -23,7 +24,7 @@ const TOKEN_EXPIRY_MINUTES = 15;
  * @returns A 32-byte hexadecimal string for state protection.
  */
 export const generateStateToken = (): string => {
-  const state = crypto.randomBytes(32).toString("hex");
+  const state = crypto.randomBytes(32).toString('hex');
   return state;
 };
 
@@ -33,12 +34,17 @@ export const generateStateToken = (): string => {
  * @param res - Express response object
  * @param next - Express next function
  */
-export const stateProtection = (req: Request, res: Response, next: NextFunction): void => {
-  const stateCookie = parseCookies(req.headers.cookie ?? "").get("magic_state");
+export const stateProtection = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const stateCookie = parseCookies(req.headers.cookie ?? '').get('magic_state');
   const stateQuery = req.query.state?.toString();
-  
-  if (!stateCookie || !stateQuery || stateCookie !== stateQuery) {
-    return res.status(403).json({ error: "State token validation failed" });
+
+  if (!(stateCookie && stateQuery) || stateCookie !== stateQuery) {
+    res.status(403).json({ error: 'State token validation failed' });
+    return;
   }
   next();
 };
@@ -57,12 +63,13 @@ export async function handleRegistration(
   email: string,
   firstName: string,
   lastName: string,
-  res: Response,
+  _res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  const existingUser = await auth.adapter.User.findOne({ email });
+  const db = await getDb();
+  const existingUser = await db.collection('users').findOne({ email });
   if (existingUser) {
-    throw new Error("Email already registered. Please log in.");
+    throw new Error('Email already registered. Please log in.');
   }
 
   const userId = crypto.randomUUID();
@@ -71,42 +78,45 @@ export async function handleRegistration(
     email,
     first_name: firstName,
     last_name: lastName,
-    avatar: "",
+    avatar: '',
     created_at: new Date(),
-    subscription: { type: "free", startDate: new Date() },
-    roles: ["user"],
+    subscription: { type: 'free', startDate: new Date() },
+    roles: ['user'],
   };
 
-  await auth.adapter.User.insertOne(newUser);
+  await db.collection('users').insertOne(newUser);
   const magicLink = await magicLinkProvider.generateMagicLink(userId, state);
 
   // NEW: Produce Kafka event instead of direct send
   try {
     await producer.connect();
-    const token = new URL(magicLink).searchParams.get("token") || "";
+    const token = new URL(magicLink).searchParams.get('token') || '';
     await producer.send({
-      topic: "email-events",
-      messages: [{
-        key: "send.magic-link.email",
-        value: JSON.stringify({
-          email,
-          variables: {
-            token,
-            link: magicLink,
-            expiryMinutes: TOKEN_EXPIRY_MINUTES,
-          },
-        }),
-      }],
+      topic: 'email-events',
+      messages: [
+        {
+          key: 'send.magic-link.email',
+          value: JSON.stringify({
+            email,
+            variables: {
+              token,
+              link: magicLink,
+              expiryMinutes: TOKEN_EXPIRY_MINUTES,
+            },
+          }),
+        },
+      ],
     });
-    console.log(`Produced magic link event for ${email}`);
-  } catch (error: any) {
-    console.error("Error producing magic link event:", error);
-    throw new Error(`Failed to send magic link: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    throw new Error(
+      `Failed to send magic link: ${err.message ?? 'Unknown error'}`
+    );
   } finally {
     await producer.disconnect();
   }
 
-  return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
+  return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
 }
 
 /**
@@ -119,43 +129,50 @@ export async function handleRegistration(
  */
 export async function handleLogin(
   email: string,
-  res: Response,
+  _res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  const user = await auth.adapter.User.findOne({ email });
+  const db = await getDb();
+  const user = await db.collection('users').findOne({ email });
   if (!user) {
-    throw new Error("No account found. Please register.");
+    throw new Error('No account found. Please register.');
   }
 
-  const magicLink = await magicLinkProvider.generateMagicLink(user._id, state);
+  const magicLink = await magicLinkProvider.generateMagicLink(
+    user._id.toString(),
+    state
+  );
 
   // NEW: Produce Kafka event instead of direct send
   try {
     await producer.connect();
-    const token = new URL(magicLink).searchParams.get("token") || "";
+    const token = new URL(magicLink).searchParams.get('token') || '';
     await producer.send({
-      topic: "email-events",
-      messages: [{
-        key: "send.magic-link.email",
-        value: JSON.stringify({
-          email,
-          variables: {
-            token,
-            link: magicLink,
-            expiryMinutes: TOKEN_EXPIRY_MINUTES,
-          },
-        }),
-      }],
+      topic: 'email-events',
+      messages: [
+        {
+          key: 'send.magic-link.email',
+          value: JSON.stringify({
+            email,
+            variables: {
+              token,
+              link: magicLink,
+              expiryMinutes: TOKEN_EXPIRY_MINUTES,
+            },
+          }),
+        },
+      ],
     });
-    console.log(`Produced magic link event for ${email}`);
-  } catch (error: any) {
-    console.error("Error producing magic link event:", error);
-    throw new Error(`Failed to send magic link: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    throw new Error(
+      `Failed to send magic link: ${err.message ?? 'Unknown error'}`
+    );
   } finally {
     await producer.disconnect();
   }
 
-  return { sessionId: "", redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
+  return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
 }
 
 /**
@@ -169,7 +186,7 @@ export async function handleLogin(
  * @returns Session ID and redirect URL
  * @throws Error if action is invalid
  */
-export async function handleMagicLinkAction(
+export function handleMagicLinkAction(
   action: string | null,
   email: string,
   firstName: string | undefined,
@@ -178,16 +195,17 @@ export async function handleMagicLinkAction(
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
   switch (action) {
-    case "register":
-      if (!firstName || !lastName) {
-        console.error("Missing firstName or lastName for registration");
-        throw new Error("First name and last name are required for registration");
+    case 'register':
+      if (!(firstName && lastName)) {
+        throw new Error(
+          'First name and last name are required for registration'
+        );
       }
       return handleRegistration(email, firstName, lastName, res, state);
-    case "login":
+    case 'login':
       return handleLogin(email, res, state);
     default:
-      throw new Error("Invalid magic link action");
+      throw new Error('Invalid magic link action');
   }
 }
 
@@ -196,9 +214,11 @@ export async function handleMagicLinkAction(
  * @param error - Error object from magic link process
  * @param res - Express response object
  */
-export const handleError = (error: any, res: Response): void => {
-  const errorMessage = encodeURIComponent(error.message || "An unexpected error occurred");
-  console.error("Magic link error:", error);
+export const handleError = (error: unknown, res: Response): void => {
+  const err = error as { message?: string };
+  const errorMessage = encodeURIComponent(
+    err.message || 'An unexpected error occurred'
+  );
   res.redirect(`${FRONTEND_URL}/login?error=${errorMessage}`);
 };
 
@@ -208,8 +228,12 @@ export const handleError = (error: any, res: Response): void => {
  * @returns Express middleware function to handle magic link flow initialization
  */
 export const initializeMagicLinkFlow = (action: string) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    if (!["login", "register"].includes(action)) {
+  return async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> => {
+    if (!['login', 'register'].includes(action)) {
       res.redirect(`${FRONTEND_URL}/login?error=Invalid action`);
       return;
     }
@@ -220,35 +244,46 @@ export const initializeMagicLinkFlow = (action: string) => {
         firstName?: string;
         lastName?: string;
       };
-      if (!email || typeof email !== "string") {
+      if (!email || typeof email !== 'string') {
         res.redirect(`${FRONTEND_URL}/login?error=Email is required`);
         return;
       }
-      if (action === "register" && (!firstName || !lastName || typeof firstName !== "string" || typeof lastName !== "string")) {
-        res.redirect(`${FRONTEND_URL}/register?error=First name and last name are required`);
+      if (
+        action === 'register' &&
+        (!(firstName && lastName) ||
+          typeof firstName !== 'string' ||
+          typeof lastName !== 'string')
+      ) {
+        res.redirect(
+          `${FRONTEND_URL}/register?error=First name and last name are required`
+        );
         return;
       }
 
       const state = generateStateToken();
       const cookieOptions = {
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         maxAge: 60 * 10 * 1000,
-        sameSite: "lax" as const,
+        sameSite: 'lax' as const,
       };
 
-      const cookies = [
-        serializeCookie("magic_state", state, cookieOptions),
-        serializeCookie("magic_action", action, cookieOptions),
-      ];
+      res.setHeader('Set-Cookie', [
+        serializeCookie('magic_state', state, cookieOptions),
+        serializeCookie('magic_action', action, cookieOptions),
+      ]);
 
-      res.setHeader("Set-Cookie", cookies);
-
-      const { sessionId, redirectUrl } = await handleMagicLinkAction(action, email, firstName, lastName, res, state);
+      const { redirectUrl } = await handleMagicLinkAction(
+        action,
+        email,
+        firstName,
+        lastName,
+        res,
+        state
+      );
       res.redirect(redirectUrl);
     } catch (error) {
-      console.error("Error in initializeMagicLinkFlow:", error);
       handleError(error, res);
     }
   };
@@ -259,28 +294,33 @@ export const initializeMagicLinkFlow = (action: string) => {
  * @returns Express middleware function to handle magic link validation and login
  */
 export const validateMagicLink = () => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> => {
     const { token, state } = req.query;
-    const cookies = parseCookies(req.headers.cookie ?? "");
-    const storedState = cookies.get("magic_state") ?? null;
-    const magicAction = cookies.get("magic_action") ?? null;
+    const cookies = parseCookies(req.headers.cookie ?? '');
+    const storedState = cookies.get('magic_state') ?? null;
+    const magicAction = cookies.get('magic_action') ?? null;
 
-    if (!token || !state || state !== storedState || !magicAction) {
+    if (!(token && state) || state !== storedState || !magicAction) {
       return res.redirect(`${FRONTEND_URL}/login?error=Invalid token or state`);
     }
 
     try {
-      const sessionId = await magicLinkProvider.validateMagicLink(token.toString());
+      const sessionId = await magicLinkProvider.validateMagicLink(
+        token.toString()
+      );
       const sessionCookie = auth.createSessionCookie(sessionId).serialize();
       const clearCookies = [
-        serializeCookie("magic_state", "", { maxAge: 0, path: "/" }),
-        serializeCookie("magic_action", "", { maxAge: 0, path: "/" }),
+        serializeCookie('magic_state', '', { maxAge: 0, path: '/' }),
+        serializeCookie('magic_action', '', { maxAge: 0, path: '/' }),
       ];
 
-      res.setHeader("Set-Cookie", [sessionCookie, ...clearCookies]);
+      res.setHeader('Set-Cookie', [sessionCookie, ...clearCookies]);
       res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
-      console.error("Error in validateMagicLink:", error);
       handleError(error, res);
     }
   };

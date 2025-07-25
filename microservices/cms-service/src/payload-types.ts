@@ -119,8 +119,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  first_name?: string | null;
-  last_name?: string | null;
+  firstname?: string | null;
+  lastname?: string | null;
   /**
    * User's email address.
    */
@@ -215,8 +215,8 @@ export interface PayloadMigration {
  */
 export interface UserSelect<T extends boolean = true> {
   id?: T;
-  first_name?: T;
-  last_name?: T;
+  firstname?: T;
+  lastname?: T;
   email?: T;
   roles?: T;
   lastActive?: T;

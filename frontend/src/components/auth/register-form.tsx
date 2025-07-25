@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useState, type FormEvent, useEffect } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Mail, User, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BRAND_CONFIG } from "@/lib/brand-config";
-import { useProviders } from "@/hooks/use-provider";
-import axios from "axios";
-import OAuthButton from "@/components/auth/oauth-button";
+import axios from 'axios';
+import { AlertCircle, Mail, Sparkles, User } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type FormEvent, useEffect, useState } from 'react';
+import OAuthButton from '@/components/auth/oauth-button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useProviders } from '@/hooks/use-provider';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 interface FormData {
   firstName: string;
@@ -21,8 +21,12 @@ interface FormData {
   priceId?: string;
 }
 
-interface Provider {
-  name: string;
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
 }
 
 export function RegisterForm() {
@@ -30,9 +34,9 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
+    firstName: '',
+    lastName: '',
+    email: '',
   });
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -42,8 +46,8 @@ export function RegisterForm() {
   const csrfToken = crypto.randomUUID();
 
   useEffect(() => {
-    const tier = searchParams.get("tier");
-    const priceId = searchParams.get("price");
+    const tier = searchParams.get('tier');
+    const priceId = searchParams.get('price');
 
     if (tier || priceId) {
       setFormData((prev) => ({
@@ -53,8 +57,8 @@ export function RegisterForm() {
       }));
       // Clean up URL parameters
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("tier");
-      newUrl.searchParams.delete("price");
+      newUrl.searchParams.delete('tier');
+      newUrl.searchParams.delete('price');
       window.history.replaceState({}, document.title, newUrl.toString());
     }
   }, [searchParams]);
@@ -63,10 +67,10 @@ export function RegisterForm() {
    * Handle redirection to OAuth provider
    * @param url - The URL to redirect to
    */
-  const handleOAuthRedirect = async (url: string) => {
+  const handleOAuthRedirect = (url: string) => {
     setIsRedirecting(true);
-    if (url === "https://localhost:3000/session") {
-      console.warn(url);
+    if (url === 'https://localhost:3000/session') {
+      // No redirect needed for local session
     } else {
       router.push(url);
     }
@@ -95,22 +99,37 @@ export function RegisterForm() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/magic-link/register",
+        'http://localhost:3000/api/auth/magic-link/register',
         formData,
-        { headers: { "X-CSRF-Token": csrfToken } }
+        { headers: { 'X-CSRF-Token': csrfToken } }
       );
       setSuccess(response.data.message);
-      document.cookie = `csrf_token=${csrfToken}; path=/; max-age=900; samesite=lax`;
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to send magic link");
+
+      if ('cookieStore' in window) {
+        await window.cookieStore.set({
+          name: 'csrf_token',
+          value: csrfToken,
+          path: '/',
+          maxAge: 900,
+          sameSite: 'lax',
+          secure: true,
+        });
+      } else {
+        // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
+        document.cookie = `csrf_token=${encodeURIComponent(csrfToken)}; path=/; max-age=900; samesite=lax; secure`;
+      }
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as ApiError)?.response?.data?.error || 'Failed to send magic link';
+      setError(errorMsg);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-32">
+      <div className="flex h-32 items-center justify-center">
         <div
-          className="animate-spin rounded-full h-8 w-8 border-b-2"
+          className="h-8 w-8 animate-spin rounded-full border-b-2"
           style={{ borderColor: BRAND_CONFIG.brand.colors.primary }}
         />
       </div>
@@ -120,117 +139,136 @@ export function RegisterForm() {
   return (
     <div className="space-y-6">
       {/* Magic Link Form */}
-      <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
+      <form className="space-y-4" onSubmit={handleMagicLinkSubmit}>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+            <Label
+              htmlFor="firstName"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
               First Name
             </Label>
             <div className="relative">
               <User
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+                className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
                 style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
               />
               <Input
+                className="pl-10"
                 id="firstName"
                 name="firstName"
+                onChange={handleInputChange}
                 placeholder="Max"
                 required
-                value={formData.firstName}
-                onChange={handleInputChange}
-                className="pl-10"
                 style={{
                   backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                   color: BRAND_CONFIG.brand.colors.textPrimary,
                 }}
+                value={formData.firstName}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+            <Label
+              htmlFor="lastName"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
               Last Name
             </Label>
             <div className="relative">
               <User
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+                className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
                 style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
               />
               <Input
+                className="pl-10"
                 id="lastName"
                 name="lastName"
+                onChange={handleInputChange}
                 placeholder="Robinson"
                 required
-                value={formData.lastName}
-                onChange={handleInputChange}
-                className="pl-10"
                 style={{
                   backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                   color: BRAND_CONFIG.brand.colors.textPrimary,
                 }}
+                value={formData.lastName}
               />
             </div>
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+          <Label
+            htmlFor="email"
+            style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+          >
             Email Address
           </Label>
           <div className="relative">
             <Mail
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+              className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
               style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
             />
             <Input
+              className="pl-10"
               id="email"
               name="email"
-              type="email"
+              onChange={handleInputChange}
               placeholder="Enter your email"
               required
-              value={formData.email}
-              onChange={handleInputChange}
-              className="pl-10"
               style={{
                 backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
                 borderColor: BRAND_CONFIG.brand.colors.border,
                 color: BRAND_CONFIG.brand.colors.textPrimary,
               }}
+              type="email"
+              value={formData.email}
             />
           </div>
         </div>
         {formData.tier && (
           <div className="space-y-2">
-            <Label style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>Selected Plan</Label>
+            <Label style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+              Selected Plan
+            </Label>
             <Input
-              value={formData.tier}
-              readOnly
               className="pl-10"
+              readOnly
               style={{
                 backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
                 borderColor: BRAND_CONFIG.brand.colors.border,
                 color: BRAND_CONFIG.brand.colors.textPrimary,
               }}
+              value={formData.tier}
             />
           </div>
         )}
         <div className="flex items-center space-x-2">
           <input
-            type="checkbox"
-            id="terms"
             className="rounded"
-            style={{ borderColor: BRAND_CONFIG.brand.colors.border }}
+            id="terms"
             required
+            style={{ borderColor: BRAND_CONFIG.brand.colors.border }}
+            type="checkbox"
           />
-          <label htmlFor="terms" className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-            I agree to the{" "}
-            <Link href="/legal/terms" className="hover:underline" style={{ color: BRAND_CONFIG.brand.colors.primary }}>
-              Terms of Service
-            </Link>{" "}
-            and{" "}
+          <label
+            className="text-sm"
+            htmlFor="terms"
+            style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+          >
+            I agree to the{' '}
             <Link
-              href="/legal/privacy"
               className="hover:underline"
+              href="/legal/terms"
+              style={{ color: BRAND_CONFIG.brand.colors.primary }}
+            >
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link
+              className="hover:underline"
+              href="/legal/privacy"
               style={{ color: BRAND_CONFIG.brand.colors.primary }}
             >
               Privacy Policy
@@ -238,12 +276,12 @@ export function RegisterForm() {
           </label>
         </div>
         <Button
-          type="submit"
           className="w-full"
           style={{
             backgroundColor: BRAND_CONFIG.brand.colors.primary,
-            color: "white",
+            color: 'white',
           }}
+          type="submit"
         >
           <div className="flex items-center space-x-2">
             <Sparkles className="h-4 w-4" />
@@ -268,16 +306,28 @@ export function RegisterForm() {
             borderColor: BRAND_CONFIG.brand.colors.primary,
           }}
         >
-          <Sparkles className="h-4 w-4" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
-          <AlertTitle style={{ color: BRAND_CONFIG.brand.colors.primary }}>Success</AlertTitle>
-          <AlertDescription style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>{success}</AlertDescription>
+          <Sparkles
+            className="h-4 w-4"
+            style={{ color: BRAND_CONFIG.brand.colors.primary }}
+          />
+          <AlertTitle style={{ color: BRAND_CONFIG.brand.colors.primary }}>
+            Success
+          </AlertTitle>
+          <AlertDescription
+            style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+          >
+            {success}
+          </AlertDescription>
         </Alert>
       )}
 
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" style={{ borderColor: BRAND_CONFIG.brand.colors.border }} />
+          <span
+            className="w-full border-t"
+            style={{ borderColor: BRAND_CONFIG.brand.colors.border }}
+          />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span
@@ -296,12 +346,12 @@ export function RegisterForm() {
       <div className="space-y-3">
         {providers?.map((provider) => (
           <OAuthButton
-            key={provider.name}
-            provider={provider.name}
             action="register"
-            onRedirect={handleOAuthRedirect}
-            formData={formData}
             className="w-full"
+            formData={formData}
+            key={provider.name}
+            onRedirect={handleOAuthRedirect}
+            provider={provider.name}
             style={{
               backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
               borderColor: BRAND_CONFIG.brand.colors.border,
@@ -322,7 +372,7 @@ export function RegisterForm() {
         >
           <div className="flex items-center space-x-2">
             <div
-              className="animate-spin rounded-full h-4 w-4 border-b-2"
+              className="h-4 w-4 animate-spin rounded-full border-b-2"
               style={{ borderColor: BRAND_CONFIG.brand.colors.primary }}
             />
             <span style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
@@ -333,11 +383,14 @@ export function RegisterForm() {
       )}
 
       {/* Login Link */}
-      <p className="text-center text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-        Already have an account?{" "}
+      <p
+        className="text-center text-sm"
+        style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+      >
+        Already have an account?{' '}
         <Link
+          className="font-medium hover:underline"
           href="/login"
-          className="hover:underline font-medium"
           style={{ color: BRAND_CONFIG.brand.colors.primary }}
         >
           Sign in here

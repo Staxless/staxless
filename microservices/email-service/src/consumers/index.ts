@@ -9,13 +9,11 @@ const consumer = createConsumer('email-service-group');
 export const startEmailConsumer = async () => {
   await consumer.connect();
   await consumer.subscribe({ topic: 'email-events', fromBeginning: true });
-  console.log('Email consumer started...');
 
   await consumer.run({
     eachMessage: async ({ message }) => {
       const eventKey = message.key?.toString();
-      if (!eventKey || !emailEventRegistry.has(eventKey)) {
-        console.warn(`[Email Consumer] No handler for event: ${eventKey}`);
+      if (!(eventKey && emailEventRegistry.has(eventKey))) {
         return;
       }
 
@@ -23,7 +21,9 @@ export const startEmailConsumer = async () => {
       try {
         await handler(message);
       } catch (error) {
-        console.error(`[Email Consumer] Error processing event ${eventKey}`, error);
+        throw new Error(
+          `[Email Consumer] Error processing event ${eventKey}, error: ${error}`
+        );
       }
     },
   });

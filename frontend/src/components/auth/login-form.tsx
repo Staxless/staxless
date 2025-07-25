@@ -1,30 +1,33 @@
-"use client";
+'use client';
 
-import { useState, type FormEvent } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Mail, Sparkles, Github, Chrome } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BRAND_CONFIG } from "@/lib/brand-config";
-import { useProviders } from "@/hooks/use-provider";
-import axios from "axios";
-import OAuthButton from "@/components/auth/oauth-button";
+import axios from 'axios';
+import { AlertCircle, Mail, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { type FormEvent, useState } from 'react';
+import OAuthButton from '@/components/auth/oauth-button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useProviders } from '@/hooks/use-provider';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
-interface Provider {
-  name: string;
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
 }
 
 export function LoginForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [email, setEmail] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { providers, isLoading, error: providersError } = useProviders();
 
   // Generate CSRF token
@@ -34,10 +37,10 @@ export function LoginForm() {
    * Handle redirection to OAuth provider
    * @param url - The URL to redirect to
    */
-  const handleOAuthRedirect = async (url: string) => {
+  const handleOAuthRedirect = (url: string) => {
     setIsRedirecting(true);
-    if (url === "https://localhost:3000/session") {
-      console.warn(url);
+    if (url === 'https://localhost:3000/session') {
+      // No redirect needed for local session
     } else {
       router.push(url);
     }
@@ -47,29 +50,44 @@ export function LoginForm() {
    * Handle magic link submission
    * @param e - The form event
    */
-  const handleMagicLinkSubmit = async (e: FormEvent) => {
+  async function handleMagicLinkSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/magic-link/login",
+        '/api/auth/magic-link/login',
         { email },
-        { headers: { "X-CSRF-Token": csrfToken } }
+        { headers: { 'X-CSRF-Token': csrfToken } }
       );
       setSuccess(response.data.message);
-      document.cookie = `csrf_token=${csrfToken}; path=/; max-age=900; samesite=lax`;
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to send magic link");
+
+      if ('cookieStore' in window) {
+        await window.cookieStore.set({
+          name: 'csrf_token',
+          value: csrfToken,
+          path: '/',
+          maxAge: 900,
+          sameSite: 'lax',
+          secure: true,
+        });
+      } else {
+        // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
+        document.cookie = `csrf_token=${encodeURIComponent(csrfToken)}; path=/; max-age=900; samesite=lax; secure`;
+      }
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as ApiError)?.response?.data?.error || 'Failed to send magic link';
+      setError(errorMsg);
     }
-  };
+  }
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-32">
+      <div className="flex h-32 items-center justify-center">
         <div
-          className="animate-spin rounded-full h-8 w-8 border-b-2"
+          className="h-8 w-8 animate-spin rounded-full border-b-2"
           style={{ borderColor: BRAND_CONFIG.brand.colors.primary }}
         />
       </div>
@@ -78,41 +96,44 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
+      <form className="space-y-4" onSubmit={handleMagicLinkSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="email" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+          <Label
+            htmlFor="email"
+            style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+          >
             Email Address
           </Label>
           <div className="relative">
             <Mail
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+              className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
               style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
             />
             <Input
+              className="border pl-10"
               id="email"
               name="email"
-              type="email"
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 border"
               style={{
                 backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
                 borderColor: BRAND_CONFIG.brand.colors.border,
                 color: BRAND_CONFIG.brand.colors.textPrimary,
               }}
+              type="email"
+              value={email}
             />
           </div>
         </div>
         <Button
-          type="submit"
           className="w-full"
           disabled={isLoading}
           style={{
             backgroundColor: BRAND_CONFIG.brand.colors.primary,
-            color: "white",
+            color: 'white',
           }}
+          type="submit"
         >
           <div className="flex items-center space-x-2">
             <Sparkles className="h-4 w-4" />
@@ -137,33 +158,39 @@ export function LoginForm() {
             borderColor: BRAND_CONFIG.brand.colors.primary,
           }}
         >
-          <Sparkles className="h-4 w-4" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
-          <AlertTitle style={{ color: BRAND_CONFIG.brand.colors.primary }}>Success</AlertTitle>
-          <AlertDescription style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+          <Sparkles
+            className="h-4 w-4"
+            style={{ color: BRAND_CONFIG.brand.colors.primary }}
+          />
+          <AlertTitle style={{ color: BRAND_CONFIG.brand.colors.primary }}>
+            Success
+          </AlertTitle>
+          <AlertDescription
+            style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+          >
             {success}
           </AlertDescription>
         </Alert>
       )}
 
-      <Separator style={{ backgroundColor: BRAND_CONFIG.brand.colors.border }} />
+      <Separator
+        style={{ backgroundColor: BRAND_CONFIG.brand.colors.border }}
+      />
 
       <div className="space-y-3">
-        <p className="text-center text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+        <p
+          className="text-center text-sm"
+          style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+        >
           Or continue with
         </p>
 
         {providers?.map((provider) => (
           <OAuthButton
-            key={provider.name}
-            provider={provider.name}
             action="login"
+            key={provider.name}
             onRedirect={handleOAuthRedirect}
-            // className="w-full border-2 hover:shadow-md transition-all duration-200"
-            // style={{
-            //   backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
-            //   borderColor: BRAND_CONFIG.brand.colors.border,
-            //   color: BRAND_CONFIG.brand.colors.textPrimary,
-            // }}
+            provider={provider.name}
           />
         ))}
       </div>
@@ -178,7 +205,7 @@ export function LoginForm() {
         >
           <div className="flex items-center space-x-2">
             <div
-              className="animate-spin rounded-full h-4 w-4 border-b-2"
+              className="h-4 w-4 animate-spin rounded-full border-b-2"
               style={{ borderColor: BRAND_CONFIG.brand.colors.primary }}
             />
             <span style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
@@ -188,11 +215,14 @@ export function LoginForm() {
         </Alert>
       )}
 
-      <p className="text-center text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+      <p
+        className="text-center text-sm"
+        style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+      >
         {"Don't have an account? "}
         <Link
+          className="font-medium hover:underline"
           href="/register"
-          className="hover:underline font-medium"
           style={{ color: BRAND_CONFIG.brand.colors.primary }}
         >
           Create one here

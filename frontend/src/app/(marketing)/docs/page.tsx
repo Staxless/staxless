@@ -1,125 +1,188 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { BRAND_CONFIG } from "@/lib/brand-config"
-import Header from "@/components/shared/header"
-import Footer from "@/components/shared/footer"
 import {
-  Search,
+  ArrowRight,
   Book,
+  ChevronRight,
   Code,
   CreditCard,
-  Settings,
   ExternalLink,
-  ChevronRight,
   HelpCircle,
-  ArrowRight,
+  Search,
+  Settings,
   Star,
-} from "lucide-react"
-import Link from "next/link"
+} from 'lucide-react';
+import Link from 'next/link';
+import Footer from '@/components/shared/footer';
+import Header from '@/components/shared/header';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
+// For quickStartSteps, featuredGuides, and apiEndpoints, add a unique id to each item for use as React key.
 const quickStartSteps = [
   {
-    step: "01",
-    title: "Installation",
-    description: "Get started with our CLI tool or download the template",
-    time: "2 min",
+    id: 'install',
+    step: '01',
+    title: 'Installation',
+    description: 'Get started with our CLI tool or download the template',
+    time: '2 min',
   },
   {
-    step: "02",
-    title: "Configuration",
-    description: "Set up your environment variables and database",
-    time: "5 min",
+    id: 'config',
+    step: '02',
+    title: 'Configuration',
+    description: 'Set up your environment variables and database',
+    time: '5 min',
   },
   {
-    step: "03",
-    title: "Customization",
-    description: "Brand your application and configure features",
-    time: "10 min",
+    id: 'custom',
+    step: '03',
+    title: 'Customization',
+    description: 'Brand your application and configure features',
+    time: '10 min',
   },
   {
-    step: "04",
-    title: "Deploy",
-    description: "Launch your SaaS application to production",
-    time: "3 min",
+    id: 'deploy',
+    step: '04',
+    title: 'Deploy',
+    description: 'Launch your SaaS application to production',
+    time: '3 min',
   },
-]
+];
 
 const featuredGuides = [
   {
-    title: "Authentication Setup",
-    description: "Complete guide to setting up OAuth and magic links",
-    category: "Security",
-    readTime: "15 min",
-    difficulty: "Intermediate",
-    href: "/docs/auth/setup",
+    id: 'auth-setup',
+    title: 'Authentication Setup',
+    description: 'Complete guide to setting up OAuth and magic links',
+    category: 'Security',
+    readTime: '15 min',
+    difficulty: 'Intermediate',
+    href: '/docs/auth/setup',
   },
   {
-    title: "Payment Integration",
-    description: "Integrate Stripe payments and subscription billing",
-    category: "Payments",
-    readTime: "20 min",
-    difficulty: "Advanced",
-    href: "/docs/payments/stripe",
+    id: 'payments',
+    title: 'Payment Integration',
+    description: 'Integrate Stripe payments and subscription billing',
+    category: 'Payments',
+    readTime: '20 min',
+    difficulty: 'Advanced',
+    href: '/docs/payments/stripe',
   },
   {
-    title: "Custom Branding",
-    description: "White-label your application with custom themes",
-    category: "Design",
-    readTime: "12 min",
-    difficulty: "Beginner",
-    href: "/docs/customization/branding",
+    id: 'branding',
+    title: 'Custom Branding',
+    description: 'White-label your application with custom themes',
+    category: 'Design',
+    readTime: '12 min',
+    difficulty: 'Beginner',
+    href: '/docs/customization/branding',
   },
-]
+];
 
 const apiEndpoints = [
-  { method: "GET", endpoint: "/api/users", description: "Fetch user data" },
-  { method: "POST", endpoint: "/api/auth/login", description: "User authentication" },
-  { method: "POST", endpoint: "/api/payments/checkout", description: "Create checkout session" },
-  { method: "GET", endpoint: "/api/subscriptions", description: "Manage subscriptions" },
-]
+  {
+    id: 'users',
+    method: 'GET',
+    endpoint: '/api/users',
+    description: 'Fetch user data',
+  },
+  {
+    id: 'login',
+    method: 'POST',
+    endpoint: '/api/auth/login',
+    description: 'User authentication',
+  },
+  {
+    id: 'checkout',
+    method: 'POST',
+    endpoint: '/api/payments/checkout',
+    description: 'Create checkout session',
+  },
+  {
+    method: 'GET',
+    endpoint: '/api/subscriptions',
+    description: 'Manage subscriptions',
+  },
+];
+
+// Replace nested ternary with a function for clarity
+function getDifficultyValue(difficulty: string) {
+  if (difficulty === 'Beginner') {
+    return 1;
+  }
+  if (difficulty === 'Intermediate') {
+    return 2;
+  }
+  return 3;
+}
 
 export default function DocsPage() {
   return (
-    <div style={{ backgroundColor: BRAND_CONFIG.brand.colors.background, minHeight: "100vh" }}>
+    <div
+      style={{
+        backgroundColor: BRAND_CONFIG.brand.colors.background,
+        minHeight: '100vh',
+      }}
+    >
       <Header user={null} />
 
       <div className="pt-20">
         {/* Hero Section */}
-        <section className="py-16 px-4 border-b" style={{ borderColor: BRAND_CONFIG.brand.colors.border }}>
+        <section
+          className="border-b px-4 py-16"
+          style={{ borderColor: BRAND_CONFIG.brand.colors.border }}
+        >
           <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12">
-              <div className="flex justify-center mb-6">
+            <div className="mb-12 text-center">
+              <div className="mb-6 flex justify-center">
                 <div
-                  className="p-4 rounded-full"
-                  style={{ backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary }}
+                  className="rounded-full p-4"
+                  style={{
+                    backgroundColor:
+                      BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  }}
                 >
-                  <Book className="h-12 w-12" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
+                  <Book
+                    className="h-12 w-12"
+                    style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                  />
                 </div>
               </div>
               <h1
-                className="text-4xl md:text-6xl font-bold mb-6"
+                className="mb-6 font-bold text-4xl md:text-6xl"
                 style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
               >
                 Documentation
               </h1>
-              <p className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
-                Everything you need to build, customize, and scale your SaaS application
+              <p
+                className="mx-auto mb-8 max-w-2xl text-xl"
+                style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
+              >
+                Everything you need to build, customize, and scale your SaaS
+                application
               </p>
 
               {/* Search Bar */}
-              <div className="max-w-lg mx-auto relative">
+              <div className="relative mx-auto max-w-lg">
                 <Search
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5"
+                  className="-translate-y-1/2 absolute top-1/2 left-4 h-5 w-5 transform"
                   style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
                 />
                 <Input
+                  className="rounded-xl border-2 py-4 pl-12 text-lg"
                   placeholder="Search documentation..."
-                  className="pl-12 py-4 text-lg border-2 rounded-xl"
                   style={{
-                    backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                    backgroundColor:
+                      BRAND_CONFIG.brand.colors.backgroundSecondary,
                     borderColor: BRAND_CONFIG.brand.colors.border,
                     color: BRAND_CONFIG.brand.colors.textPrimary,
                   }}
@@ -128,26 +191,27 @@ export default function DocsPage() {
             </div>
 
             {/* Quick Start Steps */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {quickStartSteps.map((step, index) => (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+              {quickStartSteps.map((step) => (
                 <Card
-                  key={index}
-                  className="border-2 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="cursor-pointer border-2 transition-all duration-200 hover:shadow-lg"
+                  key={step.id}
                   style={{
-                    backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                    backgroundColor:
+                      BRAND_CONFIG.brand.colors.backgroundSecondary,
                     borderColor: BRAND_CONFIG.brand.colors.border,
                   }}
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                       <span
-                        className="text-3xl font-bold opacity-30"
+                        className="font-bold text-3xl opacity-30"
                         style={{ color: BRAND_CONFIG.brand.colors.primary }}
                       >
                         {step.step}
                       </span>
                       <span
-                        className="text-sm px-2 py-1 rounded-full"
+                        className="rounded-full px-2 py-1 text-sm"
                         style={{
                           backgroundColor: `${BRAND_CONFIG.brand.colors.primary}20`,
                           color: BRAND_CONFIG.brand.colors.primary,
@@ -156,10 +220,16 @@ export default function DocsPage() {
                         {step.time}
                       </span>
                     </div>
-                    <h3 className="font-semibold mb-2" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                    <h3
+                      className="mb-2 font-semibold"
+                      style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                    >
                       {step.title}
                     </h3>
-                    <p className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                    <p
+                      className="text-sm"
+                      style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                    >
                       {step.description}
                     </p>
                   </CardContent>
@@ -169,86 +239,95 @@ export default function DocsPage() {
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-16 max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="container mx-auto max-w-6xl px-4 py-16">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-12">
+            <div className="space-y-12 lg:col-span-2">
               {/* Featured Guides */}
               <section>
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-3xl font-bold" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                <div className="mb-8 flex items-center justify-between">
+                  <h2
+                    className="font-bold text-3xl"
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
                     Featured Guides
                   </h2>
                   <Link href="/docs/guides">
                     <Button
-                      variant="outline"
                       className="border"
                       style={{
-                        backgroundColor: "transparent",
+                        backgroundColor: 'transparent',
                         borderColor: BRAND_CONFIG.brand.colors.border,
                         color: BRAND_CONFIG.brand.colors.textPrimary,
                       }}
+                      variant="outline"
                     >
                       View All
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
 
                 <div className="space-y-6">
-                  {featuredGuides.map((guide, index) => (
-                    <Link key={index} href={guide.href}>
-                      <Card
-                        className="border-2 hover:shadow-lg transition-all duration-200 cursor-pointer group"
-                        style={{
-                          backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
-                          borderColor: BRAND_CONFIG.brand.colors.border,
-                        }}
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-3">
-                                <span
-                                  className="text-sm px-3 py-1 rounded-full font-medium"
+                  {featuredGuides.map((guide) => (
+                    <Link href={guide.href} key={guide.id}>
+                      <Card className="group flex flex-col justify-between border-2 transition-all duration-200 hover:shadow-lg">
+                        <CardContent className="flex flex-col gap-4 p-6">
+                          <div className="mb-3 flex items-center space-x-3">
+                            <span
+                              className="rounded-full px-3 py-1 font-medium text-sm"
+                              style={{
+                                backgroundColor: `${BRAND_CONFIG.brand.colors.primary}20`,
+                                color: BRAND_CONFIG.brand.colors.primary,
+                              }}
+                            >
+                              {guide.category}
+                            </span>
+                            <span
+                              className="text-sm"
+                              style={{
+                                color: BRAND_CONFIG.brand.colors.textMuted,
+                              }}
+                            >
+                              {guide.readTime}
+                            </span>
+                            <div className="flex items-center">
+                              {/* Use a unique string key for stars by combining guide.id and starIdx */}
+                              {[
+                                ...new Array(
+                                  getDifficultyValue(guide.difficulty)
+                                ),
+                              ].map((_, starIdx) => (
+                                <Star
+                                  className="h-3 w-3 fill-current"
+                                  key={`star-${guide.id}-${starIdx}`}
                                   style={{
-                                    backgroundColor: `${BRAND_CONFIG.brand.colors.primary}20`,
                                     color: BRAND_CONFIG.brand.colors.primary,
                                   }}
-                                >
-                                  {guide.category}
-                                </span>
-                                <span className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-                                  {guide.readTime}
-                                </span>
-                                <div className="flex items-center">
-                                  {[
-                                    ...Array(
-                                      guide.difficulty === "Beginner" ? 1 : guide.difficulty === "Intermediate" ? 2 : 3,
-                                    ),
-                                  ].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="h-3 w-3 fill-current"
-                                      style={{ color: BRAND_CONFIG.brand.colors.primary }}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                              <h3
-                                className="text-xl font-semibold mb-2"
-                                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-                              >
-                                {guide.title}
-                              </h3>
-                              <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>{guide.description}</p>
+                                />
+                              ))}
                             </div>
-                            <ChevronRight
-                              className="h-5 w-5 group-hover:translate-x-1 transition-transform"
-                              style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-                            />
                           </div>
+                          <h3
+                            className="mb-2 font-semibold text-xl"
+                            style={{
+                              color: BRAND_CONFIG.brand.colors.textPrimary,
+                            }}
+                          >
+                            {guide.title}
+                          </h3>
+                          <p
+                            style={{
+                              color: BRAND_CONFIG.brand.colors.textMuted,
+                            }}
+                          >
+                            {guide.description}
+                          </p>
                         </CardContent>
+                        <ChevronRight
+                          className="h-5 w-5 transition-transform group-hover:translate-x-1"
+                          style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                        />
                       </Card>
                     </Link>
                   ))}
@@ -257,51 +336,75 @@ export default function DocsPage() {
 
               {/* API Reference */}
               <section>
-                <h2 className="text-3xl font-bold mb-8" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                <h2
+                  className="mb-8 font-bold text-3xl"
+                  style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                >
                   API Reference
                 </h2>
                 <Card
                   className="border-2"
                   style={{
-                    backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                    backgroundColor:
+                      BRAND_CONFIG.brand.colors.backgroundSecondary,
                     borderColor: BRAND_CONFIG.brand.colors.border,
                   }}
                 >
                   <CardHeader>
-                    <CardTitle style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>Popular Endpoints</CardTitle>
-                    <CardDescription style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                    <CardTitle
+                      style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                    >
+                      Popular Endpoints
+                    </CardTitle>
+                    <CardDescription
+                      style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                    >
                       Most commonly used API endpoints
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {apiEndpoints.map((endpoint, index) => (
+                      {apiEndpoints.map((endpoint) => (
                         <div
-                          key={index}
-                          className="flex items-center justify-between p-4 rounded-lg border"
+                          className="flex items-center justify-between rounded-lg border p-4"
+                          key={endpoint.id}
                           style={{
-                            backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
+                            backgroundColor:
+                              BRAND_CONFIG.brand.colors.backgroundTertiary,
                             borderColor: BRAND_CONFIG.brand.colors.border,
                           }}
                         >
                           <div className="flex items-center space-x-4">
                             <span
-                              className="px-2 py-1 text-xs font-mono rounded"
+                              className="rounded px-2 py-1 font-mono text-xs"
                               style={{
-                                backgroundColor: endpoint.method === "GET" ? "#10b98120" : "#f59e0b20",
-                                color: endpoint.method === "GET" ? "#10b981" : "#f59e0b",
+                                backgroundColor:
+                                  endpoint.method === 'GET'
+                                    ? '#10b98120'
+                                    : '#f59e0b20',
+                                color:
+                                  endpoint.method === 'GET'
+                                    ? '#10b981'
+                                    : '#f59e0b',
                               }}
                             >
                               {endpoint.method}
                             </span>
                             <code
                               className="font-mono text-sm"
-                              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                              style={{
+                                color: BRAND_CONFIG.brand.colors.textPrimary,
+                              }}
                             >
                               {endpoint.endpoint}
                             </code>
                           </div>
-                          <span className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                          <span
+                            className="text-sm"
+                            style={{
+                              color: BRAND_CONFIG.brand.colors.textMuted,
+                            }}
+                          >
                             {endpoint.description}
                           </span>
                         </div>
@@ -313,11 +416,11 @@ export default function DocsPage() {
                           className="w-full"
                           style={{
                             backgroundColor: BRAND_CONFIG.brand.colors.primary,
-                            color: "white",
+                            color: 'white',
                           }}
                         >
                           View Full API Documentation
-                          <Code className="h-4 w-4 ml-2" />
+                          <Code className="ml-2 h-4 w-4" />
                         </Button>
                       </Link>
                     </div>
@@ -332,53 +435,58 @@ export default function DocsPage() {
               <Card
                 className="border-2"
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardHeader>
-                  <CardTitle style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>Quick Actions</CardTitle>
+                  <CardTitle
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
+                    Quick Actions
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Link href="/dashboard/api-keys">
                     <Button
-                      variant="outline"
                       className="w-full justify-start border"
                       style={{
-                        backgroundColor: "transparent",
+                        backgroundColor: 'transparent',
                         borderColor: BRAND_CONFIG.brand.colors.border,
                         color: BRAND_CONFIG.brand.colors.textPrimary,
                       }}
+                      variant="outline"
                     >
-                      <Code className="h-4 w-4 mr-2" />
+                      <Code className="mr-2 h-4 w-4" />
                       API Keys
                     </Button>
                   </Link>
                   <Link href="/dashboard/billing">
                     <Button
-                      variant="outline"
                       className="w-full justify-start border"
                       style={{
-                        backgroundColor: "transparent",
+                        backgroundColor: 'transparent',
                         borderColor: BRAND_CONFIG.brand.colors.border,
                         color: BRAND_CONFIG.brand.colors.textPrimary,
                       }}
+                      variant="outline"
                     >
-                      <CreditCard className="h-4 w-4 mr-2" />
+                      <CreditCard className="mr-2 h-4 w-4" />
                       Billing
                     </Button>
                   </Link>
                   <Link href="/dashboard/settings">
                     <Button
-                      variant="outline"
                       className="w-full justify-start border"
                       style={{
-                        backgroundColor: "transparent",
+                        backgroundColor: 'transparent',
                         borderColor: BRAND_CONFIG.brand.colors.border,
                         color: BRAND_CONFIG.brand.colors.textPrimary,
                       }}
+                      variant="outline"
                     >
-                      <Settings className="h-4 w-4 mr-2" />
+                      <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </Button>
                   </Link>
@@ -389,40 +497,51 @@ export default function DocsPage() {
               <Card
                 className="border-2"
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardContent className="p-6">
-                  <div className="text-center space-y-4">
-                    <HelpCircle className="h-12 w-12 mx-auto" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
-                    <h3 className="font-semibold" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                  <div className="space-y-4 text-center">
+                    <HelpCircle
+                      className="mx-auto h-12 w-12"
+                      style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                    />
+                    <h3
+                      className="font-semibold"
+                      style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                    >
                       Need Help?
                     </h3>
-                    <p className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-                      Our support team is here to help you get the most out of your SaaS application.
+                    <p
+                      className="text-sm"
+                      style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                    >
+                      Our support team is here to help you get the most out of
+                      your SaaS application.
                     </p>
                     <div className="space-y-2">
                       <Button
                         className="w-full"
                         style={{
                           backgroundColor: BRAND_CONFIG.brand.colors.primary,
-                          color: "white",
+                          color: 'white',
                         }}
                       >
                         Contact Support
                       </Button>
                       <Button
-                        variant="outline"
                         className="w-full border"
                         style={{
-                          backgroundColor: "transparent",
+                          backgroundColor: 'transparent',
                           borderColor: BRAND_CONFIG.brand.colors.border,
                           color: BRAND_CONFIG.brand.colors.textPrimary,
                         }}
+                        variant="outline"
                       >
                         Join Community
-                        <ExternalLink className="h-4 w-4 ml-2" />
+                        <ExternalLink className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -433,44 +552,73 @@ export default function DocsPage() {
               <Card
                 className="border-2"
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardHeader>
-                  <CardTitle style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>Resources</CardTitle>
+                  <CardTitle
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
+                    Resources
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <Link
+                      className="flex items-center justify-between rounded p-2 transition-colors hover:bg-opacity-50"
                       href="/changelog"
-                      className="flex items-center justify-between p-2 rounded hover:bg-opacity-50 transition-colors"
-                      style={{ backgroundColor: `${BRAND_CONFIG.brand.colors.backgroundTertiary}30` }}
+                      style={{
+                        backgroundColor: `${BRAND_CONFIG.brand.colors.backgroundTertiary}30`,
+                      }}
                     >
-                      <span className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                      <span
+                        className="text-sm"
+                        style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                      >
                         Changelog
                       </span>
-                      <ExternalLink className="h-4 w-4" style={{ color: BRAND_CONFIG.brand.colors.textMuted }} />
+                      <ExternalLink
+                        className="h-4 w-4"
+                        style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                      />
                     </Link>
                     <Link
+                      className="flex items-center justify-between rounded p-2 transition-colors hover:bg-opacity-50"
                       href="/status"
-                      className="flex items-center justify-between p-2 rounded hover:bg-opacity-50 transition-colors"
-                      style={{ backgroundColor: `${BRAND_CONFIG.brand.colors.backgroundTertiary}30` }}
+                      style={{
+                        backgroundColor: `${BRAND_CONFIG.brand.colors.backgroundTertiary}30`,
+                      }}
                     >
-                      <span className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                      <span
+                        className="text-sm"
+                        style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                      >
                         System Status
                       </span>
-                      <ExternalLink className="h-4 w-4" style={{ color: BRAND_CONFIG.brand.colors.textMuted }} />
+                      <ExternalLink
+                        className="h-4 w-4"
+                        style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                      />
                     </Link>
                     <Link
+                      className="flex items-center justify-between rounded p-2 transition-colors hover:bg-opacity-50"
                       href="/roadmap"
-                      className="flex items-center justify-between p-2 rounded hover:bg-opacity-50 transition-colors"
-                      style={{ backgroundColor: `${BRAND_CONFIG.brand.colors.backgroundTertiary}30` }}
+                      style={{
+                        backgroundColor: `${BRAND_CONFIG.brand.colors.backgroundTertiary}30`,
+                      }}
                     >
-                      <span className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                      <span
+                        className="text-sm"
+                        style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                      >
                         Roadmap
                       </span>
-                      <ExternalLink className="h-4 w-4" style={{ color: BRAND_CONFIG.brand.colors.textMuted }} />
+                      <ExternalLink
+                        className="h-4 w-4"
+                        style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                      />
                     </Link>
                   </div>
                 </CardContent>
@@ -482,5 +630,5 @@ export default function DocsPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

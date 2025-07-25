@@ -1,36 +1,41 @@
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 interface AccountSettingsProps {
   user: {
-    name: string
-    email: string
-    avatar: string
-    language: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+    language: string;
+  };
 }
 
 export function AccountSettings({ user }: AccountSettingsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-       
-          <Avatar className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground">
-            <AvatarImage src={user.avatar} alt={user.name || "User"} />
-            <AvatarFallback>
-              {(user.name || "U").charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        <Avatar className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl">
+          <AvatarImage alt={user.name || 'User'} src={user.avatar} />
+          <AvatarFallback>
+            {(user.name || 'U').charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
 
         <div>
-          <h2 className="text-xl font-semibold">{user.name}</h2>
-          <p className="text-sm text-muted-foreground">{user.email}</p>
+          <h2 className="font-semibold text-xl">{user.name}</h2>
+          <p className="text-muted-foreground text-sm">{user.email}</p>
         </div>
-        <Button variant="outline" className="ml-auto">
+        <Button className="ml-auto" variant="outline">
           Manage
         </Button>
       </div>
@@ -40,12 +45,12 @@ export function AccountSettings({ user }: AccountSettingsProps) {
       <div className="space-y-4">
         <div className="grid gap-2">
           <Label htmlFor="name">Name</Label>
-          <Input id="name" defaultValue={user.name} />
+          <Input defaultValue={user.name} id="name" />
         </div>
 
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" defaultValue={user.email} />
+          <Input defaultValue={user.email} id="email" type="email" />
         </div>
 
         <div className="grid gap-2">
@@ -69,6 +74,5 @@ export function AccountSettings({ user }: AccountSettingsProps) {
 
       <Button>Save Changes</Button>
     </div>
-  )
+  );
 }
-

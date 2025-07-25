@@ -1,34 +1,45 @@
-"use client"
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card"
-import { BRAND_CONFIG } from "@/lib/brand-config"
-import Header from "@/components/shared/header"
-import Footer from "@/components/shared/footer"
-import { ArrowLeft, FileText, Calendar, Clock } from "lucide-react"
-import Link from "next/link"
-import { useParams } from "next/navigation"
-import { getPolicyContent } from "@/content/policy-content"
+import { ArrowLeft, Calendar, Clock, FileText } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import Footer from '@/components/shared/footer';
+import Header from '@/components/shared/header';
+import { Card, CardContent } from '@/components/ui/card';
+import { getPolicyContent } from '@/content/policy-content';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 export default function PolicyPage() {
-  const params = useParams()
-  const slug = params.slug as string
-  const policy = getPolicyContent(slug)
+  const params = useParams();
+  const slug = params.slug as string;
+  const policy = getPolicyContent(slug);
 
   if (!policy) {
     return (
-      <div style={{ backgroundColor: BRAND_CONFIG.brand.colors.background, minHeight: "100vh" }}>
+      <div
+        style={{
+          backgroundColor: BRAND_CONFIG.brand.colors.background,
+          minHeight: '100vh',
+        }}
+      >
         <Header user={null} />
         <div className="pt-20">
           <div className="container mx-auto px-4 py-12 text-center">
-            <h1 className="text-4xl font-bold mb-4" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+            <h1
+              className="mb-4 font-bold text-4xl"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
               Policy Not Found
             </h1>
-            <p className="mb-8" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+            <p
+              className="mb-8"
+              style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+            >
               The requested policy page could not be found.
             </p>
             <Link
-              href="/legal"
               className="inline-flex items-center space-x-2 hover:underline"
+              href="/legal"
               style={{ color: BRAND_CONFIG.brand.colors.primary }}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -38,44 +49,65 @@ export default function PolicyPage() {
         </div>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
-    <div style={{ backgroundColor: BRAND_CONFIG.brand.colors.background, minHeight: "100vh" }}>
+    <div
+      style={{
+        backgroundColor: BRAND_CONFIG.brand.colors.background,
+        minHeight: '100vh',
+      }}
+    >
       <Header user={null} />
 
       <div className="pt-20">
-        <div className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="container mx-auto max-w-4xl px-4 py-12">
           {/* Breadcrumb */}
-          <div className="flex items-center space-x-2 mb-8">
+          <div className="mb-8 flex items-center space-x-2">
             <Link
-              href="/legal"
               className="flex items-center space-x-1 hover:underline"
+              href="/legal"
               style={{ color: BRAND_CONFIG.brand.colors.primary }}
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Legal</span>
             </Link>
-            <span style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>/</span>
-            <span style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>{policy.title}</span>
+            <span style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+              /
+            </span>
+            <span style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+              {policy.title}
+            </span>
           </div>
 
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="mb-4 flex items-center space-x-3">
               <div
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary }}
+                className="rounded-lg p-2"
+                style={{
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
+                }}
               >
-                <FileText className="h-6 w-6" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
+                <FileText
+                  className="h-6 w-6"
+                  style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                />
               </div>
-              <h1 className="text-4xl font-bold" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+              <h1
+                className="font-bold text-4xl"
+                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+              >
                 {policy.title}
               </h1>
             </div>
 
-            <div className="flex items-center space-x-6 text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+            <div
+              className="flex items-center space-x-6 text-sm"
+              style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+            >
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
                 <span>Effective: {policy.effectiveDate}</span>
@@ -96,43 +128,61 @@ export default function PolicyPage() {
             }}
           >
             <CardContent className="p-8">
-              <div className="prose prose-invert max-w-none" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
-                {policy.content.map((section, index) => (
-                  <div key={index} className="mb-8">
-                    {section.type === "heading" && (
+              <div
+                className="prose prose-invert max-w-none"
+                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+              >
+                {policy.content.map((section) => (
+                  <div className="mb-8" key={section.content + section.type}>
+                    {section.type === 'heading' && (
                       <h2
-                        className="text-2xl font-bold mb-4 mt-8 first:mt-0"
+                        className="mt-8 mb-4 font-bold text-2xl first:mt-0"
                         style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
                       >
                         {section.content}
                       </h2>
                     )}
-                    {section.type === "subheading" && (
+                    {section.type === 'subheading' && (
                       <h3
-                        className="text-xl font-semibold mb-3 mt-6"
+                        className="mt-6 mb-3 font-semibold text-xl"
                         style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
                       >
                         {section.content}
                       </h3>
                     )}
-                    {section.type === "paragraph" && (
-                      <p className="mb-4 leading-relaxed" style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                    {section.type === 'paragraph' && (
+                      <p
+                        className="mb-4 leading-relaxed"
+                        style={{
+                          color: BRAND_CONFIG.brand.colors.textSecondary,
+                        }}
+                      >
                         {section.content}
                       </p>
                     )}
-                    {section.type === "list" && (
-                      <ul className="list-disc pl-6 mb-4 space-y-2">
-                        {section.items?.map((item, itemIndex) => (
-                          <li key={itemIndex} style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                    {section.type === 'list' && (
+                      <ul className="mb-4 list-disc space-y-2 pl-6">
+                        {section.items?.map((item) => (
+                          <li
+                            key={item}
+                            style={{
+                              color: BRAND_CONFIG.brand.colors.textSecondary,
+                            }}
+                          >
                             {item}
                           </li>
                         ))}
                       </ul>
                     )}
-                    {section.type === "numbered-list" && (
-                      <ol className="list-decimal pl-6 mb-4 space-y-2">
-                        {section.items?.map((item, itemIndex) => (
-                          <li key={itemIndex} style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
+                    {section.type === 'numbered-list' && (
+                      <ol className="mb-4 list-decimal space-y-2 pl-6">
+                        {section.items?.map((item) => (
+                          <li
+                            key={item}
+                            style={{
+                              color: BRAND_CONFIG.brand.colors.textSecondary,
+                            }}
+                          >
                             {item}
                           </li>
                         ))}
@@ -153,13 +203,23 @@ export default function PolicyPage() {
             }}
           >
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-3" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+              <h3
+                className="mb-3 font-semibold text-lg"
+                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+              >
                 Questions about this policy?
               </h3>
-              <p className="mb-4" style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}>
-                If you have any questions about this {policy.title.toLowerCase()}, please contact us:
+              <p
+                className="mb-4"
+                style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
+              >
+                If you have any questions about this{' '}
+                {policy.title.toLowerCase()}, please contact us:
               </p>
-              <div className="space-y-2 text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+              <div
+                className="space-y-2 text-sm"
+                style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+              >
                 <p>Email: {BRAND_CONFIG.company.email}</p>
                 <p>Address: {BRAND_CONFIG.company.address}</p>
               </div>
@@ -170,5 +230,5 @@ export default function PolicyPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

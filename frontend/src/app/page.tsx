@@ -1,18 +1,18 @@
 // "use client"
 
-import CTA from "@/components/home/cta"
-import FAQ from "@/components/home/accordian-faq"
-import Features from "@/components/home/features"
-import Hero from "@/components/home/hero"
-import Pricing from "@/components/home/pricing"
-import Footer from "@/components/shared/footer"
-import Header from "@/components/shared/header"
-import { headers } from "next/headers"
+import { headers } from 'next/headers';
+import FAQ from '@/components/home/accordian-faq';
+import CTA from '@/components/home/cta';
+import Features from '@/components/home/features';
+import Hero from '@/components/home/hero';
+import Pricing from '@/components/home/pricing';
+import Footer from '@/components/shared/footer';
+import Header from '@/components/shared/header';
 
 export default async function Home() {
-    const headersList = await headers()
-      const userInfoString = headersList.get("x-user-info")
-      const user = userInfoString ? JSON.parse(userInfoString) : null
+  const headersList = await headers();
+  const userInfoString = headersList.get('x-user-info');
+  const user = userInfoString ? JSON.parse(userInfoString) : null;
   return (
     <div className="min-h-screen">
       <Header user={user} />
@@ -25,5 +25,5 @@ export default async function Home() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

@@ -1,53 +1,59 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
-import Logo from "./logo"
-import { BRAND_CONFIG } from "@/lib/brand-config"
-import { SignOutButton } from "../auth/sign-out-button"
+import { Menu } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { BRAND_CONFIG } from '@/lib/brand-config';
+import { SignOutButton } from '../auth/sign-out-button';
+import Logo from './logo';
 
 interface NavItem {
-  name: string
-  href: string
+  name: string;
+  href: string;
 }
 
 interface User {
-  name: string
-  email: string
+  name: string;
+  email: string;
 }
 
 interface MobileMenuProps {
-  navItems: NavItem[]
-  user: User | null
+  navItems: NavItem[];
+  user: User | null;
 }
 
 export default function MobileMenu({ navItems, user }: MobileMenuProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet onOpenChange={setIsOpen} open={isOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button size="sm" variant="ghost">
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-80">
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
+      <SheetContent className="w-80" side="right">
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            className="flex items-center space-x-2"
+            href="/"
+            onClick={() => setIsOpen(false)}
+          >
             <Logo size="medium" />
-            <span className="text-xl font-semibold">{BRAND_CONFIG.company.name}</span>
+            <span className="font-semibold text-xl">
+              {BRAND_CONFIG.company.name}
+            </span>
           </Link>
         </div>
 
         <nav className="space-y-4">
           {navItems.map((item) => (
             <Link
-              key={item.name}
+              className="block text-gray-600 text-lg hover:text-gray-900"
               href={item.href}
-              className="block text-lg text-gray-600 hover:text-gray-900"
+              key={item.name}
               onClick={() => setIsOpen(false)}
             >
               {item.name}
@@ -55,26 +61,26 @@ export default function MobileMenu({ navItems, user }: MobileMenuProps) {
           ))}
         </nav>
 
-        <div className="mt-8 pt-8 border-t">
+        <div className="mt-8 border-t pt-8">
           {user ? (
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-medium text-white">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <p className="text-gray-500 text-sm">{user.email}</p>
                 </div>
               </div>
               <div className="space-y-2">
                 <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button className="w-full justify-start" variant="ghost">
                     Dashboard
                   </Button>
                 </Link>
                 <Link href="/settings" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button className="w-full justify-start" variant="ghost">
                     Settings
                   </Button>
                 </Link>
@@ -92,5 +98,5 @@ export default function MobileMenu({ navItems, user }: MobileMenuProps) {
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

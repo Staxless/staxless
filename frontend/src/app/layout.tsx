@@ -1,14 +1,14 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "@/styles/globals.css"
-import { BRAND_CONFIG } from "@/lib/brand-config"
-import Script from "next/script"
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import type React from 'react';
+import '@/styles/globals.css';
+import Script from 'next/script';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-})
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: `Home | ${BRAND_CONFIG.seo.title}`,
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   authors: [{ name: BRAND_CONFIG.company.name }],
   creator: BRAND_CONFIG.company.name,
   openGraph: {
-    type: "website",
-    locale: "en_US",
+    type: 'website',
+    locale: 'en_US',
     url: BRAND_CONFIG.company.website,
     title: BRAND_CONFIG.seo.title,
     description: BRAND_CONFIG.seo.description,
@@ -33,19 +33,19 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: 'summary_large_image',
     title: BRAND_CONFIG.seo.title,
     description: BRAND_CONFIG.seo.description,
     images: [BRAND_CONFIG.seo.ogImage],
     creator: BRAND_CONFIG.social.twitter,
   },
-    generator: 'v0.dev'
-}
+  generator: 'v0.dev',
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -57,5 +57,5 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>{children}</body>
     </html>
-  )
+  );
 }

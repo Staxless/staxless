@@ -1,22 +1,38 @@
 interface StaxlessLogoProps {
-  size?: number
+  size?: number;
 }
 
 export default function StaxlessLogo({ size = 20 }: StaxlessLogoProps) {
   return (
     <svg
-      width={size}
+      aria-label="Staxless logo"
+      className="group-hover:[&>path]:stroke-background group-hover:[&>rect]:fill-primary"
+      fill="none"
       height={size}
       viewBox="0 0 40 40"
-      fill="none"
+      width={size}
       xmlns="http://www.w3.org/2000/svg"
-      className="group-hover:[&>rect]:fill-primary group-hover:[&>path]:stroke-background"
     >
-      <rect width="40" height="40" fill="var(--color-background)" />
-      <path d="M10 30L30 10" stroke="var(--color-primary)" strokeWidth="4" strokeLinecap="round" />
-      <path d="M10 20L20 10" stroke="var(--color-primary)" strokeWidth="4" strokeLinecap="round" />
-      <path d="M20 30L30 20" stroke="var(--color-primary)" strokeWidth="4" strokeLinecap="round" />
+      <title>Staxless logo</title>
+      <rect fill="var(--color-background)" height="40" width="40" />
+      <path
+        d="M10 30L30 10"
+        stroke="var(--color-primary)"
+        strokeLinecap="round"
+        strokeWidth="4"
+      />
+      <path
+        d="M10 20L20 10"
+        stroke="var(--color-primary)"
+        strokeLinecap="round"
+        strokeWidth="4"
+      />
+      <path
+        d="M20 30L30 20"
+        stroke="var(--color-primary)"
+        strokeLinecap="round"
+        strokeWidth="4"
+      />
     </svg>
-  )
+  );
 }
-

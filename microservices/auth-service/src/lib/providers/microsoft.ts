@@ -26,12 +26,6 @@ const config: ProviderConfig = {
 export class MicrosoftProvider extends Provider {
   constructor() {
     super(config, "microsoft");
-    console.log("MicrosoftProvider Config:", {
-      clientId: this.config.clientId,
-      clientSecret: this.config.clientSecret ? "[REDACTED]" : undefined,
-      scopes: this.config.scopes,
-      redirectUri: "http://localhost:8000/oauth/microsoft/callback",
-    });
   }
 
   /**

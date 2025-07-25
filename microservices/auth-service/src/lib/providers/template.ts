@@ -8,7 +8,7 @@
  * `createProviderInstance` is suitable for standard OAuth 2.0 flows.
  *
  * Dependencies:
- * - providerTypes.ts: Provides `Provider` and `ProviderConfig`.
+ * - provider-types.ts: Provides `Provider` and `ProviderConfig`.
  *
  * Environment Variables:
  * - TEMPLATE_CLIENT_ID: OAuth client ID for the new provider.
@@ -25,12 +25,12 @@
  * cp template.ts twitch.ts
  * # Edit twitch.ts to set TWITCH_CLIENT_ID, TWITCH_REDIRECT_URI, etc.
  */
-import { Provider, ProviderConfig } from "../providerTypes";
+import { Provider, type ProviderConfig } from '../provider-types';
 
 const config: ProviderConfig = {
-  clientId: process.env.TEMPLATE_CLIENT_ID ?? "",
-  clientSecret: process.env.TEMPLATE_CLIENT_SECRET ?? "",
-  userInfoUrl: "https://api.example.com/user",
+  clientId: process.env.TEMPLATE_CLIENT_ID ?? '',
+  clientSecret: process.env.TEMPLATE_CLIENT_SECRET ?? '',
+  userInfoUrl: 'https://api.example.com/user',
   scopes: [],
   usePKCE: false,
 };
@@ -48,6 +48,6 @@ export class TemplateProvider extends Provider {
    * Creates a new template provider instance.
    */
   constructor() {
-    super(config, "template");
+    super(config, 'template');
   }
 }

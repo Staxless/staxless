@@ -1,8 +1,8 @@
-import { Kafka, Producer, Consumer } from 'kafkajs';
+import { type Consumer, Kafka, type Producer } from 'kafkajs';
 
 const kafka = new Kafka({
   clientId: 'staxless-app',
-  brokers: ['kafka:29092'] // Internal Docker network address for Kafka
+  brokers: ['kafka:29092'], // Internal Docker network address for Kafka
 });
 
 // A function to create a producer

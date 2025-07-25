@@ -5,7 +5,11 @@
  * @module healthRouter
  */
 
-import express, { Request, Response, NextFunction } from "express";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from 'express';
 
 const router = express.Router();
 
@@ -21,19 +25,21 @@ const router = express.Router();
  * @returns {void} Sends a JSON response with health check details.
  * @throws {503} If an error occurs while sending the health check response.
  */
-router.get("/health", async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
-  const healthcheck = {
-    uptime: process.uptime(),
-    message: "OK",
-    timestamp: new Date().toISOString(),
-  };
+router.get(
+  '/health',
+  async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    const healthcheck = {
+      uptime: process.uptime(),
+      message: 'OK',
+      timestamp: new Date().toISOString(),
+    };
 
-  try {
-    res.status(200).json(healthcheck);
-  } catch (error) {
-    console.error("Health check failed:", error);
-    res.status(503).json({ message: "Service Unavailable", error });
+    try {
+      res.status(200).json(await healthcheck);
+    } catch (error) {
+      res.status(503).json({ message: 'Service Unavailable', error });
+    }
   }
-});
+);
 
 export default router;

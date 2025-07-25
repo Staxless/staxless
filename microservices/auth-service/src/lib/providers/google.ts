@@ -5,7 +5,7 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "./providerTypes";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types";
 
 const config: ProviderConfig = {
   clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -25,12 +25,6 @@ const config: ProviderConfig = {
 export class GoogleProvider extends Provider {
   constructor() {
     super(config, "google");
-    console.log("GoogleProvider Config:", {
-      clientId: this.config.clientId,
-      clientSecret: this.config.clientSecret ? "[REDACTED]" : undefined,
-      scopes: this.config.scopes,
-      redirectUri: "http://localhost:8000/oauth/google/callback",
-    });
   }
 
   /**

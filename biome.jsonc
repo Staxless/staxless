@@ -1,0 +1,14 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "files": {
+    "includes": [
+      "**/*",
+      "!**/ui/**",
+      "!lib/**",
+      "!hooks/**",
+      "!**/importMap.json",
+      "!**/lib/**"
+    ]
+  },
+  "extends": ["ultracite"]
+}

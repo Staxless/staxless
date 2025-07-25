@@ -5,7 +5,7 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "./providerTypes";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types";
 
 const config: ProviderConfig = {
   clientId: process.env.GITHUB_CLIENT_ID ?? "",
@@ -25,14 +25,6 @@ const config: ProviderConfig = {
 export class GitHubProvider extends Provider {
   constructor() {
     super(config, "github");
-    console.log("GitHubProvider Config:", {
-      clientId: this.config.clientId,
-      clientSecret: this.config.clientSecret ? "[REDACTED]" : undefined,
-      scopes: this.config.scopes,
-      userInfoUrl: this.config.userInfoUrl,
-      usePKCE: this.config.usePKCE,
-      redirectUri: "http://localhost:8000/oauth/github/callback",
-    });
   }
 
   /**

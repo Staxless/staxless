@@ -25,12 +25,6 @@ const config: ProviderConfig = {
 export class DiscordProvider extends Provider {
   constructor() {
     super(config, "discord");
-    console.log("DiscordProvider Config:", {
-      clientId: this.config.clientId,
-      clientSecret: this.config.clientSecret ? "[REDACTED]" : undefined,
-      scopes: this.config.scopes,
-      redirectUri: "http://localhost:8000/oauth/discord/callback",
-    });
   }
 
   /**

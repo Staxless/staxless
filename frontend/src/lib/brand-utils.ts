@@ -1,5 +1,5 @@
-import { BRAND_CONFIG, type BrandStyle, CUSTOM_STYLE } from "./brand-config"
-import { AVAILABLE_STYLES } from "./style-presets"
+import { BRAND_CONFIG, type BrandStyle, CUSTOM_STYLE } from './brand-config';
+import { AVAILABLE_STYLES } from './style-presets';
 
 /**
  * Creates a custom style by merging a base style with overrides
@@ -7,7 +7,10 @@ import { AVAILABLE_STYLES } from "./style-presets"
  * @param overrides - Partial style overrides to apply
  * @returns A new BrandStyle object with merged properties
  */
-export function createCustomStyle(baseStyle: BrandStyle, overrides: Partial<BrandStyle>): BrandStyle {
+export function createCustomStyle(
+  baseStyle: BrandStyle,
+  overrides: Partial<BrandStyle>
+): BrandStyle {
   return {
     ...baseStyle,
     ...overrides,
@@ -15,7 +18,7 @@ export function createCustomStyle(baseStyle: BrandStyle, overrides: Partial<Bran
     typography: { ...baseStyle.typography, ...overrides.typography },
     spacing: { ...baseStyle.spacing, ...overrides.spacing },
     effects: { ...baseStyle.effects, ...overrides.effects },
-  }
+  };
 }
 
 /**
@@ -24,27 +27,27 @@ export function createCustomStyle(baseStyle: BrandStyle, overrides: Partial<Bran
  * @returns An object containing CSS variable key-value pairs
  */
 export function generateCSSVariables(style: BrandStyle = BRAND_CONFIG.style) {
-  const { colors } = style
+  const { colors } = style;
   return {
-    "--brand-primary": colors.primary,
-    "--brand-primary-hover": colors.primaryHover,
-    "--brand-secondary": colors.secondary,
-    "--brand-accent": colors.accent,
-    "--brand-success": colors.success,
-    "--brand-warning": colors.warning,
-    "--brand-error": colors.error,
-    "--brand-gradient-start": colors.gradientStart || colors.primary,
-    "--brand-gradient-middle": colors.gradientMiddle || colors.secondary,
-    "--brand-gradient-end": colors.gradientEnd || colors.accent,
-    "--brand-background": colors.background,
-    "--brand-background-secondary": colors.backgroundSecondary,
-    "--brand-background-tertiary": colors.backgroundTertiary,
-    "--brand-text-primary": colors.textPrimary,
-    "--brand-text-secondary": colors.textSecondary,
-    "--brand-text-muted": colors.textMuted,
-    "--brand-border": colors.border,
-    "--brand-border-light": colors.borderLight,
-  }
+    '--brand-primary': colors.primary,
+    '--brand-primary-hover': colors.primaryHover,
+    '--brand-secondary': colors.secondary,
+    '--brand-accent': colors.accent,
+    '--brand-success': colors.success,
+    '--brand-warning': colors.warning,
+    '--brand-error': colors.error,
+    '--brand-gradient-start': colors.gradientStart || colors.primary,
+    '--brand-gradient-middle': colors.gradientMiddle || colors.secondary,
+    '--brand-gradient-end': colors.gradientEnd || colors.accent,
+    '--brand-background': colors.background,
+    '--brand-background-secondary': colors.backgroundSecondary,
+    '--brand-background-tertiary': colors.backgroundTertiary,
+    '--brand-text-primary': colors.textPrimary,
+    '--brand-text-secondary': colors.textSecondary,
+    '--brand-text-muted': colors.textMuted,
+    '--brand-border': colors.border,
+    '--brand-border-light': colors.borderLight,
+  };
 }
 
 /**
@@ -55,8 +58,8 @@ export function generateCSSVariables(style: BrandStyle = BRAND_CONFIG.style) {
 export function switchToStyle(styleName: string): BrandStyle {
   const styles = {
     custom: CUSTOM_STYLE,
-  }
-  return styles[styleName as keyof typeof styles] || CUSTOM_STYLE
+  };
+  return styles[styleName as keyof typeof styles] || CUSTOM_STYLE;
 }
 
 /**
@@ -64,8 +67,8 @@ export function switchToStyle(styleName: string): BrandStyle {
  * @param colorName - The name of the color to retrieve
  * @returns The color value as a string
  */
-export function getBrandColor(colorName: keyof BrandStyle["colors"]) {
-  return BRAND_CONFIG.style.colors[colorName]
+export function getBrandColor(colorName: keyof BrandStyle['colors']) {
+  return BRAND_CONFIG.style.colors[colorName];
 }
 
 /**
@@ -73,7 +76,7 @@ export function getBrandColor(colorName: keyof BrandStyle["colors"]) {
  * @returns The company configuration object
  */
 export function getCompanyInfo() {
-  return BRAND_CONFIG.company
+  return BRAND_CONFIG.company;
 }
 
 /**
@@ -81,7 +84,7 @@ export function getCompanyInfo() {
  * @returns The social configuration object
  */
 export function getSocialLinks() {
-  return BRAND_CONFIG.social
+  return BRAND_CONFIG.social;
 }
 
 /**
@@ -89,7 +92,7 @@ export function getSocialLinks() {
  * @returns The navigation configuration object
  */
 export function getNavigation() {
-  return BRAND_CONFIG.navigation
+  return BRAND_CONFIG.navigation;
 }
 
 /**
@@ -97,7 +100,7 @@ export function getNavigation() {
  * @returns The SEO configuration object
  */
 export function getSEOConfig() {
-  return BRAND_CONFIG.seo
+  return BRAND_CONFIG.seo;
 }
 
 /**
@@ -105,7 +108,7 @@ export function getSEOConfig() {
  * @returns The active BrandStyle object
  */
 export function getStyleConfig() {
-  return BRAND_CONFIG.style
+  return BRAND_CONFIG.style;
 }
 
 /**
@@ -114,14 +117,14 @@ export function getStyleConfig() {
  */
 export function getAllAvailableStyles() {
   return {
-    readwise: "Readwise (Dark Gradient)",
-    grok: "Grok (Clean Minimal)",
-    bannerbear: "Bannerbear (Vibrant)",
-    stripe: "Stripe (Professional)",
-    linear: "Linear (Minimal Dark)",
-    notion: "Notion (Clean Light)",
-    vercel: "Vercel (Monochrome)",
-  }
+    readwise: 'Readwise (Dark Gradient)',
+    grok: 'Grok (Clean Minimal)',
+    bannerbear: 'Bannerbear (Vibrant)',
+    stripe: 'Stripe (Professional)',
+    linear: 'Linear (Minimal Dark)',
+    notion: 'Notion (Clean Light)',
+    vercel: 'Vercel (Monochrome)',
+  };
 }
 
 /**
@@ -131,12 +134,17 @@ export function getAllAvailableStyles() {
  * @returns A new BrandStyle object with applied customizations
  * @throws Error if the base style is not found
  */
-export function createBrandVariant(baseStyleName: string, customizations: Partial<BrandStyle>) {
-  const baseStyle = switchToStyle(baseStyleName) || AVAILABLE_STYLES[baseStyleName as keyof typeof AVAILABLE_STYLES]
+export function createBrandVariant(
+  baseStyleName: string,
+  customizations: Partial<BrandStyle>
+) {
+  const baseStyle =
+    switchToStyle(baseStyleName) ||
+    AVAILABLE_STYLES[baseStyleName as keyof typeof AVAILABLE_STYLES];
   if (!baseStyle) {
-    throw new Error(`Style "${baseStyleName}" not found`)
+    throw new Error(`Style "${baseStyleName}" not found`);
   }
-  return createCustomStyle(baseStyle, customizations)
+  return createCustomStyle(baseStyle, customizations);
 }
 
 /**
@@ -144,21 +152,25 @@ export function createBrandVariant(baseStyleName: string, customizations: Partia
  * @returns A structured data object for organization schema
  */
 export function generateStructuredData() {
-  const { company, seo } = BRAND_CONFIG
+  const { company, seo } = BRAND_CONFIG;
   return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
     name: company.name,
     description: seo.description,
     url: company.website,
     email: company.email,
     telephone: company.phone,
     address: {
-      "@type": "PostalAddress",
+      '@type': 'PostalAddress',
       streetAddress: company.address,
     },
-    sameAs: [BRAND_CONFIG.social.twitter, BRAND_CONFIG.social.github, BRAND_CONFIG.social.linkedin].filter(Boolean),
-  }
+    sameAs: [
+      BRAND_CONFIG.social.twitter,
+      BRAND_CONFIG.social.github,
+      BRAND_CONFIG.social.linkedin,
+    ].filter(Boolean),
+  };
 }
 
 /**
@@ -166,7 +178,7 @@ export function generateStructuredData() {
  * @returns An object containing CSS class names for styling
  */
 export function getStyleClasses() {
-  const style = BRAND_CONFIG.style
+  const style = BRAND_CONFIG.style;
   return {
     section: style.spacing.section,
     container: style.spacing.container,
@@ -180,8 +192,8 @@ export function getStyleClasses() {
     h3Text: style.typography.headingSize.h3,
     headingWeight: style.typography.headingWeight,
     bodyWeight: style.typography.bodyWeight,
-    fontFamily: `font-${style.typography.fontFamily.toLowerCase().replace(/\s+/g, "-")}`,
-  }
+    fontFamily: `font-${style.typography.fontFamily.toLowerCase().replace(/\s+/g, '-')}`,
+  };
 }
 
 /**
@@ -191,11 +203,11 @@ export function getStyleClasses() {
  */
 export function applyStyleToElement(element: HTMLElement, style: BrandStyle) {
   const cssVars = Object.entries({
-    "--brand-primary": style.colors.primary,
-    "--brand-background": style.colors.background,
-    "--brand-text-primary": style.colors.textPrimary,
-  })
-  cssVars.forEach(([property, value]) => {
-    element.style.setProperty(property, value)
-  })
+    '--brand-primary': style.colors.primary,
+    '--brand-background': style.colors.background,
+    '--brand-text-primary': style.colors.textPrimary,
+  });
+  for (const [property, value] of cssVars) {
+    element.style.setProperty(property, value);
+  }
 }

@@ -4,8 +4,8 @@
  * @description A utility function for combining and merging Tailwind CSS class names.
  */
 
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Combines Tailwind CSS class names with optional merging and conditional logic.

@@ -1,16 +1,19 @@
-import { isAdmin, isAdminFieldLevel } from "@/access/isAdmin";
-import { isAdminOrSelf, isAdminOrSelfFieldLevel } from "@/access/isAdminOrSelf";
-import { UserAuthStrategy } from "@/lib/userAuthStrategy";
-import { CollectionConfig } from "payload";
+import type { CollectionConfig } from 'payload';
+import { isAdmin, isAdminFieldLevel } from '@/access/is-admin';
+import {
+  isAdminOrSelf,
+  isAdminOrSelfFieldLevel,
+} from '@/access/is-admin-or-self';
+import { UserAuthStrategy } from '@/lib/user-auth-strategy';
 
 export const User: CollectionConfig = {
-  slug: "user", // Matches MongoDB collection 'user'
-  dbName: "users", // Matches MongoDB collection 'user'
+  slug: 'user', // Matches MongoDB collection 'user'
+  dbName: 'users', // Matches MongoDB collection 'user'
   admin: {
-    group: "General",
-    useAsTitle: "first_name",
+    group: 'General',
+    useAsTitle: 'firstname',
   },
-    auth: {
+  auth: {
     disableLocalStrategy: true,
     strategies: [UserAuthStrategy],
     cookies: {
@@ -20,26 +23,26 @@ export const User: CollectionConfig = {
   },
   fields: [
     {
-      name: "id",
-      type: "text",
+      name: 'id',
+      type: 'text',
       unique: true,
       required: true,
       index: true,
       admin: {
-        readOnly: false
+        readOnly: false,
       },
     },
     {
-      name: "first_name",
-      type: "text",
+      name: 'firstname',
+      type: 'text',
     },
     {
-      name: "last_name",
-      type: "text",
+      name: 'lastname',
+      type: 'text',
     },
     {
-      name: "email",
-      type: "email",
+      name: 'email',
+      type: 'email',
       unique: true,
       required: false,
       admin: {
@@ -60,10 +63,10 @@ export const User: CollectionConfig = {
       required: true,
     },
     {
-      name: "lastActive",
-      type: "date",
+      name: 'lastActive',
+      type: 'date',
       admin: {
-        description: "Last active timestamp for the user.",
+        description: 'Last active timestamp for the user.',
       },
     },
   ],
@@ -72,7 +75,7 @@ export const User: CollectionConfig = {
     delete: isAdminOrSelf,
     read: () => true,
     update: isAdminOrSelf,
-  }
+  },
   // endpoints: [AdminLogoutEndpoint],
 };
 

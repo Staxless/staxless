@@ -1,5 +1,4 @@
-import express, { Router, Request, Response } from "express";
-import { User } from "../models/userModel";
+import express, { type Router } from 'express';
 
 const router: Router = express.Router();
 

@@ -1,21 +1,30 @@
-import type { Metadata } from "next"
-import { BRAND_CONFIG } from "./brand-config"
+import type { Metadata } from 'next';
+import { BRAND_CONFIG } from './brand-config';
 
 export type MetadataProps = {
-  title?: string
-  description?: string
-  params: { slug: string }
-}
+  title?: string;
+  description?: string;
+  params: { slug: string };
+};
 
-export function generateCustomMetadata({ title, description, params }: MetadataProps): Metadata {
+export function generateCustomMetadata({
+  title,
+  description,
+  params,
+}: MetadataProps): Metadata {
   // Use params to create dynamic title or description if needed
-  const dynamicTitle = params?.slug
-    ? `${params.slug} | ${BRAND_CONFIG.seo.title}`
-    : title
-      ? `${title} | ${BRAND_CONFIG.seo.title}`
-      : BRAND_CONFIG.seo.title
+  let dynamicTitle: string;
+  if (params?.slug) {
+    dynamicTitle = `${params.slug} | ${BRAND_CONFIG.seo.title}`;
+  } else if (title) {
+    dynamicTitle = `${title} | ${BRAND_CONFIG.seo.title}`;
+  } else {
+    dynamicTitle = BRAND_CONFIG.seo.title;
+  }
 
-  const dynamicDescription = params?.slug ? `Page about ${params.slug}` : description || BRAND_CONFIG.seo.description
+  const dynamicDescription = params?.slug
+    ? `Page about ${params.slug}`
+    : description || BRAND_CONFIG.seo.description;
 
   return {
     title: {
@@ -25,15 +34,15 @@ export function generateCustomMetadata({ title, description, params }: MetadataP
     description: dynamicDescription,
     authors: [{ name: BRAND_CONFIG.company.name }], // Using company name as author
     openGraph: {
-      type: "website",
-      locale: "en_US",
+      type: 'website',
+      locale: 'en_US',
       url: BRAND_CONFIG.company.website,
       title: dynamicTitle,
       description: dynamicDescription,
       siteName: BRAND_CONFIG.seo.title,
     },
     twitter: {
-      card: BRAND_CONFIG.seo.twitterCard,
+      card: 'summary_large_image',
       site: BRAND_CONFIG.social.twitter,
     },
     keywords: BRAND_CONFIG.seo.keywords,
@@ -51,5 +60,5 @@ export function generateCustomMetadata({ title, description, params }: MetadataP
         ],
       },
     }),
-  }
+  };
 }

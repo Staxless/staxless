@@ -9,18 +9,25 @@ const consumer = createConsumer('user-service-group');
 export const startUserConsumer = async () => {
   await consumer.connect();
   await consumer.subscribe({ topic: 'payment-events', fromBeginning: true });
-  console.log('User consumer started...');
-  
+
   await consumer.run({
     eachMessage: async ({ message }) => {
       const eventKey = message.key?.toString();
-      if (!eventKey || !paymentEventRegistry.has(eventKey)) return;
+      if (!(eventKey && paymentEventRegistry.has(eventKey))) {
+        return;
+      }
 
-      const handler = paymentEventRegistry.get(eventKey)!;
+      const handler = paymentEventRegistry.get(eventKey);
+      if (!handler) {
+        // Optionally log or handle the missing handler case
+        return;
+      }
       try {
         await handler(message);
       } catch (error) {
-        console.error(`[User Consumer] Error processing payment event ${eventKey}`, error);
+        throw new Error(
+          `[User Consumer] Error processing event ${eventKey}, error: ${error}`
+        );
       }
     },
   });

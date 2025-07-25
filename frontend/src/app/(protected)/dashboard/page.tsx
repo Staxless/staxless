@@ -1,101 +1,113 @@
 // "use client"
-import { headers } from "next/headers"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { BRAND_CONFIG } from "@/lib/brand-config"
+
 import {
-  Users,
-  DollarSign,
   Activity,
-  TrendingUp,
-  Settings,
-  Bell,
-  Search,
-  Plus,
   BarChart3,
+  Bell,
+  DollarSign,
   FileText,
-} from "lucide-react"
-import { Input } from "@/components/ui/input"
-import Header from "@/components/shared/header"
-import ConfettiTrigger from "@/components/effects/confetti-trigger"
-import Footer from "@/components/shared/footer"
-
-
+  Plus,
+  Search,
+  Settings,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
+import { headers } from 'next/headers';
+import ConfettiTrigger from '@/components/effects/confetti-trigger';
+import Footer from '@/components/shared/footer';
+import Header from '@/components/shared/header';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 export default async function DashboardPage() {
-  
-
-
-  const headersList = await headers()
-    const userInfoString = headersList.get("x-user-info")
-    const user = userInfoString ? JSON.parse(userInfoString) : null
+  const headersList = await headers();
+  const userInfoString = headersList.get('x-user-info');
+  const user = userInfoString ? JSON.parse(userInfoString) : null;
   const stats = [
     {
-      title: "Total Users",
-      value: "2,847",
-      change: "+12.5%",
+      title: 'Total Users',
+      value: '2,847',
+      change: '+12.5%',
       icon: Users,
       color: BRAND_CONFIG.brand.colors.primary,
     },
     {
-      title: "Revenue",
-      value: "$45,231",
-      change: "+8.2%",
+      title: 'Revenue',
+      value: '$45,231',
+      change: '+8.2%',
       icon: DollarSign,
       color: BRAND_CONFIG.brand.colors.success,
     },
     {
-      title: "Active Sessions",
-      value: "1,234",
-      change: "+3.1%",
+      title: 'Active Sessions',
+      value: '1,234',
+      change: '+3.1%',
       icon: Activity,
       color: BRAND_CONFIG.brand.colors.warning,
     },
     {
-      title: "Growth Rate",
-      value: "23.5%",
-      change: "+2.4%",
+      title: 'Growth Rate',
+      value: '23.5%',
+      change: '+2.4%',
       icon: TrendingUp,
       color: BRAND_CONFIG.brand.colors.primary,
     },
-  ]
+  ];
 
   const recentActivity = [
-    { action: "New user registered", time: "2 minutes ago", type: "user" },
-    { action: "Payment received", time: "5 minutes ago", type: "payment" },
-    { action: "System backup completed", time: "1 hour ago", type: "system" },
-    { action: "New feature deployed", time: "3 hours ago", type: "deployment" },
-  ]
+    { action: 'New user registered', time: '2 minutes ago', type: 'user' },
+    { action: 'Payment received', time: '5 minutes ago', type: 'payment' },
+    { action: 'System backup completed', time: '1 hour ago', type: 'system' },
+    { action: 'New feature deployed', time: '3 hours ago', type: 'deployment' },
+  ];
 
   return (
-    <div style={{ backgroundColor: BRAND_CONFIG.brand.colors.background, minHeight: "100vh" }}>
+    <div
+      style={{
+        backgroundColor: BRAND_CONFIG.brand.colors.background,
+        minHeight: '100vh',
+      }}
+    >
       {/* Confetti Trigger - only shows once after successful checkout */}
       <ConfettiTrigger />
       <Header user={user} />
       <div className="pt-20">
         <div className="container mx-auto p-6">
           {/* Dashboard Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div className="mb-8 flex flex-col items-start justify-between md:flex-row md:items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+              <h1
+                className="mb-2 font-bold text-3xl"
+                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+              >
                 Dashboard
               </h1>
               <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-                Welcome back, {user.name}! Here's what's happening with your SaaS.
+                Welcome back, {user.name}! Here's what's happening with your
+                SaaS.
               </p>
             </div>
 
-            <div className="flex items-center space-x-4 mt-4 md:mt-0">
+            <div className="mt-4 flex items-center space-x-4 md:mt-0">
               <div className="relative">
                 <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+                  className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
                   style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
                 />
                 <Input
+                  className="w-64 border pl-10"
                   placeholder="Search..."
-                  className="pl-10 w-64 border"
                   style={{
-                    backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                    backgroundColor:
+                      BRAND_CONFIG.brand.colors.backgroundSecondary,
                     borderColor: BRAND_CONFIG.brand.colors.border,
                     color: BRAND_CONFIG.brand.colors.textPrimary,
                   }}
@@ -104,38 +116,48 @@ export default async function DashboardPage() {
               <Button
                 style={{
                   backgroundColor: BRAND_CONFIG.brand.colors.primary,
-                  color: "white",
+                  color: 'white',
                 }}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 New Project
               </Button>
             </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
+          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {stats.map((stat) => (
               <Card
-                key={index}
                 className="border shadow-sm"
+                key={stat.title}
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                  <CardTitle
+                    className="font-medium text-sm"
+                    style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                  >
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className="h-4 w-4" style={{ color: stat.color }} />
+                  <stat.icon
+                    className="h-4 w-4"
+                    style={{ color: stat.color }}
+                  />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                  <div
+                    className="font-bold text-2xl"
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
                     {stat.value}
                   </div>
-                  <p className="text-xs" style={{ color: BRAND_CONFIG.brand.colors.success }}>
-                    {stat.change} from last month
+                  <p className="text-xs" style={{ color: stat.color }}>
+                    {stat.change}
                   </p>
                 </CardContent>
               </Card>
@@ -143,32 +165,40 @@ export default async function DashboardPage() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Chart Card */}
             <Card
-              className="lg:col-span-2 border"
+              className="border lg:col-span-2"
               style={{
                 backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
                 borderColor: BRAND_CONFIG.brand.colors.border,
               }}
             >
               <CardHeader>
-                <CardTitle style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>Revenue Overview</CardTitle>
-                <CardDescription style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                <CardTitle
+                  style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                >
+                  Revenue Overview
+                </CardTitle>
+                <CardDescription
+                  style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                >
                   Monthly revenue for the past 6 months
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div
-                  className="h-64 flex items-center justify-center border-2 border-dashed rounded-lg"
+                  className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed"
                   style={{ borderColor: BRAND_CONFIG.brand.colors.border }}
                 >
                   <div className="text-center">
                     <BarChart3
-                      className="h-12 w-12 mx-auto mb-4"
+                      className="mx-auto mb-4 h-12 w-12"
                       style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
                     />
-                    <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>Chart component would go here</p>
+                    <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                      Chart component would go here
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -183,24 +213,43 @@ export default async function DashboardPage() {
               }}
             >
               <CardHeader>
-                <CardTitle style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>Recent Activity</CardTitle>
-                <CardDescription style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                <CardTitle
+                  style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                >
+                  Recent Activity
+                </CardTitle>
+                <CardDescription
+                  style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                >
                   Latest updates from your application
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start space-x-3">
+                  {recentActivity.map((activity) => (
+                    <div
+                      className="flex items-start space-x-3"
+                      key={activity.action + activity.time}
+                    >
                       <div
-                        className="w-2 h-2 rounded-full mt-2"
-                        style={{ backgroundColor: BRAND_CONFIG.brand.colors.primary }}
+                        className="mt-2 h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor: BRAND_CONFIG.brand.colors.primary,
+                        }}
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-medium" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                        <p
+                          className="font-medium text-sm"
+                          style={{
+                            color: BRAND_CONFIG.brand.colors.textPrimary,
+                          }}
+                        >
                           {activity.action}
                         </p>
-                        <p className="text-xs" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                        <p
+                          className="text-xs"
+                          style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                        >
                           {activity.time}
                         </p>
                       </div>
@@ -213,59 +262,92 @@ export default async function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+            <h2
+              className="mb-4 font-semibold text-xl"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
               Quick Actions
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Card
-                className="border cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer border transition-shadow hover:shadow-md"
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardContent className="p-6 text-center">
-                  <Settings className="h-8 w-8 mx-auto mb-3" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
-                  <h3 className="font-medium mb-2" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                  <Settings
+                    className="mx-auto mb-3 h-8 w-8"
+                    style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                  />
+                  <h3
+                    className="mb-2 font-medium"
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
                     Account Settings
                   </h3>
-                  <p className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                  <p
+                    className="text-sm"
+                    style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                  >
                     Manage your account preferences
                   </p>
                 </CardContent>
               </Card>
 
               <Card
-                className="border cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer border transition-shadow hover:shadow-md"
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardContent className="p-6 text-center">
-                  <FileText className="h-8 w-8 mx-auto mb-3" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
-                  <h3 className="font-medium mb-2" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                  <FileText
+                    className="mx-auto mb-3 h-8 w-8"
+                    style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                  />
+                  <h3
+                    className="mb-2 font-medium"
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
                     Documentation
                   </h3>
-                  <p className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                  <p
+                    className="text-sm"
+                    style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                  >
                     View API docs and guides
                   </p>
                 </CardContent>
               </Card>
 
               <Card
-                className="border cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer border transition-shadow hover:shadow-md"
                 style={{
-                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+                  backgroundColor:
+                    BRAND_CONFIG.brand.colors.backgroundSecondary,
                   borderColor: BRAND_CONFIG.brand.colors.border,
                 }}
               >
                 <CardContent className="p-6 text-center">
-                  <Bell className="h-8 w-8 mx-auto mb-3" style={{ color: BRAND_CONFIG.brand.colors.primary }} />
-                  <h3 className="font-medium mb-2" style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
+                  <Bell
+                    className="mx-auto mb-3 h-8 w-8"
+                    style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                  />
+                  <h3
+                    className="mb-2 font-medium"
+                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+                  >
                     Notifications
                   </h3>
-                  <p className="text-sm" style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
+                  <p
+                    className="text-sm"
+                    style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+                  >
                     Configure alert preferences
                   </p>
                 </CardContent>
@@ -276,5 +358,5 @@ export default async function DashboardPage() {
       </div>
       <Footer />
     </div>
-  )
+  );
 }

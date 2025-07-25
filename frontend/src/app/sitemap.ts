@@ -1,20 +1,19 @@
-import { BRAND_CONFIG } from "@/lib/brand-config"
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 const myFunction = () => {
-  const url = `${BRAND_CONFIG.company.website}` 
-   
+  const _url = `${BRAND_CONFIG.company.website}`;
+
   fetch(`${BRAND_CONFIG.company.website}/api/data`)
     .then((response) => response.json())
-    .then((data) => {
+    .then((_data) => {
       // Process the data
-       
     })
-    .catch((error) => {
-      console.error("Error fetching data:", error)
-    })
-}
+    .catch(() => {
+      // Ignore fetch errors for sitemap data
+    });
+};
 
-myFunction()
+myFunction();
 
 export default function sitemap() {
   return [
@@ -31,5 +30,5 @@ export default function sitemap() {
       lastModified: new Date(),
     },
     // Add more URLs as needed
-  ]
+  ];
 }

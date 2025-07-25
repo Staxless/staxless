@@ -4,15 +4,15 @@
  * @module components/SignOutButton
  */
 
-"use client";
+'use client';
 
+import { useRouter } from 'next/navigation';
 // External imports
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
 
 // Internal imports
-import { Button } from "@/components/ui/button";
-import { logout } from "@/lib/signout-user";
+import { Button } from '@/components/ui/button';
+import { logout } from '@/lib/signout-user';
 
 /**
  * @description SignOutButton component for handling user sign out
@@ -29,16 +29,14 @@ export function SignOutButton(): JSX.Element {
     setIsSigningOut(true);
     try {
       const result = await logout();
-      console.warn(result);
       if (result.success) {
-         
-        router.push("/");
+        router.push('/');
         router.refresh(); // Refresh the current route to update the UI
       } else {
-        console.error("Sign out failed:", result.error);
+        // Intentionally left blank: no action needed if sign out fails
       }
-    } catch (error) {
-      console.error("Error during sign out:", error);
+    } catch (_error) {
+      // Intentionally left blank: error is handled elsewhere or not needed
     } finally {
       setIsSigningOut(false);
     }
@@ -46,12 +44,12 @@ export function SignOutButton(): JSX.Element {
 
   return (
     <Button
-      onClick={handleSignOut}
+      className="w-full justify-start px-2 py-1.5 font-medium text-sm"
       disabled={isSigningOut}
+      onClick={handleSignOut}
       variant="ghost"
-      className="w-full justify-start px-2 py-1.5 text-sm font-medium"
     >
-      {isSigningOut ? "Signing out..." : "Sign out"}
+      {isSigningOut ? 'Signing out...' : 'Sign out'}
     </Button>
   );
 }

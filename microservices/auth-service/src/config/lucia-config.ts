@@ -1,29 +1,35 @@
 /**
  * @file lucia-config.ts
  * @module lucia-config
- * 
+ *
  * @description
  * This module connects to a MongoDB database and initializes the Lucia authentication system.
  * It configures the MongoDB adapter with session, user, OAuth account, and magic link collections.
  * It also sets session cookie security based on the environment and maps user/session attributes.
- * 
+ *
  * @usage
  * - Import this module to get the initialized Lucia instance for authentication.
  * - Ensure environment variables `DATABASE_NAME` and `NODE_ENV` are set correctly.
- * 
+ *
  * @notes
  * - Uses the MongoDB service hostname: "mongodb-service".
  * - Session cookies are secure only in production.
  * - Collections used: "session", "users", "oauthAccount", and "magicLinks".
- * 
+ *
  * @requires mongodb
  * @requires @lucia-auth/adapter-mongodb
  * @requires lucia
  */
 
-import { MongoClient, Db } from "mongodb";
-import { MongodbAdapter } from "@lucia-auth/adapter-mongodb";
-import { Lucia } from "lucia";
+import { MongodbAdapter } from '@lucia-auth/adapter-mongodb';
+import { Lucia } from 'lucia';
+import { type Collection, type Db, MongoClient } from 'mongodb';
+
+// Extend MongodbAdapter to include OauthAccount and MagicLink properties
+interface CustomMongodbAdapter extends MongodbAdapter {
+  OauthAccount: Collection;
+  MagicLink: Collection;
+}
 
 const DATABASE_NAME: string | undefined = process.env.DATABASE_NAME;
 const MONGO_URL: string = `mongodb://mongodb-service:27017/${DATABASE_NAME}`;
@@ -45,35 +51,37 @@ export const initializeLucia = async (): Promise<Lucia> => {
 
     // Initialize MongoDB adapter with session and user collections
     const adapter = new MongodbAdapter(
-      db.collection("session"),
-      db.collection("users"),
-    );
+      db.collection('session'),
+      db.collection('users')
+    ) as CustomMongodbAdapter; // Cast to the extended type
 
     // Attach OAuth account and magic link collections to adapter
-    (adapter as any).OauthAccount = db.collection("oauthAccount");
-    (adapter as any).MagicLink = db.collection("magicLinks");
+    adapter.OauthAccount = db.collection('oauthAccount');
+    adapter.MagicLink = db.collection('magicLinks');
 
     // Initialize Lucia with adapter and session/user attribute mapping
     const lucia = new Lucia(adapter, {
       sessionCookie: {
         attributes: {
-          secure: process.env.NODE_ENV === "production", // Secure cookies in production
-          sameSite: "lax", // Prevent cross-site request forgery on unsafe requests
+          secure: process.env.NODE_ENV === 'production', // Secure cookies in production
+          sameSite: 'lax', // Prevent cross-site request forgery on unsafe requests
         },
       },
-      getSessionAttributes: ({ country }: { country?: string }) => ({ country }),
+      getSessionAttributes: ({ country }: { country?: string }) => ({
+        country,
+      }),
       getUserAttributes: ({
-        first_name,
+        firstname,
         subscription,
         roles,
         avatar,
       }: {
-        first_name?: string;
+        firstname?: string;
         subscription?: string;
         roles?: string[];
         avatar?: string;
       }) => ({
-        name: first_name,
+        name: firstname,
         subscription,
         roles,
         avatar,
@@ -82,8 +90,9 @@ export const initializeLucia = async (): Promise<Lucia> => {
 
     return lucia;
   } catch (error) {
-    console.error("Error initializing Lucia:", error);
-    throw new Error("Failed to initialize Lucia");
+    throw new Error(
+      `Failed to initialize Lucia, error: ${(error as Error).message}`
+    );
   }
 };
 
@@ -96,7 +105,7 @@ export default auth;
 /**
  * Extend Lucia types to include custom user and session attributes.
  */
-declare module "lucia" {
+declare module 'lucia' {
   interface Register {
     Lucia: typeof auth;
     DatabaseUserAttributes: {

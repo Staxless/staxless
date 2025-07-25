@@ -1,55 +1,29 @@
 /**
  * @file magic-link-config.ts
  * @description Defines the MagicLinkProvider class for managing magic link authentication.
- * 
+ *
  * @exports
  * - MagicLinkProvider: Class for handling magic link generation, email sending, and validation.
  * - magicLinkProvider: Singleton instance of MagicLinkProvider.
- * 
+ *
  * @example
  * import { magicLinkProvider } from './magic-link-config';
- * 
+ *
  * // Generate and send a magic link
  * const link = await magicLinkProvider.generateMagicLink(userId, state);
  * await magicLinkProvider.sendMagicLink(userId, link);
  */
 
-import crypto from 'crypto';
-import { auth } from './lucia-config';
+import { randomBytes } from 'node:crypto';
 import { createProducer } from './kafka-client';
+import { auth } from './lucia-config';
 
 const producer = createProducer();
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000/api';
 const TOKEN_EXPIRY_MINUTES = 15;
 
-// Define types for Lucia adapter (assuming MongoDB or similar)
-interface User {
-  _id: string;
-  email: string;
-}
-
-interface MagicLink {
-  token: string;
-  user_id: string;
-  expires_at: Date;
-  created_at: Date;
-}
-
-interface AuthAdapter {
-  User: {
-    findOne: (query: { _id: string }) => Promise<User | null>;
-  };
-  MagicLink: {
-    insertOne: (data: MagicLink) => Promise<void>;
-    findOne: (query: { token: string }) => Promise<MagicLink | null>;
-    deleteOne: (query: { token: string }) => Promise<void>;
-  };
-}
-
-interface Auth {
-  adapter: AuthAdapter;
-  createSession: (userId: string, attributes: Record<string, any>) => Promise<{ id: string }>;
-}
+// Email validation regex defined at top-level scope for performance
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * MagicLinkProvider class to handle magic link authentication flows.
@@ -62,7 +36,7 @@ export class MagicLinkProvider {
    * @returns The generated magic link URL.
    */
   async generateMagicLink(userId: string, state: string): Promise<string> {
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
 
     await auth.adapter.MagicLink.insertOne({
@@ -83,41 +57,39 @@ export class MagicLinkProvider {
    */
   async sendMagicLink(userId: string, magicLink: string): Promise<void> {
     const user = await auth.adapter.User.findOne({ _id: userId });
-    if (!user || !user.email) {
-      throw new Error('User or email not found');
+    if (!user) {
+      throw new Error('User not found');
     }
+    if (!user.email) {
+      // Basic email validation
+      if (!EMAIL_REGEX.test(user.email)) {
+        throw new Error('Invalid email format');
+      }
 
-    // Basic email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-      throw new Error('Invalid email format');
-    }
-
-    try {
-      await producer.connect();
-      const token = new URL(magicLink).searchParams.get('token') || '';
-      await producer.send({
-        topic: 'email-events',
-        messages: [{
-          key: 'send.magic-link.email',
-          value: JSON.stringify({
-            email: user.email,
-            variables: {
-              token,
-              link: magicLink,
-              expiryMinutes: TOKEN_EXPIRY_MINUTES,
+      try {
+        await producer.connect();
+        const token = new URL(magicLink).searchParams.get('token') || '';
+        await producer.send({
+          topic: 'email-events',
+          messages: [
+            {
+              key: 'send.magic-link.email',
+              value: JSON.stringify({
+                email: user.email,
+                variables: {
+                  token,
+                  link: magicLink,
+                  expiryMinutes: TOKEN_EXPIRY_MINUTES,
+                },
+              }),
             },
-          }),
-        }],
-      });
-      console.log(`Produced magic link event for ${user.email}`);
-    } catch (error: any) {
-      console.error('Error producing magic link event:', {
-        message: error.message,
-        stack: error.stack,
-      });
-      throw new Error(`Failed to send magic link: ${error.message}`);
-    } finally {
-      await producer.disconnect();
+          ],
+        });
+      } catch (error) {
+        throw new Error(`Failed to send magic link: ${error.message}`);
+      } finally {
+        await producer.disconnect();
+      }
     }
   }
 

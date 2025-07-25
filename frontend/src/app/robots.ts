@@ -3,8 +3,8 @@
  * @description Generates the robots.txt configuration for the website
  */
 
-import type { MetadataRoute } from "next";
-import { BRAND_CONFIG } from "@/lib/brand-config"
+import type { MetadataRoute } from 'next';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 /**
  * Generates the robots.txt configuration for the website.
@@ -13,9 +13,9 @@ import { BRAND_CONFIG } from "@/lib/brand-config"
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: "*", // Applies the rules to all user agents
-      allow: "/", // Allow all user agents to access the root
-      disallow: "/dashboard/", // Disallow access to the /dashboard/ directory
+      userAgent: '*', // Applies the rules to all user agents
+      allow: '/', // Allow all user agents to access the root
+      disallow: '/dashboard/', // Disallow access to the /dashboard/ directory
     },
     sitemap: `${BRAND_CONFIG.company.website}/sitemap.xml`,
   };

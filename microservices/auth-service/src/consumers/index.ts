@@ -9,21 +9,28 @@ const consumer = createConsumer('auth-service-group');
 export const startAuthConsumer = async () => {
   await consumer.connect();
   await consumer.subscribe({ topic: 'auth-events', fromBeginning: true });
-  console.log('Auth consumer started, listening for events...');
 
   await consumer.run({
     eachMessage: async ({ message }) => {
       const eventKey = message.key?.toString();
-      if (!eventKey || !authEventRegistry.has(eventKey)) {
-        console.warn(`[Auth Consumer] No handler found for event: ${eventKey}`);
-        return;
+      if (!(eventKey && authEventRegistry.has(eventKey))) {
+        throw new Error(
+          `[Auth Consumer] No handler registered for event ${eventKey}`
+        );
       }
-      
-      const handler = authEventRegistry.get(eventKey)!;
+
+      const handler = authEventRegistry.get(eventKey);
+      if (!handler) {
+        throw new Error(
+          `[Auth Consumer] No handler found for event ${eventKey}`
+        );
+      }
       try {
         await handler(message);
       } catch (error) {
-        console.error(`[Auth Consumer] Error processing event ${eventKey}`, error);
+        throw new Error(
+          `[Auth Consumer] Error processing event ${eventKey}, error: ${error}`
+        );
       }
     },
   });

@@ -1,6 +1,6 @@
-import createMDX from "@next/mdx";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
+import createMDX from '@next/mdx';
+import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -9,9 +9,9 @@ const nextConfig = {
   //   serverActions: true,
   // },
   // Configure `pageExtensions` to include markdown and MDX files
-  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   // Optionally, add any other Next.js config below
-  output: "standalone", // This is to configure output
+  output: 'standalone', // This is to configure output
   webpack(config) {
     config.watchOptions = {
       poll: 1000,
@@ -19,15 +19,15 @@ const nextConfig = {
     };
     return config;
   },
-  async rewrites() {
+  rewrites() {
     return [
       {
         source: '/admin/:path*',
         destination: 'http://front-gate:8000/admin/:path*',
-      }, 
+      },
       {
-        source: "/api/:path*",
-        destination: "http://front-gate:8000/:path*",
+        source: '/api/:path*',
+        destination: 'http://front-gate:8000/:path*',
       },
     ];
   },
