@@ -1,4 +1,4 @@
-import { NOTION_STYLE } from './style-presets';
+import { NOTION_STYLE, VERCEL_STYLE } from './style-presets';
 
 /** Interface defining the structure of a brand style configuration */
 export interface BrandStyle {
@@ -93,205 +93,168 @@ export interface BrandStyle {
 export const CUSTOM_STYLE: BrandStyle = {
   name: 'custom',
   colors: {
-    primary: '#4A90E2', // Vibrant blue
-    primaryHover: '#357ABD', // Darker blue for hover
-    secondary: '#6B7280', // Neutral gray
-    accent: '#A855F7', // Warm purple for highlights
-    success: '#10B981', // Green for success states
-    warning: '#F59E0B', // Amber for warnings
-    error: '#EF4444', // Red for errors
-    background: '#F7FAFC', // Light blue-gray
-    backgroundSecondary: '#E5E7EB', // Light gray
-    backgroundTertiary: '#D1D5DB', // Medium gray
-    textPrimary: '#1A202C', // Near-black for main text
-    textSecondary: '#4B5563', // Dark gray for secondary text
-    textMuted: '#9CA3AF', // Light gray for muted text
-    border: '#D1D5DB', // Medium gray for borders
-    borderLight: '#E5E7EB', // Light gray for subtle borders
+    primary: '#000000', // Replace with your primary brand color
+    primaryHover: '#000000', // Replace with darker shade for hover
+    secondary: '#000000', // Replace with secondary brand color
+    accent: '#000000', // Replace with accent color
+    success: '#000000', // Replace with success state color
+    warning: '#000000', // Replace with warning state color
+    error: '#000000', // Replace with error state color
+    background: '#FFFFFF', // Replace with primary background color
+    backgroundSecondary: '#FFFFFF', // Replace with secondary background
+    backgroundTertiary: '#FFFFFF', // Replace with tertiary background
+    textPrimary: '#000000', // Replace with primary text color
+    textSecondary: '#000000', // Replace with secondary text color
+    textMuted: '#000000', // Replace with muted text color
+    border: '#000000', // Replace with border color
+    borderLight: '#000000', // Replace with light border color
   },
   typography: {
-    fontFamily: 'system-ui',
-    headingWeight: 'font-normal',
-    bodyWeight: 'font-normal',
+    fontFamily: 'system-ui, sans-serif', // Replace with your font family
+    headingWeight: 'font-bold', // Replace with heading font weight
+    bodyWeight: 'font-normal', // Replace with body font weight
     headingSize: {
-      hero: 'text-4xl',
-      h1: 'text-3xl',
-      h2: 'text-2xl',
-      h3: 'text-xl',
+      hero: 'text-5xl', // Replace with hero heading size
+      h1: 'text-4xl', // Replace with h1 size
+      h2: 'text-3xl', // Replace with h2 size
+      h3: 'text-2xl', // Replace with h3 size
     },
   },
   spacing: {
-    section: 'py-12',
-    container: 'max-w-6xl mx-auto px-4',
-    cardPadding: 'p-4',
+    section: 'py-12', // Replace with section padding
+    container: 'max-w-7xl mx-auto px-4', // Replace with container styles
+    cardPadding: 'p-6', // Replace with card padding
   },
   effects: {
-    borderRadius: 'rounded-none',
-    shadow: 'shadow-none',
-    blur: 'backdrop-blur-none',
-    glassmorphism: false,
-    animations: false,
+    borderRadius: 'rounded-md', // Replace with border radius
+    shadow: 'shadow-md', // Replace with shadow style
+    blur: 'backdrop-blur-sm', // Replace with blur effect
+    glassmorphism: false, // Enable/disable glassmorphism
+    animations: true, // Enable/disable animations
   },
 };
 
 /** Active style selection to switch between design presets */
-export const ACTIVE_STYLE: BrandStyle = CUSTOM_STYLE;
+export const ACTIVE_STYLE: BrandStyle = VERCEL_STYLE;
 
 /** Company configuration (style-independent) */
 export const COMPANY_CONFIG = {
   /** Company name */
-  name: 'ConnectSphere',
+  name: 'YourSaaSName', // Replace with your company name
   /** Company tagline */
-  tagline: 'Build Together, Thrive Together',
+  tagline: 'Your Tagline Here', // Replace with your tagline
   /** Company description */
-  description: 'A community platform for indie makers to collaborate and share projects.',
+  description: 'Describe your SaaS or business here.', // Replace with your description
   /** Company website URL */
-  website: 'https://connectsphere.app',
+  website: 'https://yourdomain.com', // Replace with your website
   /** Support email address */
-  email: 'hello@connectsphere.app',
+  email: 'support@yourdomain.com', // Replace with your support email
   /** Support phone number */
-  phone: '+1 (555) 987-6543',
+  phone: '+1 (555) 123-4567', // Replace with your support phone
   /** Company address */
-  address: '456 Stellar Ave, Galaxy City, State 67890',
+  address: '123 Your Street, City, State 12345', // Replace with your address
 };
 
 /** Content configuration for website sections (style-independent) */
 export const CONTENT_CONFIG = {
   /** Hero section content */
   hero: {
-    title: 'Connect with Indie Makers',
-    titleHighlight: 'Collaborate & Share',
-    titleEnd: '',
-    subtitle: 'Join a community of creators building in public.',
-    primaryCTA: 'Start Collaborating',
-    secondaryCTA: 'View Demo',
+    title: 'Welcome to YourSaaSName', // Replace with hero title
+    titleHighlight: 'Highlight Text', // Replace with highlighted text
+    titleEnd: '', // Replace with title end (optional)
+    subtitle: 'Describe what your SaaS does in one sentence.', // Replace with subtitle
+    primaryCTA: 'Get Started', // Replace with primary CTA text
+    secondaryCTA: 'Learn More', // Replace with secondary CTA text
   },
   /** Features section content */
   features: {
-    title: 'Everything you need to build your SaaS',
-    subtitle: 'Powerful features to accelerate your development and growth',
+    title: 'Features of YourSaaSName', // Replace with features title
+    subtitle: 'Describe the key features of your SaaS.', // Replace with features subtitle
     items: [
       {
         id: 'feature1',
-        icon: 'Lock',
-        title: 'Secure Authentication',
-        description: 'Robust user authentication with SSO and passwordless login.',
+        icon: 'Lock', // Replace with icon name (e.g., Lock, Star)
+        title: 'Feature One', // Replace with feature title
+        description: 'Describe the first feature of your SaaS.', // Replace with description
       },
       {
         id: 'feature2',
-        icon: 'DollarSign',
-        title: 'Seamless Payments',
-        description: 'Effortless Stripe integration for subscriptions and one-time payments.',
+        icon: 'DollarSign', // Replace with icon name
+        title: 'Feature Two', // Replace with feature title
+        description: 'Describe the second feature of your SaaS.', // Replace with description
       },
       {
         id: 'feature3',
-        icon: 'Users',
-        title: 'User Dashboard',
-        description: 'Intuitive user management with customizable profiles.',
-      },
-      {
-        id: 'feature4',
-        icon: 'TrendingUp',
-        title: 'Growth Analytics',
-        description: 'Real-time insights to track user behavior and optimize growth.',
-      },
-      {
-        id: 'feature5',
-        icon: 'Rocket',
-        title: 'Rapid Deployment',
-        description: 'Launch your SaaS in hours with our pre-built components.',
-      },
-      {
-        id: 'feature6',
-        icon: 'Sliders',
-        title: 'Brand Flexibility',
-        description: 'Fully customizable to match your unique brand identity.',
+        icon: 'Users' ,// Replace with icon name
+        title: 'Feature Three', // Replace with feature title
+        description: 'Describe the third feature of your SaaS.', // Replace with description
       },
     ],
   },
   /** Pricing section content */
   pricing: {
-    title: 'Simple, transparent pricing',
-    subtitle: "Choose the plan that's right for your business",
+    title: 'Pricing Plans', // Replace with pricing title
+    subtitle: 'Choose the plan that fits your needs.', // Replace with pricing subtitle
   },
   /** FAQ section content */
   faq: {
-    title: 'Frequently asked questions',
-    subtitle: 'Everything you need to know about our platform',
+    title: 'Frequently Asked Questions', // Replace with FAQ title
+    subtitle: 'Answers to common questions about YourSaaSName.', // Replace with FAQ subtitle
     items: [
       {
         id: 'faq1',
-        question: "What's included in the free tier?",
-        answer: 'The free tier offers core features like authentication and a basic dashboard to get you started.',
+        question: 'What does YourSaaSName do?', // Replace with question
+        answer: 'Provide a brief answer to the question.', // Replace with answer
       },
       {
         id: 'faq2',
-        question: 'Can I switch plans later?',
-        answer: 'Upgrade or downgrade anytime, with changes applied in the next billing cycle.',
-      },
-      {
-        id: 'faq3',
-        question: 'Are there any setup costs?',
-        answer: 'No setup costs. You only pay for the plan you choose.',
-      },
-      {
-        id: 'faq4',
-        question: 'How do I cancel my plan?',
-        answer: 'Cancel anytime from your account settings. Access continues until the end of your billing period.',
-      },
-      {
-        id: 'faq5',
-        question: "What's your refund policy?",
-        answer: 'We offer a 14-day money-back guarantee on all paid plans. Reach out to support for help.',
+        question: 'How do I get started?', // Replace with question
+        answer: 'Provide a brief answer to the question.', // Replace with answer
       },
     ],
   },
   /** Call-to-action section content */
   cta: {
-    title: 'Ready to build your SaaS?',
-    subtitle: "Join thousands of developers who've launched their SaaS with our platform.",
-    buttonText: 'Start building today',
+    title: 'Ready to Start?', // Replace with CTA title
+    subtitle: 'Join users who love YourSaaSName.', // Replace with CTA subtitle
+    buttonText: 'Start Now', // Replace with CTA button text
   },
 };
 
 /** Social media configuration (style-independent) */
 export const SOCIAL_CONFIG = {
   /** Twitter handle */
-  twitter: '@cosmicsaas',
+  twitter: '@YourSaaSName', // Replace with your Twitter handle
   /** GitHub profile URL */
-  github: 'https://github.com/cosmicsaas',
+  github: 'https://github.com/yourusername', // Replace with your GitHub URL
   /** LinkedIn company page URL */
-  linkedin: 'https://linkedin.com/company/cosmicsaas',
+  linkedin: 'https://linkedin.com/company/yourcompany', // Replace with your LinkedIn URL
   /** Discord community URL */
-  discord: 'https://discord.gg/cosmicsaas',
+  discord: 'https://discord.gg/yourinvite', // Replace with your Discord URL
 };
 
 /** Navigation configuration for main menu and footer (style-independent) */
 export const NAVIGATION_CONFIG = {
   /** Main navigation items */
   main: [
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Docs', href: '/docs' },
+    { name: 'Features', href: '#features' }, // Replace with navigation item
+    { name: 'Pricing', href: '#pricing' }, // Replace with navigation item
+    { name: 'Docs', href: '/docs' }, // Replace with navigation item
   ],
   /** Footer navigation sections */
   footer: {
     product: [
-      { name: 'Features', href: '#features' },
-      { name: 'Pricing', href: '#pricing' },
-      { name: 'Documentation', href: '/docs' },
-      { name: 'API Reference', href: '/docs/api' },
+      { name: 'Features', href: '#features' }, // Replace with product link
+      { name: 'Pricing', href: '#pricing' }, // Replace with product link
+      { name: 'Documentation', href: '/docs' }, // Replace with product link
     ],
     company: [
-      { name: 'About', href: '/about' },
-      { name: 'Contact', href: '/contact' },
-      { name: 'Blog', href: '/blog' },
-      { name: 'Careers', href: '/careers' },
+      { name: 'About', href: '/about' }, // Replace with company link
+      { name: 'Contact', href: '/contact' }, // Replace with company link
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/legal/privacy' },
-      { name: 'Terms of Service', href: '/legal/terms' },
-      { name: 'Cookie Policy', href: '/legal/cookies' },
+      { name: 'Privacy Policy', href: '/legal/privacy' }, // Replace with legal link
+      { name: 'Terms of Service', href: '/legal/terms' }, // Replace with legal link
     ],
   },
 };
@@ -299,15 +262,15 @@ export const NAVIGATION_CONFIG = {
 /** SEO configuration (style-independent) */
 export const SEO_CONFIG = {
   /** Page title for SEO */
-  title: 'ConnectSphere - Collaborate & Share Projects',
+  title: 'YourSaaSName - Your SaaS Description', // Replace with SEO title
   /** Meta description for SEO */
-  description: 'Join indie makers to build, share, and thrive together.',
+  description: 'Describe your SaaS for search engines.', // Replace with SEO description
   /** SEO keywords */
-  keywords: ['indie makers', 'community', 'collaboration'],
+  keywords: ['your', 'saas', 'keywords'], // Replace with SEO keywords
   /** Open Graph image URL */
-  ogImage: '/connectsphere-og.png',
+  ogImage: '/your-og-image.png', // Replace with Open Graph image URL
   /** Twitter card type */
-  twitterCard: 'summary_large_image',
+  twitterCard: 'summary_large_image', // Replace with Twitter card type
 };
 
 /** Unified brand configuration combining all settings */
@@ -329,14 +292,14 @@ export const BRAND_CONFIG = {
     /** Logo configuration */
     logo: {
       /** Logo text (first letter of company name) */
-      text: 'C',
+      text: 'Y', // Replace with first letter of your company name
       /** Logo source */
-      src: '/connectsphere-logo.png',
+      src: '/your-logo.png', // Replace with your logo path
       /** Logo sizes */
       size: {
-        small: 28,
-        medium: 36,
-        large: 52,
+        small: 24, // Replace with small logo size
+        medium: 32, // Replace with medium logo size
+        large: 48, // Replace with large logo size
       },
     },
     /** Brand colors (direct access) */
