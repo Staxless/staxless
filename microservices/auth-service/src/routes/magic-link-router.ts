@@ -24,6 +24,7 @@ const router = Router();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 router.post('/magic-link/login', initializeMagicLinkFlow('login'));
+
 router.post('/magic-link/register', initializeMagicLinkFlow('register'));
 
 router.get(

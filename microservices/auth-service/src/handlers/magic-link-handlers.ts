@@ -13,19 +13,25 @@ import { auth } from '../config/lucia-config';
 import { magicLinkProvider } from '../config/magic-link-config';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-const _BACKEND_URL =
-  process.env.BACKEND_URL || 'http://localhost:8081/auth-service';
 
 const producer = createProducer();
 const TOKEN_EXPIRY_MINUTES = 15;
+
+// Initialize Kafka producer at startup
+(async () => {
+  await producer.connect();
+  process.on('SIGTERM', async () => {
+    await producer.disconnect();
+    process.exit(0);
+  });
+})();
 
 /**
  * Generates a random state token for security.
  * @returns A 32-byte hexadecimal string for state protection.
  */
 export const generateStateToken = (): string => {
-  const state = crypto.randomBytes(32).toString('hex');
-  return state;
+  return crypto.randomBytes(32).toString('hex');
 };
 
 /**
@@ -38,13 +44,12 @@ export const stateProtection = (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): void | Response => {
   const stateCookie = parseCookies(req.headers.cookie ?? '').get('magic_state');
   const stateQuery = req.query.state?.toString();
 
   if (!(stateCookie && stateQuery) || stateCookie !== stateQuery) {
-    res.status(403).json({ error: 'State token validation failed' });
-    return;
+    return res.status(403).json({ error: 'State token validation failed' });
   }
   next();
 };
@@ -66,8 +71,7 @@ export async function handleRegistration(
   _res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  const db = await getDb();
-  const existingUser = await db.collection('users').findOne({ email });
+  const existingUser = await auth.adapter.User.findOne({ email });
   if (existingUser) {
     throw new Error('Email already registered. Please log in.');
   }
@@ -76,20 +80,18 @@ export async function handleRegistration(
   const newUser = {
     _id: userId,
     email,
-    first_name: firstName,
-    last_name: lastName,
+    firstname: firstName,
+    lastname: lastName,
     avatar: '',
     created_at: new Date(),
     subscription: { type: 'free', startDate: new Date() },
     roles: ['user'],
   };
 
-  await db.collection('users').insertOne(newUser);
+  await auth.adapter.User.insertOne(newUser);
   const magicLink = await magicLinkProvider.generateMagicLink(userId, state);
 
-  // NEW: Produce Kafka event instead of direct send
   try {
-    await producer.connect();
     const token = new URL(magicLink).searchParams.get('token') || '';
     await producer.send({
       topic: 'email-events',
@@ -107,13 +109,8 @@ export async function handleRegistration(
         },
       ],
     });
-  } catch (error: unknown) {
-    const err = error as { message?: string };
-    throw new Error(
-      `Failed to send magic link: ${err.message ?? 'Unknown error'}`
-    );
-  } finally {
-    await producer.disconnect();
+  } catch (error) {
+    throw new Error(`Failed to send magic link: ${error.message}`);
   }
 
   return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
@@ -132,20 +129,14 @@ export async function handleLogin(
   _res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
-  const db = await getDb();
-  const user = await db.collection('users').findOne({ email });
+  const user = await auth.adapter.User.findOne({ email });
   if (!user) {
     throw new Error('No account found. Please register.');
   }
 
-  const magicLink = await magicLinkProvider.generateMagicLink(
-    user._id.toString(),
-    state
-  );
+  const magicLink = await magicLinkProvider.generateMagicLink(user._id, state);
 
-  // NEW: Produce Kafka event instead of direct send
   try {
-    await producer.connect();
     const token = new URL(magicLink).searchParams.get('token') || '';
     await producer.send({
       topic: 'email-events',
@@ -163,13 +154,8 @@ export async function handleLogin(
         },
       ],
     });
-  } catch (error: unknown) {
-    const err = error as { message?: string };
-    throw new Error(
-      `Failed to send magic link: ${err.message ?? 'Unknown error'}`
-    );
-  } finally {
-    await producer.disconnect();
+  } catch (error) {
+    throw new Error(`Failed to send magic link: ${error.message}`);
   }
 
   return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
@@ -186,7 +172,7 @@ export async function handleLogin(
  * @returns Session ID and redirect URL
  * @throws Error if action is invalid
  */
-export function handleMagicLinkAction(
+export async function handleMagicLinkAction(
   action: string | null,
   email: string,
   firstName: string | undefined,
@@ -201,9 +187,9 @@ export function handleMagicLinkAction(
           'First name and last name are required for registration'
         );
       }
-      return handleRegistration(email, firstName, lastName, res, state);
+      return await handleRegistration(email, firstName, lastName, res, state);
     case 'login':
-      return handleLogin(email, res, state);
+      return await handleLogin(email, res, state);
     default:
       throw new Error('Invalid magic link action');
   }
@@ -214,10 +200,9 @@ export function handleMagicLinkAction(
  * @param error - Error object from magic link process
  * @param res - Express response object
  */
-export const handleError = (error: unknown, res: Response): void => {
-  const err = error as { message?: string };
+export const handleError = (error: Error, res: Response): void => {
   const errorMessage = encodeURIComponent(
-    err.message || 'An unexpected error occurred'
+    error.message || 'An unexpected error occurred'
   );
   res.redirect(`${FRONTEND_URL}/login?error=${errorMessage}`);
 };
@@ -269,10 +254,12 @@ export const initializeMagicLinkFlow = (action: string) => {
         sameSite: 'lax' as const,
       };
 
-      res.setHeader('Set-Cookie', [
+      const cookies = [
         serializeCookie('magic_state', state, cookieOptions),
         serializeCookie('magic_action', action, cookieOptions),
-      ]);
+      ];
+
+      res.setHeader('Set-Cookie', cookies);
 
       const { redirectUrl } = await handleMagicLinkAction(
         action,
