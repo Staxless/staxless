@@ -15,7 +15,7 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }, 
+  },
   "ts-node": {
     "esm": true,
     "transpileOnly": true,
