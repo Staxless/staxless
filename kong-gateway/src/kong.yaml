@@ -174,7 +174,7 @@ services:
     routes:
       - name: cms-admin-route
         methods: [GET, POST, PUT, DELETE]
-        paths: [/admin/(/.+)?]
+        paths: [/admin(/.+)?]
         strip_path: false
         preserve_host: true
         plugins:
