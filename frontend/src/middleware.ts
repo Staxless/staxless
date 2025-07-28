@@ -1,129 +1,120 @@
 /**
  * @file Next.js Middleware
- * @module middleware
- * @description Middleware for handling authentication, CSRF protection, and route-specific behaviors.
+ * @description Middleware for authentication, CSRF protection, and route-specific behaviors.
  */
 
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getUser, type User } from './lib/validate-user';
 
-/**
- * Routes that should force a reload when navigating back
- * @constant {string[]}
- */
-const ROUTES_TO_RELOAD = ['/login', '/register', '/dashboard'];
-
-/**
- * Protected routes that require authentication
- * @constant {string[]}
- */
+const ROUTES_TO_RELOAD = ['/login', '/register', '/dashboard', ''];
 const PROTECTED_ROUTES = ['/dashboard', '/checkout'];
-
-/**
- * Protected routes that require admin access
- * @constant {string[]}
- */
 const ADMIN_ROUTES = ['/admin'];
+const prefetchCache = new Set<string>();
 
-/**
- * Validates CSRF for non-GET requests by checking Origin and Host headers
- */
 function isValidCsrf(request: NextRequest): boolean {
   if (request.method === 'GET') {
     return true;
   }
-
-  const originHeader = request.headers.get('Origin');
-  const hostHeader = request.headers.get('Host');
-  return !!(
-    originHeader &&
-    hostHeader &&
-    new URL(originHeader).host === hostHeader
-  );
+  const origin = request.headers.get('Origin');
+  const host = request.headers.get('Host');
+  return !!(origin && host && new URL(origin).host === host);
 }
 
-/**
- * Checks if the request targets a specific route
- */
-function matchesRoute(request: NextRequest, routes: string[]): boolean {
-  return routes.some((route) => request.nextUrl.pathname.startsWith(route));
+async function prefetchAdminDashboard(
+  user: User,
+  request: NextRequest
+): Promise<void> {
+  const cacheKey = `admin-prefetch:${user.id}`;
+  if (prefetchCache.has(cacheKey)) {
+    return;
+  }
+  try {
+    const response = await fetch(`${request.nextUrl.origin}/admin`, {
+      method: 'GET',
+      headers: { Accept: 'text/html', 'Cache-Control': 'max-age=3600' },
+    });
+    if (response.ok) {
+      prefetchCache.add(cacheKey);
+    }
+  } catch (err) {
+    throw new Error('Background prefetch failed:', err);
+  }
 }
 
-/**
- * Creates a redirect response to the specified path
- */
-function redirectTo(path: string, request: NextRequest): NextResponse {
-  return NextResponse.redirect(new URL(path, request.url));
-}
-
-/**
- * Middleware function to handle authentication and route-specific behaviors
- */
-export async function middleware(request: NextRequest): Promise<NextResponse> {
-  // Validate CSRF
-  if (!isValidCsrf(request)) {
-    return new NextResponse(null, { status: 403 });
+function handleRouteRedirect(
+  request: NextRequest,
+  user: User | null,
+  pathname: string
+): NextResponse | null {
+  if (
+    ADMIN_ROUTES.some((route) => pathname.startsWith(route)) &&
+    !user?.roles.includes('admin')
+  ) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  const user: User | null = await getUser();
-  const pathname = request.nextUrl.pathname;
-
-  // Handle admin routes
-  if (matchesRoute(request, ADMIN_ROUTES) && !user?.roles.includes('admin')) {
-    return redirectTo('/login', request);
-  }
-
-  // Handle auth pages for logged-in users
   if (
     (pathname.startsWith('/login') || pathname.startsWith('/register')) &&
     user
   ) {
-    return redirectTo('/dashboard', request);
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Handle protected routes
-  const isProtected = matchesRoute(request, PROTECTED_ROUTES);
+  const isProtected = PROTECTED_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
   if (isProtected && !user) {
-    return redirectTo('/login', request);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Handle subscription status for protected routes
   if (
     isProtected &&
     user &&
     user.subscription.status !== 'active' &&
     !pathname.startsWith('/checkout')
   ) {
-    return redirectTo('/checkout', request);
+    return NextResponse.redirect(new URL('/checkout', request.url));
   }
 
-  // Handle active subscription on checkout
   if (
     pathname.startsWith('/checkout') &&
-    user &&
-    user.subscription.status === 'active'
+    user?.subscription.status === 'active'
   ) {
-    return redirectTo('/dashboard', request);
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Set headers
-  const requestHeaders = new Headers(request.headers);
-  if (user) {
-    requestHeaders.set('x-user-info', JSON.stringify(user));
-  }
-  if (request.headers.get('referer') && ROUTES_TO_RELOAD.includes(pathname)) {
-    requestHeaders.set('x-reload-on-back', 'true');
-  }
-
-  return NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  return null;
 }
 
-/**
- * Configuration for the middleware
- */
+export async function middleware(request: NextRequest): Promise<NextResponse> {
+  if (!isValidCsrf(request)) {
+    return new NextResponse(null, { status: 403 });
+  }
+
+  const user = await getUser();
+  const pathname = request.nextUrl.pathname;
+
+  if (user?.roles.includes('admin') && !pathname.startsWith('/admin')) {
+    await prefetchAdminDashboard(user, request);
+  }
+
+  const redirectResponse = handleRouteRedirect(request, user, pathname);
+  if (redirectResponse) {
+    return redirectResponse;
+  }
+
+  const headers = new Headers(request.headers);
+  if (user) {
+    headers.set('x-user-info', JSON.stringify(user));
+  }
+  if (request.headers.get('referer') && ROUTES_TO_RELOAD.includes(pathname)) {
+    headers.set('x-reload-on-back', 'true');
+  }
+
+  return NextResponse.next({ request: { headers } });
+}
+
 export const config = {
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
