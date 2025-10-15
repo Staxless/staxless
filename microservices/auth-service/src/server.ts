@@ -12,6 +12,8 @@ import express, {
   type Request,
   type Response,
 } from 'express';
+import { closeDatabase, initializeDatabase } from './config/db-config';
+import { auth, initializeLucia } from './config/lucia-config';
 import { startAuthConsumer } from './consumers';
 import authRoutes from './routes/auth-router';
 import healthCheckRoutes from './routes/health-router';
@@ -85,8 +87,33 @@ const PORT = process.env.PORT || 8080;
  * Starts the Express server on the specified port.
  * @remarks Logs a message when the server is running.
  */
-app.listen(PORT, () => {
-  startAuthConsumer().catch(() => {
-    // Error starting consumer is intentionally ignored for production safety
-  });
-});
+async function startServer() {
+  try {
+    // Initialize database and collections
+    await initializeDatabase();
+
+    await initializeLucia();
+
+    // Start Kafka consumer
+    await startAuthConsumer();
+
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+    // Handle graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('Received SIGTERM. Shutting down gracefully...');
+      server.close(async () => {
+        await closeDatabase();
+        console.log('Server shut down');
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

@@ -7,6 +7,7 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import { initializeDatabase } from './config/db-config';
 import { startUserConsumer } from './consumers';
 import healthCheckRoutes from './routes/health-router';
 import userRoutes from './routes/user-routes';
@@ -59,6 +60,11 @@ app.use('/', userRoutes);
  * Starts the Express server on the specified port.
  * @remarks Logs a message when the server is running.
  */
-app.listen(PORT, () => {
-  startUserConsumer();
+app.listen(PORT, async () => {
+  try {
+    await initializeDatabase();
+    await startUserConsumer();
+  } catch (error) {
+    throw new Error(`Failed to start server: ${(error as Error).message}`);
+  }
 });

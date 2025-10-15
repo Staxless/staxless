@@ -1,17 +1,36 @@
-import { MongoClient } from 'mongodb';
+/**
+ * @file db-config.ts
+ * @description Initializes and exports the shared MongoDB database connection for the auth service.
+ */
 
-const DATABASE_NAME = 'database';
-const MONGO_URL = `mongodb://mongodb-service:27017/${DATABASE_NAME}`;
+import createDatabase, {
+  type Database,
+  type DatabaseConnectionParams,
+} from '../lib/database';
+import { createMongoDatabase } from './mongo-db-client';
 
-export async function connectDB(): Promise<MongoClient> {
-  const client = new MongoClient(MONGO_URL, {
-    connectTimeoutMS: 10_000,
-    serverSelectionTimeoutMS: 10_000,
-  });
-  await client.connect();
+/**
+ * Database connection parameters
+ */
+const dbParams: DatabaseConnectionParams = {
+  uri: process.env.DATABASE_URL || 'mongodb://mongodb-service:27017',
+  dbName: process.env.DATABASE_NAME || 'auth_db',
+};
 
-  client.on('error', (_err) => {
-    // Intentionally ignore MongoDB client errors here (handled elsewhere)
-  });
-  return client;
+/**
+ * Shared database instance
+ */
+const db: Database = createDatabase(createMongoDatabase(dbParams));
+
+/**
+ * Initializes the database connection on service startup
+ * @returns {Promise<void>}
+ */
+export async function initializeDatabase(): Promise<void> {
+  await db.connect();
 }
+
+/**
+ * Exports the database instance for use in other modules
+ */
+export const database = db;

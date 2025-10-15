@@ -1,6 +1,10 @@
-import type { Db, ObjectId } from 'mongodb';
-import { ObjectId as MongoObjectId } from 'mongodb';
-import { connectDB } from '../config/db-config.js';
+/**
+ * @file user-model.ts
+ * @description Manages the MongoDB user collection operations using the shared database service.
+ */
+
+import { type Collection, ObjectId as MongoObjectId } from 'mongodb';
+import { database } from '../config/db-config';
 
 export interface UserType {
   _id: string;
@@ -71,50 +75,46 @@ const userSchema = {
   },
 };
 
-let db: Db;
-
-const initializeDatabase = async () => {
-  const connection = await connectDB();
-  db = connection.db(process.env.DATABASE_NAME);
+const initializeCollection = async (): Promise<Collection> => {
+  const db = database.getClient();
   const collections = await db.listCollections({ name: 'users' }).toArray();
   if (collections.length === 0) {
     await db.createCollection('users', {
       validator: { $jsonSchema: userSchema },
     });
   } else {
-    // Update validator for existing collection
     await db.command({
       collMod: 'users',
       validator: { $jsonSchema: userSchema },
     });
   }
+  return db.collection('users');
 };
 
-initializeDatabase().catch(() => {
-  // Ignore DB initialization errors at startup (handled elsewhere)
-});
-
 export const User = {
-  async create(userData: Omit<UserType, '_id'> & { _id?: ObjectId }) {
+  async create(userData: Omit<UserType, '_id'> & { _id?: MongoObjectId }) {
+    const collection = await initializeCollection();
     userData._id = userData._id || new MongoObjectId();
     userData.created_at = userData.created_at || new Date();
     userData.subscription = userData.subscription || {
       type: 'free',
       startDate: new Date(),
     };
-    const result = await db.collection('users').insertOne(userData);
+    const result = await collection.insertOne(userData);
     return result;
   },
 
   async findOne(query: Partial<UserType>) {
-    return await db.collection('users').findOne(query);
+    const collection = await initializeCollection();
+    return await collection.findOne(query);
   },
 
   async updateSubscription(
-    id: string | ObjectId,
+    id: string | MongoObjectId,
     subscriptionData: UserType['subscription']
   ) {
-    return await db.collection('users').updateOne(
+    const collection = await initializeCollection();
+    return await collection.updateOne(
       { _id: id },
       {
         $set: {
@@ -126,6 +126,11 @@ export const User = {
   },
 
   async updateOne(query: { _id: string }, update: Partial<UserType>) {
-    return await db.collection('users').updateOne(query, update);
+    const collection = await initializeCollection();
+    return await collection.updateOne(query, update);
   },
 };
+
+initializeCollection().catch(() => {
+  // Ignore DB initialization errors at startup (handled elsewhere)
+});
