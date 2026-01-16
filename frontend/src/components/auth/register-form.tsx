@@ -105,14 +105,12 @@ export function RegisterForm() {
       );
       setSuccess(response.data.message);
 
-      if ('cookieStore' in window) {
+      if (window.cookieStore) {
         await window.cookieStore.set({
           name: 'csrf_token',
           value: csrfToken,
           path: '/',
-          maxAge: 900,
           sameSite: 'lax',
-          secure: true,
         });
       } else {
         // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
@@ -347,16 +345,9 @@ export function RegisterForm() {
         {providers?.map((provider) => (
           <OAuthButton
             action="register"
-            className="w-full"
-            formData={formData}
             key={provider.name}
             onRedirect={handleOAuthRedirect}
             provider={provider.name}
-            style={{
-              backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
-              borderColor: BRAND_CONFIG.brand.colors.border,
-              color: BRAND_CONFIG.brand.colors.textPrimary,
-            }}
           />
         ))}
       </div>

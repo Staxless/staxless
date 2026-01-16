@@ -91,8 +91,8 @@ export default async function DashboardPage() {
                 Dashboard
               </h1>
               <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-                Welcome back, {user.name}! Here's what's happening with your
-                SaaS.
+                Welcome back, {user.name}! Here&apos;s what&apos;s happening
+                with your SaaS.
               </p>
             </div>
 

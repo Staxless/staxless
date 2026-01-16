@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LoginForm } from '@/components/auth/login-form';
 import Logo from '@/components/shared/logo';
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Login',
 };
 

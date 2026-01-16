@@ -38,7 +38,7 @@ function parseResponseText(responseText: string): unknown {
   try {
     return JSON.parse(responseText);
   } catch (_parseError) {
-    throw new Error(`Invalid JSON response from server: ${responseText}`);
+    throw new Error(`Invalid JSON response from server: ${_parseError}`);
   }
 }
 
@@ -50,7 +50,7 @@ function saveProvidersToSession(data: Provider[]): void {
   try {
     sessionStorage.setItem('oauthProviders', JSON.stringify(data));
   } catch (_error) {
-    // Intentional no-op: silently ignore session storage failures
+    throw new Error(`Failed to save providers to session storage: ${_error}`);
   }
 }
 
@@ -79,6 +79,7 @@ function loadFromSessionStorage(): Provider[] | null {
     }
   } catch (_err) {
     sessionStorage.removeItem('oauthProviders');
+    throw new Error(`Failed to load providers from session storage: ${_err}`);
   }
   return null;
 }

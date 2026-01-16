@@ -40,7 +40,7 @@ export async function logout(): Promise<LogoutResult> {
 
   try {
     const response = await axios.post(
-      'http://front-gate:8000/auth/logout',
+      'http://kong-api-gateway:8000/auth/logout',
       {},
       {
         headers: {
@@ -55,7 +55,7 @@ export async function logout(): Promise<LogoutResult> {
       return { success: true };
     }
     return { success: false, error: 'Sign out failed' };
-  } catch (_error) {
+  } catch {
     return { success: false, error: 'Error during sign out' };
   }
 }

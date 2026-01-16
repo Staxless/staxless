@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react'; // Add Suspense import
 import { RegisterForm } from '@/components/auth/register-form';
 import Logo from '@/components/shared/logo';
 import {
@@ -10,7 +12,10 @@ import {
 } from '@/components/ui/card';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-export const metadata = {
+// Force the page to be dynamic to avoid prerendering issues
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
   title: 'Register',
 };
 
@@ -56,7 +61,9 @@ export default function RegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RegisterForm />
+            <Suspense fallback={<div>Loading registration form...</div>}>
+              <RegisterForm />
+            </Suspense>
           </CardContent>
         </Card>
 
