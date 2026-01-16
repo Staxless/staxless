@@ -1,30 +1,55 @@
 # Architecture Overview
 
-Staxless is built with modularity and scalability in mind, using a microservices approach that's easy to understand and extend. Think of it as a well-organized toolbox where each tool (service) has a specific job, and they all work together seamlessly. Here's a friendly breakdown to help you visualize the big picture.
+Staxless is built with modularity and scalability in mind, using a clean microservices approach that's straightforward to understand and easy to extend. Think of it as a well-organized toolbox — each tool (service) has a clear job, and they all work together smoothly.
 
 ## Core Components
 
-- **Frontend**: A Next.js app in `frontend/` that handles the user interface. It uses React for dynamic components, Tailwind CSS for styling, and shadcn/ui for consistent, accessible UI elements. This is where users interact with your SaaS—login, dashboard, checkout, and more.
-- **API Gateway**: Powered by Kong in `kong-gateway/`, this acts as the "front door" for all API requests. It routes traffic securely, handles authentication, and enforces rules like rate limiting or RBAC (role-based access control).
-- **Microservices**: These are the backend workhorses, each in `microservices/`:
-  - **Auth Service**: Manages logins via OAuth or magic links.
-  - **User Service**: Stores and updates user data, including subscriptions.
-  - **Stripe Service**: Integrates payments and handles webhooks.
-  - **Email Service**: Sends emails using Mailgun.
-  - **CMS Service**: Uses Payload CMS for managing content like users and media.
-- **Event Streaming**: Kafka handles asynchronous communication—e.g., auth triggers an email event. This keeps services decoupled and responsive.
-- **Database**: MongoDB stores persistent data like users and content. It's configured for easy scaling.
-- **Networking**: Two Docker networks separate traffic: `frontend` for public-facing (e.g., UI to Kong) and `backend` for internal (e.g., services to MongoDB/Kafka). This enhances security.
+- **Frontend**  
+  A Next.js application (`frontend/`) that handles the entire user interface.  
+  Built with React, Tailwind CSS, and shadcn/ui components for modern, accessible, and beautiful UI.
 
-## How It All Connects
+- **API Gateway**  
+  Powered by **Kong** (`kong-gateway/`).  
+  Acts as the single entry point for all API traffic. Handles routing, authentication, rate limiting, and role-based access control (RBAC).
 
-Requests start at the frontend, go through Kong (which checks permissions), hit the relevant microservice, and may trigger Kafka events for other services. Data flows to MongoDB as needed. This setup allows you to scale individual parts without overhauling everything.
+- **Microservices** (located in `microservices/`)
+
+  - **Auth Service** — Handles login flows (OAuth providers + magic links)
+  - **User Service** — Manages user profiles, settings, and subscription status
+  - **Stripe Service** — Processes payments, creates checkout sessions, and handles Stripe webhooks
+  - **Email Service** — Sends transactional emails (primarily triggered via events)
+
+- **Event Streaming**  
+  **Kafka** enables reliable, asynchronous communication between services.  
+  Example: when a user signs up → auth service publishes an event → email service sends welcome email.
+
+- **Database**  
+  **MongoDB** — Stores all persistent data (users, subscriptions, etc.).  
+  Simple to scale horizontally when needed.
+
+- **Networking**  
+  Two separate Docker networks for better security:
+  - `frontend` → public-facing communication (browser ↔ Kong ↔ frontend)
+  - `backend` → internal-only (services ↔ MongoDB, Kafka, each other)
+
+## How It All Connects (Request Flow)
+
+1. User interacts with the Next.js frontend
+2. Frontend makes API calls to Kong (`localhost:8000` / your-domain:8000)
+3. Kong authenticates (via `x-user-info` header), applies rate limits & RBAC
+4. Kong routes the request to the correct microservice
+5. Microservice processes request, reads/writes to MongoDB if needed
+6. When appropriate, services publish events to Kafka
+7. Other services consume those events (e.g. email sending, analytics, etc.)
+
+This decoupled design makes the system resilient and easy to scale.
 
 ## Why This Architecture?
 
-Scalability: Add replicas to services like auth or user for high traffic.
-Security: Kong and RBAC protect endpoints; networks isolate traffic.
-Flexibility: Easy to swap providers (e.g., email from Mailgun to SendGrid) or add services.
-Developer-Friendly: Docker Compose for local dev, with hot reloading and clear separation of concerns.
+- **Scalability** — You can scale individual services (add replicas of auth, user, etc.) independently
+- **Security** — Kong centralizes auth & rate limiting; internal network isolates databases & message queues
+- **Flexibility** — Easy to change providers (Stripe → Lemon Squeezy, Mailgun → Resend, etc.) or add brand new services
+- **Developer Experience** — Local development with Docker Compose, hot reloading, clear separation of concerns
 
-For details on specific services, check out the Services section!
+Want to dive deeper into any specific service?  
+Check the [Services section](./services/) for detailed documentation on each component.
