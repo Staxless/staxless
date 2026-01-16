@@ -1,4 +1,5 @@
 import { Mail, Sparkles } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Logo from '@/components/shared/logo';
 import {
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Magic Link Sent',
 };
 

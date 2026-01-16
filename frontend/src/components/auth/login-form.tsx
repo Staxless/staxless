@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { AlertCircle, Mail, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 import OAuthButton from '@/components/auth/oauth-button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -27,7 +27,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [email, setEmail] = useState<string>('');
-  const router = useRouter();
+  // const router = useRouter();
   const { providers, isLoading, error: providersError } = useProviders();
 
   // Generate CSRF token
@@ -42,7 +42,8 @@ export function LoginForm() {
     if (url === 'https://localhost:3000/session') {
       // No redirect needed for local session
     } else {
-      router.push(url);
+      window.location.href = url;
+      // router.push(url);
     }
   };
 
@@ -63,14 +64,12 @@ export function LoginForm() {
       );
       setSuccess(response.data.message);
 
-      if ('cookieStore' in window) {
+      if (window.cookieStore) {
         await window.cookieStore.set({
           name: 'csrf_token',
           value: csrfToken,
           path: '/',
-          maxAge: 900,
           sameSite: 'lax',
-          secure: true,
         });
       } else {
         // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API

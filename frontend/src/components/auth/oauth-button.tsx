@@ -8,12 +8,9 @@
 
 import { Apple, Facebook, Github, Gitlab, Twitch, Twitter } from 'lucide-react';
 import type { CSSProperties } from 'react';
-// External imports
 import { useState } from 'react';
 import { FaBitbucket, FaDiscord, FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import { SiAuth0, SiOkta } from 'react-icons/si';
-
-// Internal imports
 import { Button } from '@/components/ui/button';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
@@ -75,8 +72,9 @@ export default function OAuthButton({
   className,
   style,
 }: OAuthButtonProps): React.ReactElement {
+  // @ts-check-ignore
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [_error, setError] = useState<string | null>(null);
 
   const isConfigured = provider in providerConfig;
   const { icon: Icon } = isConfigured
@@ -116,7 +114,6 @@ export default function OAuthButton({
     const r = Number.parseInt(hex.slice(1, 3), 16);
     const g = Number.parseInt(hex.slice(3, 5), 16);
     const b = Number.parseInt(hex.slice(5, 7), 16);
-    // Calculate luminance
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance < 0.5;
   };
@@ -126,33 +123,40 @@ export default function OAuthButton({
     : '#000000';
 
   return (
-    <Button
-      aria-busy={isLoading}
-      aria-disabled={!isConfigured || isLoading}
-      aria-label={buttonText}
-      className={`w-full border-2 transition-all duration-200 hover:shadow-md ${className}`}
-      disabled={!isConfigured || isLoading}
-      onClick={handleClick}
-      style={{
-        backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
-        borderColor: BRAND_CONFIG.brand.colors.border,
-        color: textColor,
-        ...style,
-      }}
-      variant="outline"
-    >
-      {Icon && (
-        <Icon
-          aria-hidden="true"
-          className="mr-3 h-5 w-5"
-          style={{ color: textColor }}
-        />
+    <div className="space-y-2">
+      {error && (
+        <p className="text-red-500 text-sm" role="alert">
+          {error}
+        </p>
       )}
-      <span className="truncate">
-        {isLoading
-          ? 'Loading...'
-          : `Continue with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`}
-      </span>
-    </Button>
+      <Button
+        aria-busy={isLoading}
+        aria-disabled={!isConfigured || isLoading}
+        aria-label={buttonText}
+        className={`w-full border-2 transition-all duration-200 hover:shadow-md ${className}`}
+        disabled={!isConfigured || isLoading}
+        onClick={handleClick}
+        style={{
+          backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
+          borderColor: BRAND_CONFIG.brand.colors.border,
+          color: textColor,
+          ...style,
+        }}
+        variant="outline"
+      >
+        {Icon && (
+          <Icon
+            aria-hidden="true"
+            className="mr-3 h-5 w-5"
+            style={{ color: textColor }}
+          />
+        )}
+        <span className="truncate">
+          {isLoading
+            ? 'Loading...'
+            : `Continue with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`}
+        </span>
+      </Button>
+    </div>
   );
 }

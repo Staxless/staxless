@@ -3,22 +3,18 @@
  * @description Provides a button component for user sign out functionality
  * @module components/SignOutButton
  */
-
 'use client';
 
 import { useRouter } from 'next/navigation';
-// External imports
 import { useState } from 'react';
-
-// Internal imports
 import { Button } from '@/components/ui/button';
 import { logout } from '@/lib/signout-user';
 
 /**
  * @description SignOutButton component for handling user sign out
- * @returns {JSX.Element} The rendered sign out button
+ * @returns The rendered sign out button
  */
-export function SignOutButton(): JSX.Element {
+export function SignOutButton() {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -35,7 +31,7 @@ export function SignOutButton(): JSX.Element {
       } else {
         // Intentionally left blank: no action needed if sign out fails
       }
-    } catch (_error) {
+    } catch {
       // Intentionally left blank: error is handled elsewhere or not needed
     } finally {
       setIsSigningOut(false);
