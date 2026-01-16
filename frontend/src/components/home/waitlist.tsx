@@ -10,7 +10,7 @@ import { Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
+// import { toast } from '@/components/ui/use-toast';
 
 /**
  * @function WaitlistHeroSimple
@@ -30,10 +30,10 @@ export default function WaitlistHeroSimple() {
     e.preventDefault();
     // Here you would typically send the email to your API
 
-    toast({
-      title: "You're on the list!",
-      description: "We'll notify you when we launch. Stay tuned!",
-    });
+    // toast({
+    //   title: "You're on the list!",
+    //   description: "We'll notify you when we launch. Stay tuned!",
+    // });
     setEmail('');
   };
 

@@ -58,7 +58,7 @@ export default function Pricing() {
         const products = await getProducts();
         setPlans(products);
       } catch (_error) {
-        // Intentionally left blank: no action needed on error
+        throw new Error(_error as string);
       } finally {
         setIsLoading(false);
       }
