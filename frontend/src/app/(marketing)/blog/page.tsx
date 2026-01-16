@@ -1,209 +1,199 @@
-'use client';
+export const revalidate = 60;
+// Force dynamic rendering to ensure the function runs
+export const dynamic = 'force-dynamic';
 
-import { Calendar, FileText, Tag } from 'lucide-react';
-import Link from 'next/link';
-import Footer from '@/components/shared/footer';
-import Header from '@/components/shared/header';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { getAllBlogSlugs, getBlogContent } from '@/content/blog-content';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import type { Metadata } from 'next';
+import BlogClient from '@/components/blog/blog-client';
+import { type BlogPostPayloadItem, getPublishedPosts } from '@/lib/payload';
 
-// Define type for blog post to ensure icon is a React component
-type BlogPost = {
+// Define types for rich text nodes
+type RichTextNode = {
+  text?: string;
+  children?: RichTextNode[];
+  [key: string]: unknown;
+};
+
+// Define extractPlainText function
+function extractPlainText(nodes: unknown): string {
+  if (!(nodes && Array.isArray(nodes))) return '';
+
+  return (nodes as RichTextNode[])
+    .map((node: RichTextNode) => {
+      if (node.text) {
+        return node.text;
+      }
+      if (node.children) {
+        return extractPlainText(node.children);
+      }
+      return '';
+    })
+    .join(' ')
+    .trim();
+}
+
+export const metadata: Metadata = {
+  title: 'Blog | Latest Articles and Insights',
+  description:
+    'Discover our latest blog posts, articles, and insights on technology, development, and industry trends.',
+  openGraph: {
+    title: 'Blog | Latest Articles and Insights',
+    description:
+      'Discover our latest blog posts, articles, and insights on technology, development, and industry trends.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blog | Latest Articles and Insights',
+    description:
+      'Discover our latest blog posts, articles, and insights on technology, development, and industry trends.',
+  },
+};
+
+export interface BlogPost {
   id: string;
   title: string;
   description: string;
   slug: string;
-  icon: React.ComponentType<{
-    className?: string;
-    style?: React.CSSProperties;
-  }>;
   publishedDate: string;
-  category: string;
-};
+  category: { name: string; slug: string };
+  image?: { url: string; alt?: string };
+  metaDescription?: string;
+  readTime?: number;
+}
 
-// Fetch all blog posts dynamically
-const blogPosts: BlogPost[] = getAllBlogSlugs()
-  .map((slug) => getBlogContent(slug))
-  .filter(
-    (post): post is NonNullable<ReturnType<typeof getBlogContent>> =>
-      post !== null
-  )
-  .map((post) => ({
-    id: post.title.toLowerCase().replace(/\s+/g, '-'),
-    title: post.title,
-    description: post.metaDescription,
-    slug:
-      getAllBlogSlugs().find((s) => getBlogContent(s)?.title === post.title) ||
-      '',
-    icon: FileText, // Explicitly set to FileText component
-    publishedDate: post.publishedDate,
-    category: post.category,
-  }));
+async function getBlogPosts(): Promise<BlogPost[]> {
+  console.log('=====================================');
+  console.log('🚀 getBlogPosts FUNCTION CALLED');
+  console.log('🕐 Time:', new Date().toISOString());
+  console.log('🌍 Environment:', process.env.NODE_ENV);
+  console.log('=====================================');
 
-export default function BlogPage() {
-  return (
-    <div
-      style={{
-        backgroundColor: BRAND_CONFIG.brand.colors.background,
-        minHeight: '100vh',
-      }}
-    >
-      <Header user={null} />
+  try {
+    console.log('📞 About to call getPublishedPosts...');
+    const posts = await getPublishedPosts(1, 100);
 
-      <div className="pt-20">
-        {/* Hero Section */}
-        <section className="px-4 py-16">
-          <div className="container mx-auto max-w-4xl text-center">
-            <div className="mb-6 flex justify-center">
-              <div
-                className="rounded-full p-4"
-                style={{
-                  backgroundColor:
-                    BRAND_CONFIG.brand.colors.backgroundSecondary,
-                }}
-              >
-                <FileText
-                  className="h-12 w-12"
-                  style={{ color: BRAND_CONFIG.brand.colors.primary }}
-                />
-              </div>
-            </div>
-            <h1
-              className="mb-6 font-bold text-4xl md:text-5xl"
-              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-            >
-              Blog
-            </h1>
-            <p
-              className="text-xl"
-              style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
-            >
-              Explore our latest articles, tutorials, and tips to stay informed
-              and inspired
-            </p>
-          </div>
-        </section>
+    console.log(`✅ getPublishedPosts returned ${posts.length} posts`);
 
-        <div className="container mx-auto px-4 pb-20">
-          {/* Blog Posts Grid */}
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {blogPosts.map((post) => (
-              <Link href={`/blog/${post.slug}`} key={post.id}>
-                <Card
-                  className="h-full cursor-pointer border transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                  style={{
-                    backgroundColor:
-                      BRAND_CONFIG.brand.colors.backgroundSecondary,
-                    borderColor: BRAND_CONFIG.brand.colors.border,
-                  }}
-                >
-                  <CardHeader>
-                    <div className="mb-2 flex items-center space-x-3">
-                      <post.icon
-                        className="h-6 w-6"
-                        style={{ color: BRAND_CONFIG.brand.colors.primary }}
-                      />
-                      <CardTitle
-                        style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-                      >
-                        {post.title}
-                      </CardTitle>
-                    </div>
-                    <CardDescription
-                      style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-                    >
-                      {post.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="text-sm"
-                        style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-                      >
-                        Published: {post.publishedDate}
-                      </span>
-                      <span
-                        className="rounded px-2 py-1 text-sm"
-                        style={{
-                          backgroundColor:
-                            BRAND_CONFIG.brand.colors.backgroundTertiary,
-                          color: BRAND_CONFIG.brand.colors.textMuted,
-                        }}
-                      >
-                        {post.category}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+    if (posts.length === 0) {
+      console.warn('⚠️ WARNING: No posts returned from getPublishedPosts');
+      console.warn('⚠️ This could mean:');
+      console.warn('   1. No posts in database');
+      console.warn('   2. No posts with _status: "published"');
+      console.warn('   3. No posts with publishedDate set');
+      console.warn('   4. API connection issue');
+      return [];
+    }
 
-          {/* Contact Section */}
-          <Card
-            className="mx-auto mt-16 max-w-2xl border"
-            style={{
-              backgroundColor: BRAND_CONFIG.brand.colors.backgroundSecondary,
-              borderColor: BRAND_CONFIG.brand.colors.border,
-            }}
-          >
-            <CardHeader className="text-center">
-              <CardTitle
-                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-              >
-                Have Feedback or Ideas?
-              </CardTitle>
-              <CardDescription
-                style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-              >
-                We’d love to hear your thoughts or suggestions for future blog
-                posts
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="space-y-4">
-                <div>
-                  <h4
-                    className="mb-2 font-medium"
-                    style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-                  >
-                    Contact Information
-                  </h4>
-                  <div
-                    className="space-y-1 text-sm"
-                    style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-                  >
-                    <p>Email: {BRAND_CONFIG.company.email}</p>
-                    <p>Phone: {BRAND_CONFIG.company.phone}</p>
-                    <p>Address: {BRAND_CONFIG.company.address}</p>
-                  </div>
-                </div>
-                <div
-                  className="border-t pt-4"
-                  style={{ borderColor: BRAND_CONFIG.brand.colors.border }}
-                >
-                  <p
-                    className="text-sm"
-                    style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-                  >
-                    We typically respond within 2-3 business days
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+    // Log first post for debugging
+    console.log('📝 First post sample:', {
+      id: posts[0].id,
+      title: posts[0].title,
+      slug: posts[0].slug,
+      hasCategory: !!posts[0].category,
+      categoryType: typeof posts[0].category,
+      hasDescription: !!posts[0].description,
+      hasImage: !!posts[0].image,
+    });
 
-      <Footer />
-    </div>
-  );
+    const mappedPosts: BlogPost[] = posts.map(
+      (post: BlogPostPayloadItem, index: number): BlogPost => {
+        try {
+          // Extract and validate readTime
+          const readTime: number | undefined =
+            typeof post.readTime === 'number' ? post.readTime : undefined;
+
+          // Extract and validate category
+          const category =
+            typeof post.category === 'string'
+              ? { name: 'Uncategorized', slug: 'uncategorized' }
+              : {
+                  name: post.category?.name || 'Uncategorized',
+                  slug: post.category?.slug || 'uncategorized',
+                };
+
+          // Extract and validate image - CONVERT TO RELATIVE URL
+          const image =
+            typeof post.image === 'string'
+              ? undefined
+              : post.image?.url
+                ? {
+                    // Remove domain from URL to make it relative
+                    url: post.image.url.replace(/^https?:\/\/[^/]+/, ''),
+                    alt: post.image.alt,
+                  }
+                : undefined;
+
+          // Extract description
+          const description = post.description
+            ? extractPlainText(post.description)
+            : post.metaDescription || 'No description available';
+
+          if (index === 0) {
+            console.log('✅ Successfully mapped first post:', {
+              title: post.title,
+              category: category.name,
+              hasImage: !!image,
+              imageUrl: image?.url,
+              descriptionLength: description.length,
+            });
+          }
+
+          // Return the BlogPost object
+          return {
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            metaDescription: post.metaDescription,
+            readTime,
+            description,
+            category,
+            image,
+            publishedDate: new Date(post.publishedDate).toLocaleDateString(
+              'en-US',
+              {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }
+            ),
+          };
+        } catch (mappingError) {
+          console.error(`❌ Error mapping post ${index}:`, mappingError);
+          console.error('Post data:', JSON.stringify(post, null, 2));
+          throw mappingError;
+        }
+      }
+    );
+
+    console.log(`✅ Successfully mapped ${mappedPosts.length} posts`);
+    console.log('=====================================');
+    return mappedPosts;
+  } catch (error) {
+    console.error('=====================================');
+    console.error('❌ CRITICAL ERROR in getBlogPosts');
+    console.error('❌ Error:', error);
+    if (error instanceof Error) {
+      console.error('❌ Message:', error.message);
+      console.error('❌ Stack:', error.stack);
+    }
+    console.error('=====================================');
+    return [];
+  }
+}
+
+export default async function BlogPage() {
+  console.log('');
+  console.log('═════════════════════════════════════');
+  console.log('🎨 BlogPage COMPONENT RENDERING');
+  console.log('🕐 Time:', new Date().toISOString());
+  console.log('═════════════════════════════════════');
+
+  const posts = await getBlogPosts();
+
+  console.log('═════════════════════════════════════');
+  console.log(`📊 BlogPage passing ${posts.length} posts to client`);
+  console.log('═════════════════════════════════════');
+  console.log('');
+
+  return <BlogClient posts={posts} />;
 }

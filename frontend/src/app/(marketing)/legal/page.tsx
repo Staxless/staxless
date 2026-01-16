@@ -183,8 +183,8 @@ export default function LegalPage() {
               <CardDescription
                 style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
               >
-                We're here to help clarify any questions you may have about our
-                legal documents
+                We&apos;re here to help clarify any questions you may have about
+                our legal documents
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">

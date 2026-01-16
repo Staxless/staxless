@@ -69,6 +69,9 @@ export interface Config {
   collections: {
     user: User;
     media: Media;
+    'legal-docs': LegalDoc;
+    posts: Post;
+    categories: Category;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -77,6 +80,9 @@ export interface Config {
   collectionsSelect: {
     user: UserSelect<false> | UserSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'legal-docs': LegalDocsSelect<false> | LegalDocsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -154,6 +160,111 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-docs".
+ */
+export interface LegalDoc {
+  id: string;
+  /**
+   * Used in the URL (e.g. "privacy-policy"). Automatically generated from title.
+   */
+  title: string;
+  /**
+   * Short summary of the document purpose.
+   */
+  description?: string | null;
+  /**
+   * Used in the URL (e.g. "privacy-policy"). Automatically generated from title.
+   */
+  slug: string;
+  /**
+   * Used for display icon in the frontend. Match to your icon set.
+   */
+  icon: 'eye' | 'file-text' | 'cookie' | 'shield' | 'users' | 'scale';
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  image: string | Media;
+  category: string | Category;
+  tags?: string[] | null;
+  description?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  content: (
+    | {
+        code: string;
+        language?: ('js' | 'ts' | 'py' | 'html' | 'css' | 'java' | 'cpp' | 'other') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'code';
+      }
+    | {
+        content: {
+          [k: string]: unknown;
+        }[];
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richText';
+      }
+    | {
+        /**
+         * Enter MDX (Markdown with JSX) here. Will be rendered on the frontend.
+         */
+        mdxContent: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'mdx';
+      }
+  )[];
+  relatedPosts?: (string | Post)[] | null;
+  slug?: string | null;
+  authors: (string | User)[];
+  publishedDate: string;
+  metaDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  headline: string;
+  description: string;
+  posts?: (string | Post)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -166,6 +277,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'legal-docs';
+        value: string | LegalDoc;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -240,6 +363,78 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-docs_select".
+ */
+export interface LegalDocsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  slug?: T;
+  icon?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  image?: T;
+  category?: T;
+  tags?: T;
+  description?: T;
+  content?:
+    | T
+    | {
+        code?:
+          | T
+          | {
+              code?: T;
+              language?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richText?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        mdx?:
+          | T
+          | {
+              mdxContent?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  relatedPosts?: T;
+  slug?: T;
+  authors?: T;
+  publishedDate?: T;
+  metaDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  headline?: T;
+  description?: T;
+  posts?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

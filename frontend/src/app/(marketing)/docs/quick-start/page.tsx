@@ -55,10 +55,6 @@ const features = [
 ];
 
 export default function QuickStartPage() {
-  const _copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
   return (
     <div
       style={{
@@ -130,7 +126,7 @@ export default function QuickStartPage() {
               <CardTitle
                 style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
               >
-                What You'll Build
+                What You&apos;ll Build
               </CardTitle>
               <CardDescription
                 style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
@@ -233,7 +229,8 @@ export default function QuickStartPage() {
               <CardDescription
                 style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
               >
-                Now that you have your SaaS running, here's what to do next:
+                Now that you have your SaaS running, here&apos;s what to do
+                next:
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -307,7 +304,7 @@ export default function QuickStartPage() {
                     </p>
                   </div>
                 </Link>
-                <Link href="/docs/api/overview">
+                <Link href="/docs/api-overview">
                   <div
                     className="cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md"
                     style={{
@@ -346,7 +343,7 @@ export default function QuickStartPage() {
               className="mb-6"
               style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
             >
-              If you run into any issues, we're here to help
+              If you run into any issues, we&apos;re here to help
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
