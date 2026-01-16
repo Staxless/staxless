@@ -5,11 +5,12 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types.js";
+import { loadSecret } from "../../lib/secrets-manager.js";
 
 const config: ProviderConfig = {
-  clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  clientId: loadSecret('GOOGLE_CLIENT_ID') ?? process.env.GOOGLE_CLIENT_ID ?? "",
+  clientSecret: loadSecret('GOOGLE_CLIENT_SECRET') ?? process.env.GOOGLE_CLIENT_SECRET ?? "",
   userInfoUrl: "https://www.googleapis.com/oauth2/v3/userinfo",
   scopes: ["profile", "email", "openid"],
   usePKCE: true,
@@ -39,7 +40,7 @@ export class GoogleProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("Google requires GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/oauth/google/callback";
+    const redirectUri = `${process.env.API_GATEWAY_URL}/oauth/google/callback`;
      
     return new arctic.Google(clientId, clientSecret, redirectUri);
   }

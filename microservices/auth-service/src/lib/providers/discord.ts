@@ -5,11 +5,12 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "../providerTypes";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types.js";
+import { loadSecret } from "../../lib/secrets-manager.js";
 
 const config: ProviderConfig = {
-  clientId: process.env.DISCORD_CLIENT_ID ?? "",
-  clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
+  clientId: loadSecret('DISCORD_CLIENT_ID') ?? process.env.DISCORD_CLIENT_ID ?? "",
+  clientSecret: loadSecret('DISCORD_CLIENT_SECRET') ?? process.env.DISCORD_CLIENT_SECRET ?? "",
   userInfoUrl: "https://discord.com/api/users/@me",
   scopes: ["identify", "email"],
   usePKCE: false,
@@ -39,7 +40,7 @@ export class DiscordProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("Discord requires DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/oauth/discord/callback";
+    const redirectUri = `${process.env.API_GATEWAY_URL}oauth/discord/callback`;
      
     return new arctic.Discord(clientId, clientSecret, redirectUri);
   }

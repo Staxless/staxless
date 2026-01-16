@@ -6,17 +6,18 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "../providerTypes";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types.js";
+import { loadSecret } from "../../lib/secrets-manager.js";
 
 const config: ProviderConfig = {
-  clientId: process.env.MICROSOFT_CLIENT_ID ?? "",
-  clientSecret: process.env.MICROSOFT_CLIENT_SECRET ?? "",
+  clientId: loadSecret('MICROSOFT_CLIENT_ID') ?? process.env.MICROSOFT_CLIENT_ID ?? "",
+  clientSecret: loadSecret('MICROSOFT_CLIENT_SECRET') ?? process.env.MICROSOFT_CLIENT_SECRET ?? "",
   userInfoUrl: "https://graph.microsoft.com/v1.0/me",
-  scopes: ["User.Read"],
+  scopes: ["User"],
   usePKCE: true,
 };
 
-/**
+/** 
  * Microsoft OAuth provider class.
  *
  * Extends the base Provider class to implement Microsoft-specific OAuth flow and user info normalization.
@@ -40,9 +41,9 @@ export class MicrosoftProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("Microsoft requires MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/oauth/microsoft/callback";
+    const redirectUri = `${process.env.API_GATEWAY_URL}/oauth/microsoft/callback`
      
-    return new arctic.MicrosoftEntraId(clientId, clientSecret, redirectUri, { tenantId: "common" });
+    return new arctic.MicrosoftEntraId(clientId, clientSecret, redirectUri, "common");
   }
 
   /**

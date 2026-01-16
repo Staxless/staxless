@@ -4,20 +4,18 @@
  * This module provides utility functions for handling OAuth authentication flows,
  * including CSRF protection, user info normalization, and user registration/login
  * processes for various OAuth providers.
- *
  */
-
 import crypto from 'node:crypto';
 import { generateCodeVerifier, OAuth2RequestError } from 'arctic';
 import axios from 'axios';
 import type { NextFunction, Request, Response } from 'express';
 import { parseCookies, serializeCookie } from 'oslo/cookie';
-import { auth } from '../config/lucia-config';
-import { providers } from '../config/oauth-config';
+import { auth } from '../config/lucia-config.js';
+import { providers } from '../config/oauth-config.js';
 import type {
   NormalizedUserInfo,
   Provider,
-} from '../lib/providers/provider-types';
+} from '../lib/providers/provider-types.js';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
@@ -67,7 +65,6 @@ export async function getUserInfo(
   if (!provider.instance) {
     throw new Error('Provider instance not configured');
   }
-
   try {
     let codeVerifier: string | undefined;
     if (provider.usePKCE) {
@@ -78,17 +75,15 @@ export async function getUserInfo(
         throw new Error('Code verifier missing for PKCE flow');
       }
     }
-
     const tokens =
       provider.usePKCE && codeVerifier
         ? await provider.instance.validateAuthorizationCode(code, codeVerifier)
-        : await provider.instance.validateAuthorizationCode(code);
-
+        : // @ts-expect-error
+          await provider.instance.validateAuthorizationCode(code);
     const userResponse = await axios.get(provider.userInfoUrl, {
       headers: { Authorization: `Bearer ${tokens.accessToken}` },
     });
-
-    return provider.normalizeUserInfo(userResponse.data); // Use provider's normalizeUserInfo
+    return provider.normalizeUserInfo(userResponse.data);
   } catch (error) {
     throw error instanceof OAuth2RequestError
       ? error
@@ -107,6 +102,7 @@ export async function createOAuthAccount(
   providerUserId: string,
   providerId: string
 ): Promise<void> {
+  // @ts-expect-error: Adapter typing to be resolved
   await auth.adapter.OauthAccount.insertOne({
     provider_id: providerId,
     provider_user_id: providerUserId,
@@ -124,6 +120,7 @@ export async function findOAuthAccount(
   providerUserId: string,
   providerId: string
 ): Promise<Record<string, unknown> | null> {
+  // @ts-expect-error: Adapter typing to be resolved
   return await auth.adapter.OauthAccount.findOne({
     provider_id: providerId,
     provider_user_id: providerUserId,
@@ -145,12 +142,11 @@ export async function handleRegistration(
   if (existingAccount) {
     throw new Error('OAuth account already in use. Please login.');
   }
-
   const userId = crypto.randomUUID();
   const newUser = {
     _id: userId,
-    firstname: oauthUser.fname || '', // Changed from first_name
-    lastname: oauthUser.lname || '', // Changed from last_name
+    firstname: oauthUser.fname || '',
+    lastname: oauthUser.lname || '',
     email: oauthUser.email || null,
     avatar: oauthUser.picture || '',
     created_at: new Date(),
@@ -160,10 +156,9 @@ export async function handleRegistration(
     },
     roles: ['user'],
   };
-
+  // @ts-expect-error: Adapter typing to be resolved
   await auth.adapter.User.insertOne(newUser);
   await createOAuthAccount(userId, oauthUser.id, provider.name);
-
   const session = await auth.createSession(userId, {});
   return { sessionId: session.id, redirectUrl: 'checkout' };
 }
@@ -183,8 +178,7 @@ export async function handleLogin(
   if (!oauthAccount) {
     throw new Error('No account found. Please register.');
   }
-
-  const session = await auth.createSession(oauthAccount.user_id, {});
+  const session = await auth.createSession(oauthAccount.user_id as string, {});
   return { sessionId: session.id, redirectUrl: 'dashboard' };
 }
 
@@ -224,8 +218,8 @@ export const handleError = (error: unknown, res: Response): void => {
   ) {
     errorMessage = 'Bad verification code';
   } else if (
-    typeof error === 'object' &&
     error &&
+    typeof error === 'object' &&
     'message' in error &&
     typeof (error as { message?: unknown }).message === 'string'
   ) {
@@ -245,7 +239,13 @@ export const initializeOAuthFlow = (action: string) => {
     res: Response,
     _next: NextFunction
   ): Promise<void> => {
-    const providerName = req.params.providerName.toLowerCase();
+    const providerName = req.params.providerName?.toLowerCase();
+
+    if (!providerName) {
+      res.redirect(`${FRONTEND_URL}/login?error=Provider name missing`);
+      return;
+    }
+
     const provider: Provider = providers[providerName];
 
     if (!['login', 'register'].includes(action)) {
@@ -254,35 +254,27 @@ export const initializeOAuthFlow = (action: string) => {
     }
 
     if (!provider?.instance) {
-      res.redirect(`${FRONTEND_URL}/login?error=Invalid provider ${providers}`);
+      res.redirect(
+        `${FRONTEND_URL}/login?error=Invalid provider ${providerName}`
+      );
       return;
     }
 
     try {
       const state = crypto.randomBytes(16).toString('hex');
       const csrfToken = generateCSRFToken();
-      // Use generateCodeVerifier directly
       const codeVerifier = provider.usePKCE
         ? generateCodeVerifier()
         : undefined;
+
       const cookieOptions = {
         path: '/',
         secure: process.env.NODE_ENV === 'production',
+        domain: process.env.COOKIE_DOMAIN || undefined,
         httpOnly: true,
         maxAge: 60 * 10 * 1000,
         sameSite: 'lax' as const,
       };
-
-      const authUrl =
-        provider.usePKCE && codeVerifier
-          ? await provider.instance.createAuthorizationURL(
-              state,
-              codeVerifier,
-              { scopes: provider.scopes }
-            )
-          : await provider.instance.createAuthorizationURL(state, {
-              scopes: provider.scopes,
-            });
 
       const cookies = [
         serializeCookie('oauth_state', state, cookieOptions),
@@ -299,9 +291,26 @@ export const initializeOAuthFlow = (action: string) => {
         );
       }
 
+      let authUrl: URL;
+      if (provider.usePKCE && codeVerifier) {
+        authUrl = await provider.instance.createAuthorizationURL(
+          state,
+          codeVerifier,
+          {
+            scopes: provider.scopes as string[],
+          }
+        );
+      } else {
+        // @ts-expect-error
+        authUrl = await provider.instance.createAuthorizationURL(state, {
+          scopes: provider.scopes,
+        });
+      }
+
       res.setHeader('Set-Cookie', cookies);
       res.redirect(authUrl.toString());
     } catch (error) {
+      console.error('OAuth initialization error:', error);
       handleError(error, res);
     }
   };

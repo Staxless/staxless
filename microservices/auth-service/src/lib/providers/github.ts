@@ -5,11 +5,12 @@
  */
 
 import * as arctic from "arctic";
-import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types";
+import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types.js";
+import { loadSecret } from "../../lib/secrets-manager.js";
 
 const config: ProviderConfig = {
-  clientId: process.env.GITHUB_CLIENT_ID ?? "",
-  clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+  clientId: loadSecret('GITHUB_CLIENT_ID') ?? process.env.GITHUB_CLIENT_ID ?? "",
+  clientSecret: loadSecret('GITHUB_CLIENT_SECRET') ?? process.env.GITHUB_CLIENT_SECRET ?? "",
   userInfoUrl: "https://api.github.com/user",
   scopes: ["user:email"],
   usePKCE: false,
@@ -39,7 +40,7 @@ export class GitHubProvider extends Provider {
     if (!clientId || !clientSecret) {
       throw new Error("GitHub requires GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET");
     }
-    const redirectUri = "http://localhost:8000/oauth/github/callback";
+    const redirectUri = `${process.env.API_GATEWAY_URL}/oauth/github/callback`;  
      
     return new arctic.GitHub(clientId, clientSecret, { redirectURI: redirectUri });
   }

@@ -13,12 +13,12 @@
 import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
 import { parseCookies, serializeCookie } from 'oslo/cookie';
-import { auth } from '../config/lucia-config';
-import { magicLinkProvider } from '../config/magic-link-config';
+import { auth } from '../config/lucia-config.js';
+import { magicLinkProvider } from '../config/magic-link-config.js';
 import {
   handleError,
   initializeMagicLinkFlow,
-} from '../handlers/magic-link-handlers';
+} from '../handlers/magic-link-handlers.js';
 
 const router = Router();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -54,7 +54,7 @@ router.get(
 
       res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
-      handleError(error, res);
+      handleError(error as Error, res);
     }
   }
 );

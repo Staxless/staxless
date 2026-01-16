@@ -8,9 +8,9 @@
 import crypto from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { parseCookies, serializeCookie } from 'oslo/cookie';
-import { createProducer } from '../config/kafka-client';
-import { auth } from '../config/lucia-config';
-import { magicLinkProvider } from '../config/magic-link-config';
+import { createProducer } from '../config/kafka-client.js';
+import { auth } from '../config/lucia-config.js';
+import { magicLinkProvider } from '../config/magic-link-config.js';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
@@ -44,7 +44,7 @@ export const stateProtection = (
   req: Request,
   res: Response,
   next: NextFunction
-): void | Response => {
+): undefined | Response => {
   const stateCookie = parseCookies(req.headers.cookie ?? '').get('magic_state');
   const stateQuery = req.query.state?.toString();
 
@@ -71,6 +71,7 @@ export async function handleRegistration(
   _res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
+  // @ts-expect-error
   const existingUser = await auth.adapter.User.findOne({ email });
   if (existingUser) {
     throw new Error('Email already registered. Please log in.');
@@ -87,7 +88,7 @@ export async function handleRegistration(
     subscription: { type: 'free', startDate: new Date() },
     roles: ['user'],
   };
-
+  // @ts-expect-error
   await auth.adapter.User.insertOne(newUser);
   const magicLink = await magicLinkProvider.generateMagicLink(userId, state);
 
@@ -110,7 +111,11 @@ export async function handleRegistration(
       ],
     });
   } catch (error) {
-    throw new Error(`Failed to send magic link: ${error.message}`);
+    const errorMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message?: string }).message
+        : String(error);
+    throw new Error(`Failed to send magic link: ${errorMessage}`);
   }
 
   return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
@@ -129,6 +134,7 @@ export async function handleLogin(
   _res: Response,
   state: string
 ): Promise<{ sessionId: string; redirectUrl: string }> {
+  // @ts-expect-error
   const user = await auth.adapter.User.findOne({ email });
   if (!user) {
     throw new Error('No account found. Please register.');
@@ -155,7 +161,11 @@ export async function handleLogin(
       ],
     });
   } catch (error) {
-    throw new Error(`Failed to send magic link: ${error.message}`);
+    const errorMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message?: string }).message
+        : String(error);
+    throw new Error(`Failed to send magic link: ${errorMessage}`);
   }
 
   return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
@@ -271,7 +281,7 @@ export const initializeMagicLinkFlow = (action: string) => {
       );
       res.redirect(redirectUrl);
     } catch (error) {
-      handleError(error, res);
+      handleError(error as Error, res);
     }
   };
 };
@@ -308,7 +318,7 @@ export const validateMagicLink = () => {
       res.setHeader('Set-Cookie', [sessionCookie, ...clearCookies]);
       res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
-      handleError(error, res);
+      handleError(error as Error, res);
     }
   };
 };

@@ -6,7 +6,7 @@
 import { MongodbAdapter } from '@lucia-auth/adapter-mongodb';
 import { Lucia } from 'lucia';
 import type { Collection, Db } from 'mongodb';
-import { database } from './db-config';
+import { database } from './db-config.js';
 
 // Extend MongodbAdapter to include OauthAccount and MagicLink properties
 interface CustomMongodbAdapter extends MongodbAdapter {
@@ -35,6 +35,7 @@ export async function initializeLucia(): Promise<Lucia> {
         attributes: {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
+          domain: process.env.COOKIE_DOMAIN || undefined,
         },
       },
       getSessionAttributes: ({ country }: { country?: string }) => ({

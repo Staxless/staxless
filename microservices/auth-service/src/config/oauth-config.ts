@@ -20,9 +20,9 @@
  * // e.g., githubProvider.normalizeUserInfo(userInfo)
  */
 
-import { GitHubProvider } from '../lib/providers/github';
-import { GoogleProvider } from '../lib/providers/google';
-import type { Provider } from '../lib/providers/provider-types';
+import { GitHubProvider } from '../lib/providers/github.js';
+import { GoogleProvider } from '../lib/providers/google.js';
+import type { Provider } from '../lib/providers/provider-types.js';
 
 export const providers: { [key: string]: Provider } = {
   github: new GitHubProvider(),

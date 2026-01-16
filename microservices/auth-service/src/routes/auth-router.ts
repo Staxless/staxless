@@ -13,7 +13,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
 import { parseCookies } from 'oslo/cookie';
-import { auth } from '../config/lucia-config';
+import { auth } from '../config/lucia-config.js';
 
 export const router = Router();
 

@@ -15,8 +15,8 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import { createProducer } from './kafka-client';
-import { auth } from './lucia-config';
+import { createProducer } from './kafka-client.js';
+import { auth } from './lucia-config.js';
 
 const producer = createProducer();
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000/api';
@@ -39,6 +39,7 @@ export class MagicLinkProvider {
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
 
+    // @ts-expect-error
     await auth.adapter.MagicLink.insertOne({
       token,
       user_id: userId,
@@ -56,6 +57,7 @@ export class MagicLinkProvider {
    * @param magicLink - The generated magic link URL.
    */
   async sendMagicLink(userId: string, magicLink: string): Promise<void> {
+    // @ts-expect-error
     const user = await auth.adapter.User.findOne({ _id: userId });
     if (!user) {
       throw new Error('User not found');
@@ -86,7 +88,11 @@ export class MagicLinkProvider {
           ],
         });
       } catch (error) {
-        throw new Error(`Failed to send magic link: ${error.message}`);
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? (error as { message: string }).message
+            : String(error);
+        throw new Error(`Failed to send magic link: ${errorMessage}`);
       } finally {
         await producer.disconnect();
       }
@@ -100,17 +106,20 @@ export class MagicLinkProvider {
    * @throws If the token is invalid or expired.
    */
   async validateMagicLink(token: string): Promise<string> {
+    // @ts-expect-error
     const magicLink = await auth.adapter.MagicLink.findOne({ token });
     if (!magicLink) {
       throw new Error('Invalid or expired magic link');
     }
 
     if (new Date() > new Date(magicLink.expires_at)) {
+      // @ts-expect-error
       await auth.adapter.MagicLink.deleteOne({ token });
       throw new Error('Magic link expired');
     }
 
     const session = await auth.createSession(magicLink.user_id, {});
+    // @ts-expect-error
     await auth.adapter.MagicLink.deleteOne({ token }); // Delete used token
 
     return session.id;

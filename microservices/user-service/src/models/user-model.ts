@@ -2,9 +2,13 @@
  * @file user-model.ts
  * @description Manages the MongoDB user collection operations using the shared database service.
  */
-
-import { type Collection, ObjectId as MongoObjectId } from 'mongodb';
-import { database } from '../config/db-config';
+import {
+  type Collection,
+  type Db,
+  ObjectId as MongoObjectId,
+  type WithId,
+} from 'mongodb';
+import { database } from '../config/db-config.js';
 
 export interface UserType {
   _id: string;
@@ -75,62 +79,112 @@ const userSchema = {
   },
 };
 
-const initializeCollection = async (): Promise<Collection> => {
-  const db = database.getClient();
-  const collections = await db.listCollections({ name: 'users' }).toArray();
-  if (collections.length === 0) {
-    await db.createCollection('users', {
-      validator: { $jsonSchema: userSchema },
-    });
-  } else {
-    await db.command({
-      collMod: 'users',
-      validator: { $jsonSchema: userSchema },
-    });
+// Cache the collection to avoid re-initialization on every call
+let cachedCollection: Collection<UserType> | null = null;
+let isInitializing = false;
+let initializationPromise: Promise<Collection<UserType>> | null = null;
+
+/**
+ * Get or initialize the users collection
+ * Only creates/modifies collection schema once
+ */
+const getCollection = async (): Promise<Collection<UserType>> => {
+  // Return cached collection if available
+  if (cachedCollection) {
+    return cachedCollection;
   }
-  return db.collection('users');
+
+  // If already initializing, wait for that to complete
+  if (isInitializing && initializationPromise) {
+    return await initializationPromise;
+  }
+
+  // Start initialization
+  isInitializing = true;
+  initializationPromise = (async () => {
+    try {
+      const db: Db = await database.getClient();
+      const collections = await db.listCollections({ name: 'users' }).toArray();
+
+      // Only create/modify collection if it doesn't exist
+      // This requires elevated permissions, so we skip it if collection exists
+      if (collections.length === 0) {
+        console.log('Creating users collection with schema validation...');
+        try {
+          await db.createCollection('users', {
+            validator: { $jsonSchema: userSchema },
+          });
+          console.log('✅ Users collection created with validation');
+        } catch (createError: any) {
+          // If we don't have permission, just use the collection without validation
+          if (
+            createError.codeName === 'Unauthorized' ||
+            createError.code === 13
+          ) {
+            console.warn(
+              '⚠️  No permission to create collection with validator. Using collection without schema validation.'
+            );
+          } else {
+            throw createError;
+          }
+        }
+      } else {
+        // Collection exists - don't try to modify it (requires collMod permission)
+        console.log(
+          'Users collection already exists, skipping schema validation setup'
+        );
+      }
+
+      const collection = db.collection<UserType>('users');
+      cachedCollection = collection;
+      isInitializing = false;
+      return collection;
+    } catch (error) {
+      isInitializing = false;
+      initializationPromise = null;
+      throw error;
+    }
+  })();
+
+  return await initializationPromise;
 };
 
 export const User = {
-  async create(userData: Omit<UserType, '_id'> & { _id?: MongoObjectId }) {
-    const collection = await initializeCollection();
-    userData._id = userData._id || new MongoObjectId();
+  async create(userData: Omit<UserType, '_id'> & { _id?: string }) {
+    const collection = await getCollection();
+    userData._id = userData._id || new MongoObjectId().toString();
     userData.created_at = userData.created_at || new Date();
     userData.subscription = userData.subscription || {
       type: 'free',
       startDate: new Date(),
     };
-    const result = await collection.insertOne(userData);
-    return result;
+    return await collection.insertOne(userData as UserType);
   },
 
-  async findOne(query: Partial<UserType>) {
-    const collection = await initializeCollection();
-    return await collection.findOne(query);
+  findOne(query: { _id: string }): Promise<WithId<UserType> | null> {
+    return getCollection().then((collection) => collection.findOne(query));
   },
 
-  async updateSubscription(
-    id: string | MongoObjectId,
-    subscriptionData: UserType['subscription']
-  ) {
-    const collection = await initializeCollection();
-    return await collection.updateOne(
-      { _id: id },
-      {
-        $set: {
-          subscription: subscriptionData,
-          subscriptionUpdatedAt: new Date(),
-        },
-      }
+  updateSubscription(id: string, subscriptionData: UserType['subscription']) {
+    return getCollection().then((collection) =>
+      collection.updateOne(
+        { _id: id },
+        {
+          $set: {
+            subscription: subscriptionData,
+            subscriptionUpdatedAt: new Date(),
+          },
+        }
+      )
     );
   },
 
-  async updateOne(query: { _id: string }, update: Partial<UserType>) {
-    const collection = await initializeCollection();
-    return await collection.updateOne(query, update);
+  updateOne(
+    query: { _id: string },
+    update: Partial<UserType> | { [key: string]: any }
+  ) {
+    return getCollection().then((collection) =>
+      collection.updateOne(query, update)
+    );
   },
 };
-
-initializeCollection().catch(() => {
-  // Ignore DB initialization errors at startup (handled elsewhere)
-});

@@ -12,13 +12,12 @@ import express, {
   type Request,
   type Response,
 } from 'express';
-import { closeDatabase, initializeDatabase } from './config/db-config';
-import { auth, initializeLucia } from './config/lucia-config';
-import { startAuthConsumer } from './consumers';
-import authRoutes from './routes/auth-router';
-import healthCheckRoutes from './routes/health-router';
-import magicLinkRoutes from './routes/magic-link-router';
-import oauthRoutes from './routes/oauth-router';
+import { initializeDatabase } from './config/db-config.js';
+import { startAuthConsumer } from './consumers/index.js';
+import authRoutes from './routes/auth-router.js';
+import healthCheckRoutes from './routes/health-router.js';
+import magicLinkRoutes from './routes/magic-link-router.js';
+import oauthRoutes from './routes/oauth-router.js';
 
 // Load environment variables
 dotenv.config({ path: './secrets/.env' });
@@ -28,7 +27,6 @@ dotenv.config({ path: './secrets/.env' });
  * @type {Express}
  */
 const app: Express = express();
-
 // Middleware
 /**
  * Middleware to log incoming request details.
@@ -37,6 +35,7 @@ const app: Express = express();
  * @param next - The next middleware function in the stack.
  */
 app.use((_req: Request, _res: Response, next: NextFunction) => {
+  console.log(`Incoming request: ${_req.method} ${_req.url}`);
   next();
 });
 
@@ -83,37 +82,87 @@ app.use('/', authRoutes);
  */
 const PORT = process.env.PORT || 8080;
 
+async function initializeKafka() {
+  const KAFKA_ENABLED = process.env.KAFKA_ENABLED !== 'false';
+  const MAX_RETRIES = 5;
+  const RETRY_DELAY = 5000; // 5 seconds
+  const INITIAL_DELAY = 2000; // Wait 2 seconds before first attempt
+
+  if (!KAFKA_ENABLED) {
+    console.log('Kafka is disabled via KAFKA_ENABLED env var');
+    return;
+  }
+
+  // Give database time to fully initialize
+  console.log(
+    `Waiting ${INITIAL_DELAY / 1000}s before starting Kafka consumer...`
+  );
+  await new Promise((resolve) => setTimeout(resolve, INITIAL_DELAY));
+
+  let retries = 0;
+
+  while (retries < MAX_RETRIES) {
+    try {
+      console.log(
+        `Attempting to start Kafka consumer (attempt ${retries + 1}/${MAX_RETRIES})...`
+      );
+      await startAuthConsumer();
+      console.log('✅ Kafka consumer started successfully');
+      return;
+    } catch (error) {
+      retries++;
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn(
+        `⚠️  Kafka connection failed (attempt ${retries}/${MAX_RETRIES}): ${errorMsg}`
+      );
+
+      if (retries < MAX_RETRIES) {
+        console.log(`Retrying in ${RETRY_DELAY / 1000} seconds...`);
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      } else {
+        console.error(
+          '❌ Failed to connect to Kafka after maximum retries. Service will continue without Kafka consumer.'
+        );
+      }
+    }
+  }
+}
+
 /**
- * Starts the Express server on the specified port.
- * @remarks Logs a message when the server is running.
+ * Initialize services and start server
  */
 async function startServer() {
   try {
-    // Initialize database and collections
+    // 1. Initialize database first (critical)
+    console.log('Connecting to database...');
     await initializeDatabase();
+    console.log('✅ Database connected');
 
-    await initializeLucia();
-
-    // Start Kafka consumer
-    await startAuthConsumer();
-
-    const server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    // 2. Start Express server immediately
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
     });
 
-    // Handle graceful shutdown
-    process.on('SIGTERM', async () => {
-      console.log('Received SIGTERM. Shutting down gracefully...');
-      server.close(async () => {
-        await closeDatabase();
-        console.log('Server shut down');
-        process.exit(0);
-      });
+    // 3. Initialize Kafka in background (non-blocking)
+    // Don't await - let it run in parallel
+    initializeKafka().catch((error) => {
+      console.error('Kafka initialization error:', error);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 }
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received, shutting down gracefully...');
+  process.exit(0);
+});
 
 startServer();

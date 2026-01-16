@@ -4,7 +4,7 @@
  */
 
 import type { Collection, InsertOneResult, UpdateResult } from 'mongodb';
-import { database } from '../config/db-config';
+import { database } from '../config/db-config.js';
 
 interface SessionSchema {
   _id: string;
@@ -18,8 +18,8 @@ const sessionSchemaValidator = {
   bsonType: 'object',
   required: ['_id', 'user_id', 'expires_at'],
   properties: {
-    _id: { bsonType: 'string', description: 'Session ID', uniqueItems: true },
-    user_id: { bsonType: 'string', description: 'User ID', uniqueItems: true },
+    _id: { bsonType: 'string', description: 'Session ID' },
+    user_id: { bsonType: 'string', description: 'User ID' },
     expires_at: { bsonType: 'date', description: 'Expiration date' },
     createdAt: { bsonType: 'date', description: 'Creation timestamp' },
     lastAccessed: { bsonType: 'date', description: 'Last accessed timestamp' },
@@ -27,7 +27,7 @@ const sessionSchemaValidator = {
 };
 
 // Static reference to the initialized collection
-let collection: Collection<SessionSchema> | null = null;
+let collection: Collection<SessionSchema> | undefined;
 
 /**
  * Initializes the session collection with schema validation.
@@ -36,10 +36,6 @@ let collection: Collection<SessionSchema> | null = null;
 export const initializeCollection = async (): Promise<
   Collection<SessionSchema>
 > => {
-  if (collection) {
-    return collection; // Return cached collection if already initialized
-  }
-
   try {
     const db = database.getClient(); // Triggers connect() if not connected
     const collections = await db.listCollections({ name: 'session' }).toArray();
@@ -48,12 +44,14 @@ export const initializeCollection = async (): Promise<
         validator: { $jsonSchema: sessionSchemaValidator },
       });
     }
-    collection = db.collection<SessionSchema>('session');
-    return collection;
+    collection = db.collection('session');
+    return collection || Promise.reject('Failed to get session collection');
   } catch (error) {
-    throw new Error(
-      `Failed to initialize session collection: ${error.message}`
-    );
+    const errorMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message?: string }).message
+        : String(error);
+    throw new Error(`Failed to initialize session collection: ${errorMessage}`);
   }
 };
 

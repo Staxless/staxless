@@ -14,23 +14,25 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { parseCookies, serializeCookie } from 'oslo/cookie';
-import { auth } from '../config/lucia-config';
-import { getConfiguredProviders, providers } from '../config/oauth-config';
+import { auth } from '../config/lucia-config.js';
+import { getConfiguredProviders, providers } from '../config/oauth-config.js';
 import {
   getUserInfo,
   handleError,
   handleOAuthAction,
   initializeOAuthFlow,
-} from '../handlers/oauth-handlers';
-import type { Provider } from '../lib/providers/provider-types';
+} from '../handlers/oauth-handlers.js';
+import type { Provider } from '../lib/providers/provider-types.js';
 
 const router = Router();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+// FIXED: Move /providers route BEFORE parameterized routes
 router.get('/providers', (_req: Request, res: Response) => {
   try {
     res.json(getConfiguredProviders());
-  } catch (_error) {
+  } catch (error) {
+    console.error('Error fetching providers:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -39,13 +41,20 @@ router.get('/login/:providerName', initializeOAuthFlow('login'));
 router.get('/register/:providerName', initializeOAuthFlow('register'));
 
 router.get('/:providerName/callback', async (req: Request, res: Response) => {
-  const providerName = req.params.providerName.toLowerCase();
+  const providerName = req.params.providerName?.toLowerCase();
+
+  if (!providerName) {
+    res.redirect(`${FRONTEND_URL}/login?error=Provider name missing`);
+    return;
+  }
+
   const provider: Provider = providers[providerName];
 
-  if (!provider?.instance) {
-    return res.redirect(
+  if (!provider) {
+    res.redirect(
       `${FRONTEND_URL}/login?error=Invalid provider ${providerName}`
     );
+    return;
   }
 
   const code = req.query.code?.toString() ?? null;
@@ -54,8 +63,39 @@ router.get('/:providerName/callback', async (req: Request, res: Response) => {
   const storedState = cookies.get('oauth_state') ?? null;
   const oauthAction = cookies.get('oauth_action') ?? null;
 
+  // Debug logging for OAuth callback
+  console.log('OAuth callback received:', {
+    providerName,
+    hasCode: !!code,
+    hasState: !!state,
+    stateValue: state,
+    hasStoredState: !!storedState,
+    storedStateValue: storedState,
+    stateMatch: state === storedState,
+    hasOAuthAction: !!oauthAction,
+    oauthActionValue: oauthAction,
+    allCookies: Object.fromEntries(cookies),
+    cookieHeader: req.headers.cookie,
+    requestHeaders: {
+      host: req.headers.host,
+      referer: req.headers.referer,
+      origin: req.headers.origin,
+      'user-agent': req.headers['user-agent'],
+    },
+  });
+
   if (!(code && state) || state !== storedState || !oauthAction) {
-    return res.redirect(`${FRONTEND_URL}/login?error=Invalid state or action`);
+    console.error('OAuth callback validation failed:', {
+      hasCode: !!code,
+      hasState: !!state,
+      hasStoredState: !!storedState,
+      stateMatch: state === storedState,
+      hasOAuthAction: !!oauthAction,
+      allCookies: Object.fromEntries(cookies),
+      cookieHeader: req.headers.cookie,
+    });
+    res.redirect(`${FRONTEND_URL}/login?error=Invalid state or action`);
+    return;
   }
 
   try {
@@ -76,6 +116,7 @@ router.get('/:providerName/callback', async (req: Request, res: Response) => {
 
     res.redirect(`${FRONTEND_URL}/${result.redirectUrl}`);
   } catch (error) {
+    console.error('OAuth callback error:', error);
     handleError(error, res);
   }
 });

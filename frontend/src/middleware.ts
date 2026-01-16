@@ -26,19 +26,33 @@ async function prefetchAdminDashboard(
   request: NextRequest
 ): Promise<void> {
   const cacheKey = `admin-prefetch:${user.id}`;
+
   if (prefetchCache.has(cacheKey)) {
     return;
   }
+
   try {
     const response = await fetch(`${request.nextUrl.origin}/admin`, {
       method: 'GET',
-      headers: { Accept: 'text/html', 'Cache-Control': 'max-age=3600' },
+      headers: {
+        Accept: 'text/html',
+        'Cache-Control': 'max-age=3600',
+      },
+      // Add timeout to prevent hanging
+      signal: AbortSignal.timeout(5000), // 5 second timeout
     });
+
     if (response.ok) {
       prefetchCache.add(cacheKey);
     }
   } catch (err) {
-    throw new Error('Background prefetch failed:', err);
+    // Log the error but don't throw - gracefully degrade
+    console.warn(
+      `Failed to prefetch admin dashboard for user ${user.id}:`,
+      err instanceof Error ? err.message : 'Unknown error'
+    );
+    // Add to cache anyway to prevent repeated failed attempts
+    prefetchCache.add(cacheKey);
   }
 }
 
@@ -118,6 +132,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
-    ...ROUTES_TO_RELOAD,
+    '/login',
+    '/register',
+    '/dashboard',
+    '/',
   ],
 };

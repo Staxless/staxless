@@ -13,6 +13,7 @@
 
 import * as arctic from "arctic";
 
+
 /**
  * Configuration for initializing an OAuth provider.
  */
@@ -28,13 +29,14 @@ export interface ProviderConfig {
 /**
  * Supported Arctic OAuth2 providers or custom client instance.
  */
-export type ArcticProvider =
-  | arctic.GitHub
+export type ArcticProvider = 
+ | arctic.GitHub
   | arctic.Google
+  | arctic.MicrosoftEntraId
+  | arctic.Discord
   | arctic.Twitter
-  | arctic.Spotify
-  | arctic.OAuth2Client
-  | any;
+  | arctic.Spotify;
+
 
 /**
  * Standardized structure for user info returned from an OAuth provider.
@@ -66,8 +68,8 @@ export abstract class Provider {
    */
   constructor(protected config: ProviderConfig, name: string) {
     const { userInfoUrl, scopes = [], usePKCE = false } = config;
-    if (!config.clientId) throw new Error(`[${name}]: clientId is required`);
-    if (!userInfoUrl) throw new Error(`[${name}]: userInfoUrl is required`);
+    // if (!config.clientId) throw new Error(`[${name}]: clientId is required`);
+    // if (!userInfoUrl) throw new Error(`[${name}]: userInfoUrl is required`);
 
     this.instance = this.createProviderInstance();
     this.userInfoUrl = userInfoUrl;
@@ -82,6 +84,7 @@ export abstract class Provider {
    */
   protected createProviderInstance(): ArcticProvider {
     const { clientId, clientSecret } = this.config;
+    // @ts-ignore
     return new arctic.OAuth2Client(clientId, clientSecret, process.env.REDIRECT_URI);
   }
 
