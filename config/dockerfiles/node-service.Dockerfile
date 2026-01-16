@@ -1,35 +1,53 @@
-# Use the latest stable release of the Node.js image as the base image for the builder stage
-FROM node:lts AS builder
-# Set the user to 'node' for better security practices
+# ──────────────────────────────────────────────────────────────
+# 1. BUILDER – compile TS → dist/
+# ──────────────────────────────────────────────────────────────
+FROM node:lts-alpine AS builder
 USER node
-# Set the working directory to '/app' inside the container
-WORKDIR /home/node/
-# Copy the package.json file and change ownership to 'node' user
-COPY --chown=node:node ["../package.json", "./"]
-# Install the necessary packages: axios, cors, stripe, and express
-RUN ["npm", "install"]
-# Copy the rest of the application files and change ownership to 'node' user
-COPY --chown=node:node ["../", "."] 
-# Consider specifying specific files for better control
-# Uncomment the following line if you need to clean up files, keeping only 'dist' and 'node_modules'
-# RUN ["/bin/bash", "-c", "find . ! -name dist ! -name node_modules -maxdepth 1 -mindepth 1 -exec rm -rf {} \\;"]
+WORKDIR /home/node
 
-# Create a new stage for development
-FROM builder AS dev
-# Install 'nodemon' for development purposes and save it as a dev dependency
-RUN ["npm", "install","nodemon", "--save-dev"]
-# Expose port 8003 for development
-EXPOSE 8084
-# Start the application in development mode using nodemon
+# Copy package files + tsconfig
+COPY --chown=node:node ["package*.json", "tsconfig.json", "./"]
+
+# Install all dependencies (including dev: typescript, @types/*)
+RUN ["npm", "ci"]
+
+# Copy source
+COPY --chown=node:node ["src", "./src"]
+
+# Build using local tsc → creates dist/
+RUN ["npm", "run", "build"]
+
+# Remove dev dependencies
+RUN ["npm", "prune", "--production"]
+
+# Clean up source and config (not needed in prod)
+RUN ["rm", "-rf", "src", "tsconfig.json"]
+
+# ──────────────────────────────────────────────────────────────
+# 2. DEV – hot reload with tsx
+# ──────────────────────────────────────────────────────────────
+FROM node:lts-alpine AS dev
+USER node
+WORKDIR /home/node
+
+COPY --chown=node:node ["package*.json", "tsconfig.json", "./"]
+RUN ["npm", "ci"]
+COPY --chown=node:node ["src", "./src"]
+
 CMD ["npm", "run", "dev"]
 
-# Create a new stage for production
-FROM node:alpine AS prod
-# Set the user to 'node' for better security practices
+# ──────────────────────────────────────────────────────────────
+# 3. PROD – run compiled JS only
+# ──────────────────────────────────────────────────────────────
+FROM node:lts-alpine AS prod
 USER node
-# Set the working directory to '/home/node' inside the container
-WORKDIR /home/node/
-# Copy the built application from the builder stage to the production stage
-COPY --chown=node:node --from=builder /home/node/ ./
-# Start the application in production mode
-CMD ["npm", "run", "prod"]
+WORKDIR /home/node
+ENV HOST=0.0.0.0
+
+# Copy only runtime files
+COPY --chown=node:node --from=builder ["/home/node/package*.json", "./"]
+COPY --chown=node:node --from=builder ["/home/node/node_modules", "./node_modules"]
+COPY --chown=node:node --from=builder ["/home/node/dist", "./dist"]
+
+# Run compiled app directly
+CMD ["node", "dist/server.js"]

@@ -9,6 +9,7 @@
 **/.pem
 **/package-lock.json
 **/.pnpm-store
+**/dist
 
 # React frontend
 **/client/node_modules

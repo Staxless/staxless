@@ -1,0 +1,61 @@
+group "default" {
+//   targets = ["frontend", "auth-service", "user-service", "stripe-service", "email-service", "cms-service", "kong-api-gateway"]
+targets = ["frontend"]//, "auth-service", "user-service", "stripe-service"]
+}
+
+target "frontend" {
+  context = "../frontend/"
+  dockerfile = "../config/dockerfiles/frontend.Dockerfile"
+  target = "prod" 
+  tags = ["ghcr.io/staxless/staxless/frontend:latest"]
+  platforms = ["linux/amd64"]
+}
+
+target "auth-service" {
+  context = "../microservices/auth-service/"
+  dockerfile = "../../config/dockerfiles/node-service.Dockerfile"
+  target = "prod"
+  tags = ["ghcr.io/staxless/staxless/auth-service:latest"]
+  platforms = ["linux/amd64"]
+}
+
+target "user-service" {
+  context = "../microservices/user-service/"
+  dockerfile = "../../config/dockerfiles/node-service.Dockerfile"
+  target = "prod"
+  tags = ["ghcr.io/staxless/staxless/user-service:latest"]
+  platforms = ["linux/amd64"]
+}
+
+target "stripe-service" {
+  context = "../microservices/stripe-service/"
+  dockerfile = "../../config/dockerfiles/node-service.Dockerfile"
+  target = "prod"
+  tags = ["ghcr.io/staxless/staxless/stripe-service:latest"]
+  platforms = ["linux/amd64"]
+}
+
+// target "email-service" {
+//   context = "../microservices/email-service/"
+//   dockerfile = "../../config/dockerfiles/node-service.Dockerfile"
+//   target = "prod"
+//   tags = ["ghcr.io/staxless/staxless/email-service:latest"]
+//   platforms = ["linux/amd64"]
+// }
+
+// target "cms-service" {
+//   context = "../microservices/cms-service/"
+//   dockerfile = "../../config/dockerfiles/payload.Dockerfile"
+//   target = "prod"
+//   tags = ["ghcr.io/staxless/staxless/cms-service:latest"]
+//   platforms = ["linux/amd64"]
+// }
+
+target "kong-api-gateway" {
+  context = "../kong-gateway/"
+  dockerfile = "../config/dockerfiles/kong.Dockerfile"
+  target = "prod"
+  tags = ["ghcr.io/staxless/staxless/kong:latest"]
+  platforms = ["linux/amd64"]
+  no-cache = true
+}
