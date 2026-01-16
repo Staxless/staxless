@@ -25,7 +25,7 @@ export interface Product {
 }
 
 export const getProducts = async (): Promise<Product[]> => {
-  const response = await fetch('http://front-gate:8000/products', {
+  const response = await fetch('http://kong-api-gateway:8000/products', {
     method: 'GET',
   });
 

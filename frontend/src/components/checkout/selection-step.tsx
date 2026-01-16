@@ -10,17 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-interface SelectionStepProps {
-  onNext?: () => void; // Optional, not used in direct Stripe redirect
-}
-
-export default function SelectionStep(_: SelectionStepProps) {
+export default function SelectionStep() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -76,7 +71,7 @@ export default function SelectionStep(_: SelectionStepProps) {
     } catch (_error) {
       toast({
         title: 'Error',
-        description: 'Failed to proceed to payment. Please try again.',
+        description: `Failed to proceed to payment. Please try again. ${_error}`,
         variant: 'destructive',
       });
     } finally {
