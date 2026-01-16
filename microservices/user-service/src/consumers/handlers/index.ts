@@ -2,7 +2,7 @@
 // Action: CREATE new file
 
 import type { KafkaMessage } from 'kafkajs';
-import handleSubscriptionUpdate from './handle-subscription-update';
+import handleSubscriptionUpdate from './handle-subscription-update.js';
 
 export const paymentEventRegistry = new Map<
   string,

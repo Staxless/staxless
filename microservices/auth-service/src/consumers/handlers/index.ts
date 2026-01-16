@@ -2,8 +2,8 @@
 // Action: CREATE new file
 
 import type { KafkaMessage } from 'kafkajs';
-import handleSessionValidation from './handle-session-validation';
-import handleUserLogout from './handle-user-logout';
+import handleSessionValidation from './handle-session-validation.js';
+import handleUserLogout from './handle-user-logout.js';
 
 export const authEventRegistry = new Map<
   string,

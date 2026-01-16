@@ -2,7 +2,7 @@
 // Action: CREATE new file
 
 import type { KafkaMessage } from 'kafkajs';
-import handleSendMagicLink from './handle-send-magic-link';
+import handleSendMagicLink from './handle-send-magic-link.js';
 
 export const emailEventRegistry = new Map<
   string,

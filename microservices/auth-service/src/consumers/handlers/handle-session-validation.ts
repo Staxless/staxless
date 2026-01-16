@@ -1,6 +1,6 @@
 import type { KafkaMessage } from 'kafkajs';
-import { createProducer } from '../../config/kafka-client';
-import { auth } from '../../config/lucia-config'; // Adjust path if necessary
+import { createProducer } from '../../config/kafka-client.js';
+import { auth } from '../../config/lucia-config.js'; // Adjust path if necessary
 
 const producer = createProducer();
 

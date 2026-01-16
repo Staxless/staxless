@@ -1,8 +1,8 @@
 // File: /microservices/auth-service/src/consumers/index.ts
 // Action: CREATE new file
 
-import { createConsumer } from '../config/kafka-client';
-import { authEventRegistry } from './handlers';
+import { createConsumer } from '../config/kafka-client.js';
+import { authEventRegistry } from './handlers/index.js';
 
 const consumer = createConsumer('auth-service-group');
 

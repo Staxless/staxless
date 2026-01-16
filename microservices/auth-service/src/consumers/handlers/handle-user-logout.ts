@@ -2,7 +2,7 @@
 // Action: CREATE new file
 
 import type { KafkaMessage } from 'kafkajs';
-import { auth } from '../../config/lucia-config'; // Adjust path if necessary
+import { auth } from '../../config/lucia-config.js'; // Adjust path if necessary
 
 export default async function handleUserLogout(message: KafkaMessage) {
   if (!message.value) {
