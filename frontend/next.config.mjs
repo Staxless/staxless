@@ -1,17 +1,33 @@
-import createMDX from '@next/mdx';
-import rehypeHighlight from 'rehype-highlight';
-import remarkGfm from 'remark-gfm';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['next-mdx-remote'],
-  // experimental: {
-  //   serverActions: true,
-  // },
-  // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  // Optionally, add any other Next.js config below
-  output: 'standalone', // This is to configure output
+  output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'int.staxless.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+      },
+      {
+        protocol: 'http',
+        hostname: 'cms-service',
+        port: '8085',
+      },
+      {
+        protocol: 'http',
+        hostname: 'kong-api-gateway',
+        port: '8000',
+      },
+    ],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
   webpack(config) {
     config.watchOptions = {
       poll: 1000,
@@ -21,25 +37,32 @@ const nextConfig = {
   },
   rewrites() {
     return [
+      // IMPORTANT: More specific routes MUST come first
+      // CMS media files - MOVED TO TOP
       {
-        source: '/admin/:path*',
-        destination: 'http://front-gate:8000/admin/:path*',
+        source: '/cms/api/media/:path*',
+        destination: 'http://kong-api-gateway:8000/cms/api/media/:path*',
+      },
+      // CMS admin requests
+      {
+        source: '/cms/admin/:path*',
+        destination: 'http://kong-api-gateway:8000/cms/admin/:path*',
       },
       {
+        source: '/admin/:path*',
+        destination: 'http://kong-api-gateway:8000/cms/admin/:path*',
+      },
+      // CMS API requests - LESS specific, comes after media
+      {
+        source: '/cms/api/:path*',
+        destination: 'http://kong-api-gateway:8000/cms/api/:path*',
+      },
+      // General API requests
+      {
         source: '/api/:path*',
-        destination: 'http://front-gate:8000/:path*',
+        destination: 'http://kong-api-gateway:8000/:path*',
       },
     ];
   },
 };
-
-const withMDX = createMDX({
-  // Add markdown plugins here, as desired
-  options: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeHighlight],
-  },
-});
-
-// Merge MDX config with Next.js config and export
-export default withMDX(nextConfig);
+export default nextConfig;
