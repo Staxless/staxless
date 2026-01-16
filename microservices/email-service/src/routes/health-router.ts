@@ -27,19 +27,14 @@ const router = express.Router();
  */
 router.get(
   '/health',
-  async (_req: Request, res: Response, _next: NextFunction): Promise<void> => {
+  (_req: Request, res: Response, _next: NextFunction): void => {
     const healthcheck = {
       uptime: process.uptime(),
       message: 'OK',
       timestamp: new Date().toISOString(),
     };
 
-    try {
-      res.status(200).json(await healthcheck);
-    } catch (error) {
-      res.status(503).json({ message: 'Service Unavailable', error });
-    }
+    res.status(200).json(healthcheck);
   }
 );
-
 export default router;

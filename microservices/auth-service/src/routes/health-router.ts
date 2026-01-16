@@ -19,11 +19,7 @@ router.get(
       timestamp: new Date().toISOString(),
     };
 
-    try {
-      res.status(200).json(healthcheck);
-    } catch (error) {
-      res.status(503).json({ message: 'Service Unavailable', error });
-    }
+    res.status(200).json(healthcheck);
   }
 );
 
