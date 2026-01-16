@@ -1,20 +1,5 @@
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-const myFunction = () => {
-  const _url = `${BRAND_CONFIG.company.website}`;
-
-  fetch(`${BRAND_CONFIG.company.website}/api/data`)
-    .then((response) => response.json())
-    .then((_data) => {
-      // Process the data
-    })
-    .catch(() => {
-      // Ignore fetch errors for sitemap data
-    });
-};
-
-myFunction();
-
 export default function sitemap() {
   return [
     {
