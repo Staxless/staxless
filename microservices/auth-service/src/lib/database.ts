@@ -25,7 +25,7 @@ export abstract class BaseDatabase {
   constructor(params: DatabaseConnectionParams) {
     this.params = params;
   }
-
+ 
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;
   abstract getClient(): any;

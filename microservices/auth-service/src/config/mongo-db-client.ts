@@ -2,13 +2,14 @@
  * @file mongoDatabase.ts
  * @description MongoDB-specific database client implementation
  */
+import type { Document, MatchKeysAndValues } from 'mongodb';
 
 import { type Db, MongoClient } from 'mongodb';
 import {
   BaseDatabase,
   type DatabaseConnectionParams,
   type QueryParams,
-} from '../lib/database';
+} from '../lib/database.js';
 
 /**
  * MongoDB-specific database implementation
@@ -16,14 +17,17 @@ import {
  * @extends BaseDatabase
  */
 export class MongoDatabase extends BaseDatabase {
-  private db?: Db;
-  private isConnecting: Promise<void> | null = null; // Track ongoing connection attempt
-  private isConnected = false;
+  client: MongoClient;
+  params!: DatabaseConnectionParams;
+  db?: Db;
+  isConnecting: Promise<void> | null = null; // Track ongoing connection attempt
+  isConnected = false;
 
   constructor(params: DatabaseConnectionParams) {
     super(params);
+    this.params = params;
     this.client = new MongoClient(params.uri, {
-      auth: params.uri.includes('@') ? undefined : undefined, // MongoDB URI typically includes auth credentials
+      auth: params.uri.includes('@') ? undefined : undefined,
     });
   }
 
@@ -34,7 +38,7 @@ export class MongoDatabase extends BaseDatabase {
    */
   async connect(): Promise<void> {
     if (this.isConnected) {
-      console.log('MongoDB already connected');
+      // MongoDB already connected
       return;
     }
 
@@ -66,7 +70,7 @@ export class MongoDatabase extends BaseDatabase {
    */
   async disconnect(): Promise<void> {
     if (!this.isConnected) {
-      console.log('MongoDB not connected, no need to disconnect');
+      // MongoDB not connected, no need to disconnect
       return;
     }
 
@@ -103,7 +107,7 @@ export class MongoDatabase extends BaseDatabase {
     if (!this.db) {
       throw new Error('Database connection failed');
     }
-    // console.log(this);
+
     return this.db;
   }
 
@@ -132,11 +136,14 @@ export class MongoDatabase extends BaseDatabase {
    * @throws {Error} If data is missing or insertion fails
    */
   async insertOne<T>(params: QueryParams<T>): Promise<void> {
-    await super.insertOne(params);
+    this.validateInsertOneParams(params);
     const db = await this.getClient();
     const collection = db.collection(params.collection);
+    if (!params.data) {
+      throw new Error('InsertOne: data is required');
+    }
     try {
-      await collection.insertOne(params.data!);
+      await collection.insertOne(params.data);
     } catch (error) {
       throw new Error(
         `Failed to insert document into collection ${params.collection}: ${(error as Error).message}`
@@ -151,14 +158,19 @@ export class MongoDatabase extends BaseDatabase {
    * @throws {Error} If data or filter is missing
    */
   async update<T>(params: QueryParams<T>): Promise<void> {
-    await super.update(params);
+    this.validateUpdateParams(params);
     const db = await this.getClient();
     const collection = db.collection(params.collection);
+    if (!params.filter) {
+      throw new Error('Update: filter is required');
+    }
+    if (!params.data) {
+      throw new Error('Update: data is required');
+    }
     try {
-      await collection.updateMany(
-        params.filter!,
-        { $set: params.data },
-        params.options
+      await collection.updateOne(
+        params.filter as MatchKeysAndValues<Document>,
+        { $set: params.data }
       );
     } catch (error) {
       throw new Error(
@@ -174,11 +186,16 @@ export class MongoDatabase extends BaseDatabase {
    * @throws {Error} If filter is missing
    */
   async delete<T>(params: QueryParams<T>): Promise<void> {
-    await super.delete(params);
+    this.validateDeleteParams(params);
     const db = await this.getClient();
     const collection = db.collection(params.collection);
+    if (!params.filter) {
+      throw new Error('Delete: filter is required');
+    }
     try {
-      await collection.deleteMany(params.filter!);
+      await collection.deleteMany(
+        params.filter as MatchKeysAndValues<Document>
+      );
     } catch (error) {
       throw new Error(
         `Failed to delete documents from collection ${params.collection}: ${(error as Error).message}`

@@ -1,36 +1,47 @@
 /**
  * @file db-config.ts
- * @description Initializes and exports the shared MongoDB database connection for the auth service.
+ * @description Initializes the database connection for the application.
  */
 
-import createDatabase, {
-  type Database,
-  type DatabaseConnectionParams,
-} from '../lib/database';
-import { createMongoDatabase } from './mongo-db-client';
+import type { BaseDatabase } from '../lib/database.js';
+import { loadSecret } from '../lib/secrets-manager.js';
+import { createMongoDatabase } from './mongo-db-client.js';
 
 /**
- * Database connection parameters
+ * Database instance for the application.
+ * @type {BaseDatabase}
  */
-const dbParams: DatabaseConnectionParams = {
-  uri: process.env.DATABASE_URL || 'mongodb://mongodb-service:27017',
-  dbName: process.env.DATABASE_NAME || 'auth_db',
-};
-
+export const database: BaseDatabase = createMongoDatabase({
+  uri:
+    loadSecret('DATABASE_URL') ||
+    process.env.DATABASE_URL ||
+    'mongodb://localhost:27017',
+  dbName: 'db', //process.env.DATABASE_NAME ?? 'db',
+});
 /**
- * Shared database instance
- */
-const db: Database = createDatabase(createMongoDatabase(dbParams));
-
-/**
- * Initializes the database connection on service startup
- * @returns {Promise<void>}
+ * Initializes the database connection.
+ * @returns {Promise<void>} A promise that resolves when the database is connected.
  */
 export async function initializeDatabase(): Promise<void> {
-  await db.connect();
+  try {
+    await database.connect();
+  } catch (error) {
+    throw new Error(
+      `Failed to initialize database: ${(error as Error).message}`
+    );
+  }
 }
 
 /**
- * Exports the database instance for use in other modules
+ * Closes the database connection.
+ * @returns {Promise<void>} A promise that resolves when the database connection is closed.
  */
-export const database = db;
+export async function closeDatabase(): Promise<void> {
+  try {
+    await database.disconnect();
+  } catch (error) {
+    throw new Error(
+      `Failed to close database connection: ${(error as Error).message}`
+    );
+  }
+}

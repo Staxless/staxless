@@ -3,18 +3,21 @@
  * @description Initializes the database connection for the application.
  */
 
-import type { BaseDatabase } from '../lib/database';
-import { createMongoDatabase } from './mongo-db-client';
+import type { BaseDatabase } from '../lib/database.js';
+import { loadSecret } from '../lib/secrets-manager.js';
+import { createMongoDatabase } from './mongo-db-client.js';
 
 /**
  * Database instance for the application.
  * @type {BaseDatabase}
  */
 export const database: BaseDatabase = createMongoDatabase({
-  uri: process.env.DATABASE_URL ?? 'mongodb://localhost:27017',
-  dbName: process.env.DATABASE_NAME ?? 'appdb',
+  uri:
+    loadSecret('DATABASE_URL') ||
+    process.env.DATABASE_URL ||
+    'mongodb://localhost:27017',
+  dbName: 'db', //process.env.DATABASE_NAME ?? 'db',
 });
-
 /**
  * Initializes the database connection.
  * @returns {Promise<void>} A promise that resolves when the database is connected.
