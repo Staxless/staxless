@@ -1,25 +1,26 @@
 _format_version: "2.1"
-# plugins:
-#   - name: cors
-#     config:
-#       origins:
-#         - http://front-gate:8000
-#       methods:
-#         - GET
-#         - POST
-#         - PUT
-#         - DELETE
-#       headers:
-#         - Content-Type
-#         - x-user-info
-#         - Authorization
-#       credentials: true
-#       max_age: 3600
 
 services:
   - name: auth
-    url: http://auth:8080
+    url: http://auth-upstream
     plugins:
+      - name: cors
+        config:
+          origins:
+            - "https://int.staxless.com"
+            - "http://localhost:3000"
+          credentials: true
+          methods:
+            - GET
+            - POST
+            - OPTIONS
+          headers:
+            - Accept
+            - Content-Type
+            - Cookie
+            - X-User-Info
+          exposed_headers:
+            - Set-Cookie
       - name: rate-limiting
         config:
           minute: 100
@@ -35,51 +36,62 @@ services:
     connect_timeout: 5000
     routes:
       - name: oauth-providers
-        methods: [GET]
-        paths: [/oauth/providers]
+        methods:
+          - GET
+        paths:
+          - /oauth/providers
         strip_path: false
       - name: oauth-register
-        methods: [GET]
-        paths: [/oauth/register/(.+)]
+        methods:
+          - GET
+        paths:
+          - /oauth/register/(.+)
         strip_path: false
       - name: oauth-login
-        methods: [GET]
-        paths: [/oauth/login/(.+)]
+        methods:
+          - GET
+        paths:
+          - /oauth/login/(.+)
         strip_path: false
-        plugins:
-          - name: request-transformer
-            config:
-              add:
-                headers:
-                  - Cookie:${request.headers.cookie}
-                  - x-user-info:${request.headers.x-user-info}
       - name: oauth-callback
-        methods: [GET]
-        paths: [/oauth/(.+)/callback]
+        methods:
+          - GET
+        paths:
+          - /oauth/(.+)/callback
         strip_path: false
       - name: magicLink-register
-        methods: [POST]
-        paths: [/auth/magic-link/register]
+        methods:
+          - POST
+        paths:
+          - /auth/magic-link/register
         strip_path: false
       - name: magicLink-login
-        methods: [POST]
-        paths: [/auth/magic-link/login]
+        methods:
+          - POST
+        paths:
+          - /auth/magic-link/login
         strip_path: false
       - name: magicLink-callback
-        methods: [GET]
-        paths: [/auth/magic-link/callback]
+        methods:
+          - GET
+        paths:
+          - /auth/magic-link/callback
         strip_path: false
       - name: auth-logout
-        methods: [POST]
-        paths: [/auth/logout]
+        methods:
+          - POST
+        paths:
+          - /auth/logout
         strip_path: false
       - name: auth-validate-request
-        methods: [POST]
-        paths: [/auth/validate-request]
+        methods:
+          - POST
+        paths:
+          - /auth/validate-request
         strip_path: false
 
   - name: stripe
-    url: http://stripe:8083
+    url: http://stripe-upstream
     plugins:
       - name: rate-limiting
         config:
@@ -96,35 +108,42 @@ services:
     connect_timeout: 5000
     routes:
       - name: checkout
-        methods: [POST]
-        paths: [/checkout]
+        methods:
+          - POST
+        paths:
+          - /checkout
         strip_path: false
         plugins:
           - name: rbac-auth
             config:
-              auth_service_url: http://auth:8080
+              auth_service_url: http://auth-service:8080
               required_roles:
                 - user
           - name: request-transformer
             config:
               add:
                 headers:
-                  - Content-Type:application/json
-                  - x-user-info:${request.headers.x-user-info}
-                  - cookie:auth_session=${request.headers.cookie.auth_session}
+                  - "Content-Type:application/json"
+                  - "x-user-info:${request.headers.x-user-info}"
+                  - "cookie:auth_session=${request.headers.cookie.auth_session}"
       - name: webhook
-        methods: [POST, GET]
-        paths: [/webhook]
+        methods:
+          - POST
+          - GET
+          - OPTIONS
+        paths:
+          - /webhook
         strip_path: false
         plugins:
           - name: cors
             config:
               origins:
-                - ${FRONTEND_DOMAIN:http://localhost:3000}
-                - https://stripe.com
+                - "${FRONTEND_DOMAIN:http://localhost:3000}"
+                - "https://stripe.com"
               methods:
                 - GET
                 - POST
+                - OPTIONS
               headers:
                 - Content-Type
                 - x-user-info
@@ -135,28 +154,15 @@ services:
                 - stripe-signature
               credentials: true
               max_age: 3600
-          - name: pre-function
-            config:
-              access:
-                - |
-                  local headers = kong.request.get_headers()
-                  if not headers["stripe-signature"] then
-                    return kong.response.exit(400, { error = "Missing stripe-signature header" })
-                  end
-          - name: request-transformer
-            config:
-              http_method: null
-              add:
-                headers:
-                  - x-user-info:${request.headers.x-user-info}
-                  - stripe-signature:${request.headers.stripe-signature}
       - name: products
-        methods: [GET]
-        paths: [/products]
+        methods:
+          - GET
+        paths:
+          - /products
         strip_path: false
 
   - name: cms
-    url: http://cms:8085
+    url: http://cms-upstream
     plugins:
       - name: rate-limiting
         config:
@@ -173,59 +179,168 @@ services:
     connect_timeout: 5000
     routes:
       - name: cms-admin-route
-        methods: [GET, POST, PUT, DELETE]
-        paths: [/admin(/.+)?]
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        paths:
+          - /cms/admin(/.+)?
         strip_path: false
         preserve_host: true
         plugins:
           - name: rbac-auth
             config:
-              auth_service_url: http://auth:8080
+              auth_service_url: http://auth-service:8080
               required_roles:
                 - admin
+
+      - name: cms-user-route
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        paths:
+          - /cms/users(/.+)?
+        strip_path: false
+        preserve_host: true
+        plugins:
+          - name: rbac-auth
+            config:
+              auth_service_url: http://auth-service:8080
+              required_roles:
+                - admin
+
+      - name: cms-content-route
+        methods:
+          - GET
+        paths:
+          - /cms/api(/.+)?
+        strip_path: false
+        preserve_host: true
+
+      - name: cms-next-image
+        methods:
+          - GET
+        paths:
+          - /_next/image
+        strip_path: false
+        preserve_host: true
+
+  - name: email
+    url: http://email-upstream
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 30
+          hour: 300
+          policy: local
+          limit_by: consumer
+    read_timeout: 10000
+    write_timeout: 10000
+    connect_timeout: 5000
+    routes:
+      - name: send-email
+        methods:
+          - POST
+        paths:
+          - /email/send
+        strip_path: false
 
 upstreams:
   - name: auth-upstream
     targets:
-      - target: auth:8080
+      - target: auth-service:8080
     healthchecks:
       active:
         type: http
         http_path: /health
+        timeout: 5
+        concurrency: 10
         headers: {}
         healthy:
           interval: 10
           successes: 1
+          http_statuses:
+            - 200
+            - 302
         unhealthy:
           interval: 10
           http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
 
   - name: stripe-upstream
     targets:
-      - target: stripe:8083
+      - target: stripe-service:8083
     healthchecks:
       active:
         type: http
         http_path: /health
+        timeout: 5
+        concurrency: 10
         headers: {}
         healthy:
           interval: 10
           successes: 1
+          http_statuses:
+            - 200
+            - 302
         unhealthy:
           interval: 10
           http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
 
   - name: email-upstream
     targets:
-      - target: email:8084
+      - target: email-service:8084
     healthchecks:
       active:
         type: http
         http_path: /health
+        timeout: 5
+        concurrency: 10
         headers: {}
         healthy:
           interval: 10
           successes: 1
+          http_statuses:
+            - 200
+            - 302
         unhealthy:
           interval: 10
           http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
+
+  - name: cms-upstream
+    targets:
+      - target: cms-service:8085
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        timeout: 5
+        concurrency: 10
+        headers: {}
+        healthy:
+          interval: 10
+          successes: 1
+          http_statuses:
+            - 200
+            - 302
+        unhealthy:
+          interval: 10
+          http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
