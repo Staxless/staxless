@@ -56,8 +56,8 @@ export default function CheckoutSuccessPage() {
               className="text-xl"
               style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
             >
-              Your payment was successful. Let's get you started on your SaaS
-              journey.
+              Your payment was successful. Let&apos;s get you started on your
+              SaaS journey.
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export default function CheckoutSuccessPage() {
                   className="text-sm"
                   style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
                 >
-                  We've sent you login credentials and setup instructions.
+                  We&apos;ve sent you login credentials and setup instructions.
                 </p>
               </CardContent>
             </Card>

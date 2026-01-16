@@ -37,8 +37,8 @@ export async function createCheckoutSession(
   let user: User;
   try {
     user = JSON.parse(userInfoString);
-  } catch (_error) {
-    throw new Error('Invalid user information');
+  } catch {
+    throw new Error(`Invalid user information: ${userInfoString}`);
   }
 
   if (!user.id) {
@@ -46,7 +46,7 @@ export async function createCheckoutSession(
   }
 
   try {
-    const response = await fetch('http://front-gate:8000/checkout', {
+    const response = await fetch('http://kong-api-gateway:8000/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,13 +60,15 @@ export async function createCheckoutSession(
     });
 
     if (!response.ok) {
-      const _errorData = await response.text();
-      throw new Error(`Stripe service error: ${response.status}`);
+      const errorData = await response.text();
+      throw new Error(
+        `Stripe service error: ${response.status} - ${errorData}`
+      );
     }
 
     const data: CheckoutResponse = await response.json();
     return data;
-  } catch (_error) {
+  } catch {
     throw new Error('Failed to create checkout session');
   }
 }

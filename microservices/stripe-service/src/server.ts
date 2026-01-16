@@ -3,8 +3,6 @@
  * @description Node.js server for authentication service using Lucia and OAuth providers.
  * @module server
  */
-
-import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import healthCheckRoutes from './routes/health-router';
@@ -28,28 +26,16 @@ app.use((_req, _res, next) => {
 });
 
 /**
- * Middleware to handle Stripe webhooks.
- * @remarks This middleware should be placed before body parsing middleware to handle raw body parsing for Stripe webhooks.
+ * Middleware to handle raw body parsing ONLY for webhook route
+ * @remarks This MUST be before express.json() to preserve raw body for Stripe signature verification
  */
-app.use('/', webhookRoutes);
+app.use('/webhook', express.raw({ type: 'application/json' }));
 
 /**
- * Middleware to parse JSON request bodies.
+ * Middleware to parse JSON request bodies for all other routes.
  */
 app.use(express.json());
 
-/**
- * Middleware to enable CORS with configured origin and credentials.
- * @remarks Uses the FRONTEND_URL environment variable or defaults to http://localhost:3000.
- */
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
-    credentials: true,
-  })
-);
-
-// Routes
 /**
  * Mounts health check routes at the root path.
  */
@@ -62,15 +48,15 @@ app.use('/', healthCheckRoutes);
 app.use('/', stripeRoutes);
 
 /**
- * Starts the Express server on the specified port.
- * @remarks Logs a message when the server is running.
+ * Mounts Stripe webhook routes at the root path.
+ * @remarks Handles Stripe webhooks with raw body parsing.
  */
-// import logger from './lib/logger'; // Import the logger
+app.use('/', webhookRoutes);
 
 /**
  * Starts the Express server on the specified port.
  * @remarks Logs a message when the server is running.
  */
 app.listen(PORT, () => {
-  // logger.info('Stripe server started successfully');
+  console.log(`Stripe service listening on port ${PORT}`);
 });
