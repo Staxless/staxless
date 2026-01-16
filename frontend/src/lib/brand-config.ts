@@ -1,4 +1,4 @@
-import { NOTION_STYLE, VERCEL_STYLE } from './style-presets';
+// 
 
 /** Interface defining the structure of a brand style configuration */
 export interface BrandStyle {
@@ -110,7 +110,7 @@ export const CUSTOM_STYLE: BrandStyle = {
     borderLight: '#000000', // Replace with light border color
   },
   typography: {
-    fontFamily: 'system-ui, sans-serif', // Replace with your font family
+    fontFamily: '"Cabinet Grotesk"', // system-ui, sans-serif', // Replace with your font family
     headingWeight: 'font-bold', // Replace with heading font weight
     bodyWeight: 'font-normal', // Replace with body font weight
     headingSize: {
@@ -135,7 +135,7 @@ export const CUSTOM_STYLE: BrandStyle = {
 };
 
 /** Active style selection to switch between design presets */
-export const ACTIVE_STYLE: BrandStyle = VERCEL_STYLE;
+export const ACTIVE_STYLE: BrandStyle = CUSTOM_STYLE;
 
 /** Company configuration (style-independent) */
 export const COMPANY_CONFIG = {
@@ -240,6 +240,7 @@ export const NAVIGATION_CONFIG = {
     { name: 'Features', href: '#features' }, // Replace with navigation item
     { name: 'Pricing', href: '#pricing' }, // Replace with navigation item
     { name: 'Docs', href: '/docs' }, // Replace with navigation item
+    { name: 'Blog', href: '/blog' }, 
   ],
   /** Footer navigation sections */
   footer: {
