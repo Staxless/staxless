@@ -69,7 +69,7 @@ export const UserAuthStrategy = {
     
       let response: { session?: any; user?: { id: string; roles: string[]; name?: string } };
       try {
-        const fetchResponse = await fetch('http://back-gate:8000/auth/validate-request', {
+        const fetchResponse = await fetch('http://auth-service:8080/auth/validate-request', {
           method: 'POST',
           headers: {
             Cookie: `auth_session=${sessionID}`,

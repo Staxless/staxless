@@ -13,7 +13,7 @@ x-kong-config: &kong-env
 
 # Define DATABASE_URI as an anchor
 x-shared-env: &shared-env
-  DATABASE_URL: mongodb+srv://staxless-app-user:wa2lsXydfMeIfcTD@starless-integration.2ctzsjl.mongodb.net/?appName=starless-integration#mongodb://mongodb-service:27017/db #mongodb+srv://staxless-user:2Iy673q1e5A8tSH0@staxless-mongo-1dff0e82.mongo.ondigitalocean.com
+  DATABASE_URL: 
   DATABASE_NAME: db
   NODE_ENV: development
 
