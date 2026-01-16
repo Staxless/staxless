@@ -1,10 +1,12 @@
 {
   "name": "stripe-service",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
+    "build": "tsc",
     "dev": "tsx watch src/server.ts",
-    "prod": "tsc node dist/index.js"
+    "start": "node dist/server.js",
+    "prod": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "Zachary Benson",

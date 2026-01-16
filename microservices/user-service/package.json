@@ -1,11 +1,13 @@
 {
-  "name": "database-service",
-  "version": "1.0.0",
-  "main": "server.js",
+  "name": "user-service",
+  "version": "2.0.0",
+  "main": "server.ts",
   "type": "module",
   "scripts": {
+    "build": "tsc",
     "dev": "tsx watch src/server.ts",
-    "prod": "tsc node dist/index.js"
+    "start": "node dist/server.js",
+    "prod": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "Zachary Benson",

@@ -2,8 +2,21 @@ import { withPayload } from '@payloadcms/next/withPayload';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  assetPrefix: 'http://localhost:8085',
-  // Your Next.js config here
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'int.staxless.com',
+        'staxless.com', // prod domain when you add it
+        'localhost:3000', // local dev
+      ],
+    },
+  },
+  basePath: '/cms',
+  assetPrefix:
+    process.env.NODE_ENV === 'production'
+      ? 'https://int.staxless.com/cms/admin'
+      : '/admin',
+  output: 'standalone',
 };
 
 export default withPayload(nextConfig, {
