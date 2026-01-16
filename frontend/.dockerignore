@@ -25,6 +25,7 @@
 **/.cache
 **/.next/cache
 
+
 # Ignore misc files
 **/.DS_Store
 **/Thumbs.db
