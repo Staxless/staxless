@@ -44,16 +44,6 @@ services:
       platforms:
         - linux/amd64
 
-  cms-service:
-    image: ghcr.io/staxless/staxless/cms-service:latest
-    build:
-      context: ../microservices/cms-service/
-      dockerfile: ../../config/dockerfiles/payload.Dockerfile
-      target: prod
-      platforms:
-        - linux/amd64
-        - linux/arm64
-
   kong-api-gateway:
     image: ghcr.io/staxless/staxless/kong:latest
     build:

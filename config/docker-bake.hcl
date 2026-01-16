@@ -1,6 +1,6 @@
 group "default" {
-//   targets = ["frontend", "auth-service", "user-service", "stripe-service", "email-service", "cms-service", "kong-api-gateway"]
-targets = ["frontend"]//, "auth-service", "user-service", "stripe-service"]
+//   targets = ["frontend", "auth-service", "user-service", "stripe-service", "email-service", "kong-api-gateway"]
+targets = ["frontend"]
 }
 
 target "frontend" {
@@ -35,21 +35,14 @@ target "stripe-service" {
   platforms = ["linux/amd64"]
 }
 
-// target "email-service" {
-//   context = "../microservices/email-service/"
-//   dockerfile = "../../config/dockerfiles/node-service.Dockerfile"
-//   target = "prod"
-//   tags = ["ghcr.io/staxless/staxless/email-service:latest"]
-//   platforms = ["linux/amd64"]
-// }
+target "email-service" {
+  context = "../microservices/email-service/"
+  dockerfile = "../../config/dockerfiles/node-service.Dockerfile"
+  target = "prod"
+  tags = ["ghcr.io/staxless/staxless/email-service:latest"]
+  platforms = ["linux/amd64"]
+}
 
-// target "cms-service" {
-//   context = "../microservices/cms-service/"
-//   dockerfile = "../../config/dockerfiles/payload.Dockerfile"
-//   target = "prod"
-//   tags = ["ghcr.io/staxless/staxless/cms-service:latest"]
-//   platforms = ["linux/amd64"]
-// }
 
 target "kong-api-gateway" {
   context = "../kong-gateway/"

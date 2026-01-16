@@ -1,7 +1,0 @@
-@import "tailwindcss/utilities" layer(utilities);
-
-/* Removed non-standard @custom-variant and @theme at-rules */
-
-@layer utilities {
-  /* Removed non-standard @plugin at-rule */
-}

@@ -9,8 +9,6 @@ import { getUser, type User } from './lib/validate-user';
 
 const ROUTES_TO_RELOAD = ['/login', '/register', '/dashboard', ''];
 const PROTECTED_ROUTES = ['/dashboard', '/checkout'];
-const ADMIN_ROUTES = ['/admin'];
-const prefetchCache = new Set<string>();
 
 function isValidCsrf(request: NextRequest): boolean {
   if (request.method === 'GET') {
@@ -21,53 +19,11 @@ function isValidCsrf(request: NextRequest): boolean {
   return !!(origin && host && new URL(origin).host === host);
 }
 
-async function prefetchAdminDashboard(
-  user: User,
-  request: NextRequest
-): Promise<void> {
-  const cacheKey = `admin-prefetch:${user.id}`;
-
-  if (prefetchCache.has(cacheKey)) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`${request.nextUrl.origin}/admin`, {
-      method: 'GET',
-      headers: {
-        Accept: 'text/html',
-        'Cache-Control': 'max-age=3600',
-      },
-      // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(5000), // 5 second timeout
-    });
-
-    if (response.ok) {
-      prefetchCache.add(cacheKey);
-    }
-  } catch (err) {
-    // Log the error but don't throw - gracefully degrade
-    console.warn(
-      `Failed to prefetch admin dashboard for user ${user.id}:`,
-      err instanceof Error ? err.message : 'Unknown error'
-    );
-    // Add to cache anyway to prevent repeated failed attempts
-    prefetchCache.add(cacheKey);
-  }
-}
-
 function handleRouteRedirect(
   request: NextRequest,
   user: User | null,
   pathname: string
 ): NextResponse | null {
-  if (
-    ADMIN_ROUTES.some((route) => pathname.startsWith(route)) &&
-    !user?.roles.includes('admin')
-  ) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
   if (
     (pathname.startsWith('/login') || pathname.startsWith('/register')) &&
     user
@@ -108,10 +64,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   const user = await getUser();
   const pathname = request.nextUrl.pathname;
-
-  if (user?.roles.includes('admin') && !pathname.startsWith('/admin')) {
-    await prefetchAdminDashboard(user, request);
-  }
 
   const redirectResponse = handleRouteRedirect(request, user, pathname);
   if (redirectResponse) {
