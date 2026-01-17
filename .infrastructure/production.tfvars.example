@@ -1,0 +1,21 @@
+# DigitalOcean Configuration
+do_token        = "FROM_GITHUB_SECRET"
+ssh_fingerprint = "aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:00"
+domain          = "yourdomain.com"
+
+# Infrastructure
+region       = "nyc3"
+manager_size = "s-2vcpu-4gb"
+worker_size  = "s-2vcpu-4gb"
+worker_count = 2
+
+# Network
+vpc_cidr = "10.17.0.0/16"
+
+# Security - UPDATE WITH YOUR IP!
+authorized_ssh_ips = [
+  "YOUR.IP.ADDRESS.HERE/32",
+]
+
+# Backups
+enable_backups = true
