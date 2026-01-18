@@ -1,24 +1,65 @@
 # Next.js
-**/.next
+**/.next/
+**/out/
 
-# Node.js backend
-**/node_modules
+# Node.js
+**/node_modules/
 **/npm-debug.log
-**/.env
-**/.DS_Store
-**/.pem
+**/yarn-error.log
+**/yarn-debug.log
 **/package-lock.json
-**/.pnpm-store
-**/dist
+**/.pnpm-store/
 
-# React frontend
-**/client/node_modules
-**/client/build
+# Build outputs
+**/dist/
+**/build/
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.*.local
 **/*.env
+
+# Terraform - CRITICAL
+.infrastructure/.terraform/
+.infrastructure/*.tfstate
+.infrastructure/*.tfstate.*
+.infrastructure/*.tfstate.backup
+.infrastructure/.terraform.lock.hcl
+.infrastructure/crash.log
+.infrastructure/override.tf
+.infrastructure/override.tf.json
+.infrastructure/*_override.tf
+.infrastructure/*_override.tf.json
+.infrastructure/production.tfvars
+.infrastructure/test.tfvars
+
+# Security
+**/*.pem
+**/*.key
+
+# OS
 **/.DS_Store
+**/Thumbs.db
 
-# misc
-**/misc
+# IDE
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo
+**/*~
 
-#White list
+# Logs
+**/logs/
+**/*.log
+
+# Misc
+**/misc/
+
+# Docker
+**/docker-compose.override.yml
+
+# Whitelist
 !**/template.env
+!**/.env.example
+!**/production.tfvars.example
