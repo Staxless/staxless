@@ -13,14 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useProviders } from '@/hooks/use-provider';
 import { BRAND_CONFIG } from '@/lib/brand-config';
-
-interface ApiError {
-  response?: {
-    data?: {
-      error?: string;
-    };
-  };
-}
+import { getUserMessage, logError } from '@/lib/error-handling';
 
 export function LoginForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -75,9 +68,9 @@ export function LoginForm() {
         // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
         document.cookie = `csrf_token=${encodeURIComponent(csrfToken)}; path=/; max-age=900; samesite=lax; secure`;
       }
-    } catch (err: unknown) {
-      const errorMsg =
-        (err as ApiError)?.response?.data?.error || 'Failed to send magic link';
+    } catch (error) {
+      logError(error, { action: 'magic-link-login', email });
+      const errorMsg = getUserMessage(error);
       setError(errorMsg);
     }
   }

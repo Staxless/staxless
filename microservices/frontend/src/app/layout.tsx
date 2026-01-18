@@ -4,6 +4,7 @@ import type React from 'react';
 import '@/styles/globals.css';
 import Script from 'next/script';
 import { BRAND_CONFIG } from '@/lib/brand-config';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -55,7 +56,9 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </body>
     </html>
   );
 }

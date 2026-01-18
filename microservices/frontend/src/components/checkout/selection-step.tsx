@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { BRAND_CONFIG } from '@/lib/brand-config';
+import { getUserMessage, logError } from '@/lib/error-handling';
 
 export default function SelectionStep() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
@@ -19,17 +20,26 @@ export default function SelectionStep() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts);
-        setSelectedPlanId(fetchedProducts[1]?.id || ''); // Default to second plan
-      } catch {
-        // Ignore product fetch errors
+        const result = await getProducts();
+        if (result.success) {
+          setProducts(result.data);
+          setSelectedPlanId(result.data[1]?.id || ''); // Default to second plan
+        } else {
+          logError(new Error(result.error), { action: 'fetchProducts' });
+          toast({
+            title: 'Error',
+            description: result.error,
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        logError(error, { action: 'fetchProducts' });
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [toast]);
 
   const selectedPlan = products.find((p) => p.id === selectedPlanId);
   const basePrice = selectedPlan?.default_price?.unit_amount
@@ -66,12 +76,21 @@ export default function SelectionStep() {
 
     setIsProcessing(true);
     try {
-      const { url } = await createCheckoutSession(selectedPlan.id);
-      window.location.href = url; // Redirect to Stripe checkout
-    } catch (_error) {
+      const result = await createCheckoutSession(selectedPlan.id);
+      if (result.success) {
+        window.location.href = result.data.url; // Redirect to Stripe checkout
+      } else {
+        toast({
+          title: 'Error',
+          description: result.error,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      logError(error, { action: 'createCheckoutSession', planId: selectedPlan.id });
       toast({
         title: 'Error',
-        description: `Failed to proceed to payment. Please try again. ${_error}`,
+        description: getUserMessage(error),
         variant: 'destructive',
       });
     } finally {

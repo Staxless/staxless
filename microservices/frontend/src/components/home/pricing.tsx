@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { getProducts, type Product } from '@/app/actions/get-products';
 import { Button } from '@/components/ui/button';
 import { BRAND_CONFIG } from '@/lib/brand-config';
+import { logError } from '@/lib/error-handling';
 
 const formatPrice = (
   price: unknown,
@@ -55,10 +56,16 @@ export default function Pricing() {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const products = await getProducts();
-        setPlans(products);
-      } catch (_error) {
-        throw new Error(_error as string);
+        const result = await getProducts();
+        if (result.success) {
+          setPlans(result.data);
+        } else {
+          logError(new Error(result.error), { action: 'fetchPlans' });
+          setPlans([]);
+        }
+      } catch (error) {
+        logError(error, { action: 'fetchPlans' });
+        setPlans([]);
       } finally {
         setIsLoading(false);
       }

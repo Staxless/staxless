@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useProviders } from '@/hooks/use-provider';
 import { BRAND_CONFIG } from '@/lib/brand-config';
+import { getUserMessage, logError } from '@/lib/error-handling';
 
 interface FormData {
   firstName: string;
@@ -19,14 +20,6 @@ interface FormData {
   email: string;
   tier?: string;
   priceId?: string;
-}
-
-interface ApiError {
-  response?: {
-    data?: {
-      error?: string;
-    };
-  };
 }
 
 export function RegisterForm() {
@@ -116,9 +109,13 @@ export function RegisterForm() {
         // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
         document.cookie = `csrf_token=${encodeURIComponent(csrfToken)}; path=/; max-age=900; samesite=lax; secure`;
       }
-    } catch (err: unknown) {
-      const errorMsg =
-        (err as ApiError)?.response?.data?.error || 'Failed to send magic link';
+    } catch (error) {
+      logError(error, {
+        action: 'magic-link-register',
+        email: formData.email,
+        tier: formData.tier,
+      });
+      const errorMsg = getUserMessage(error);
       setError(errorMsg);
     }
   };
