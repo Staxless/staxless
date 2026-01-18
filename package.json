@@ -2,33 +2,24 @@
   "name": "staxless",
   "version": "2.0.0",
   "private": true,
+  "description": "SaaS boilerplate with Next.js frontend, Node.js microservices, and Kong API gateway",
+  "license": "ISC",
   "scripts": {
-    "docker:build-push": "bash ./scripts/docker-build-push.sh",
-
-    "staxless-dev-build": "docker compose -f ./config/docker-compose.dev.yml up --build",
-    "staxless-dev-up": "docker compose -f ./config/docker-compose.dev.yml up",
-    "staxless-dev-down": "docker compose -f ./config/docker-compose.dev.yml down",
-    "staxless-dev-logs": "docker compose -f ./config/docker-compose.dev.yml logs -f",
-
-    "staxless-prod-deploy": "docker stack deploy -c ./config/docker-compose.prod.yml staxless",
-    "staxless-prod-rm": "docker stack rm staxless",
-    "staxless-prod-ps": "docker stack ps staxless",
-    "staxless-prod-logs": "docker service logs -f staxless",
-
-    "dev:build": "npm run staxless-dev-build",
-    "dev:up": "npm run staxless-dev-up",
-    "dev:down": "npm run staxless-dev-down",
-    "dev:logs": "npm run staxless-dev-logs",
-
-    "prod:deploy": "npm run staxless-prod-deploy",
-    "prod:rm": "npm run staxless-prod-rm",
-    "prod:ps": "npm run staxless-prod-ps",
-    "prod:logs": "npm run staxless-prod-logs",
-
-    "lint": "npx ultracite check",
-    "format": "npx ultracite fix",
+    "docker:build-push": "bash ./.scripts/docker-build-push.sh",
+    "install:microservices": "bash .scripts/development/install-services.sh",
+    "dev:start": "docker compose -f ./docker/compose/docker-compose.dev.yml up --build",
+    "dev:up": "docker compose -f ./docker/compose/docker-compose.dev.yml up",
+    "dev:down": "docker compose -f ./docker/compose/docker-compose.dev.yml down",
+    "dev:logs": "docker compose -f ./docker/compose/docker-compose.dev.yml logs -f",
+    "prod:deploy": "docker stack deploy -c ./docker/compose/prod.yml staxless",
+    "prod:remove": "docker stack rm staxless",
+    "prod:status": "docker stack ps staxless",
+    "prod:logs": "docker service logs -f staxless",
+    "lint": "npx ultracite lint",
+    "format": "npx ultracite format",
     "test": "jest",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "lint:fix": "npx ultracite fix"
   },
   "eslintConfig": {
     "extends": [
@@ -48,11 +39,6 @@
       "last 1 safari version"
     ]
   },
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@biomejs/biome": "2.0.0",
     "@semantic-release/changelog": "^6.0.3",
@@ -68,7 +54,7 @@
     "postcss": "^8.5.5",
     "semantic-release": "^24.1.3",
     "tailwindcss": "^4.1.10",
-    "ultracite": "5.0.26"
+    "ultracite": "^5.6.4"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,json,css}": "npx ultracite fix"
@@ -85,5 +71,8 @@
       "@semantic-release/git",
       "@semantic-release/github"
     ]
+  },
+  "dependencies": {
+    "@staxless/cli": "^1.0.0"
   }
 }

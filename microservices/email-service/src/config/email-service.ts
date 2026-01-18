@@ -2,8 +2,7 @@
  * @file emailService.ts
  * @description Email service implementation for sending templated emails
  */
-
-import { type TemplateConfigMap, templateConfig } from './email-config';
+import { type TemplateConfigMap, templateConfig } from './email-config.js';
 
 /**
  * Interface defining the parameters required to send an email
@@ -16,6 +15,23 @@ export interface SendEmailParams {
   email: string;
   /** Object containing key-value pairs for template variables */
   variables: Record<string, string | number | boolean>;
+}
+
+/**
+ * Interface defining the structure of email data for sending
+ * @interface EmailData
+ */
+export interface EmailData {
+  /** Sender's email address */
+  from: string;
+  /** Recipient's email address */
+  to: string;
+  /** Email subject line */
+  subject: string;
+  /** Template name (if applicable) */
+  template?: string;
+  /** Optional additional fields for provider-specific data */
+  [key: string]: unknown;
 }
 
 /**
@@ -45,7 +61,7 @@ export interface EmailService {
  */
 export function createEmailService(emailClient: {
   get: (path: string) => Promise<{ template: string }>;
-  messages: () => { send: (data: Record<string, unknown>) => Promise<unknown> };
+  messages: () => { send: (data: EmailData) => Promise<unknown> };
 }): EmailService {
   /**
    * Sends an email using the specified template and variables
@@ -80,8 +96,8 @@ export function createEmailService(emailClient: {
       throw new Error(`Missing variables: ${missingVars.join(', ')}`);
     }
 
-    const data = {
-      from: `Your App <no-reply@${process.env.MAILGUN_DOMAIN}>`,
+    const data: EmailData = {
+      from: `Your App <no-reply@${process.env.EMAIL_DOMAIN || 'example.com'}>`,
       to: email,
       subject: config.subject,
       template: config.templateName,
@@ -95,6 +111,7 @@ export function createEmailService(emailClient: {
         )
       ),
     };
+
     return await emailClient.messages().send(data);
   }
 

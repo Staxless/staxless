@@ -1,0 +1,50 @@
+# Ignore node modules
+**/node_modules
+
+# Ignore logs
+**/logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Ignore environment variables
+**/.env
+**/.env.*
+**/.env.example
+
+# Ignore build output
+**/build
+**/.next
+**/out
+
+# Ignore coverage directory
+**/coverage
+
+# Ignore cache directories
+**/.cache
+**/.next/cache
+
+
+# Ignore misc files
+**/.DS_Store
+**/Thumbs.db
+
+# Ignore IDE/editor specific files
+**/.idea
+**/.vscode
+**/*.suo
+**/*.ntvs*
+**/*.njsproj
+**/*.sln
+
+# Ignore dependency directories and config files
+**/.babelrc
+**/.eslintrc.js
+**/.jest
+**/.nyc_output
+**/.prettierignore
+**/*.tsbuildinfo
+
+# Ignore other artifacts
+**/*.swp

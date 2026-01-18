@@ -1,0 +1,55 @@
+services:
+  frontend:
+    image: ghcr.io/staxless/staxless/frontend:latest
+    build:
+      context: ../microservices/frontend/
+      dockerfile: docker/compose/dockerfiles/frontend.Dockerfile
+      target: prod
+      platforms:
+        - linux/amd64
+
+  auth-service:
+    image: ghcr.io/staxless/staxless/auth-service:latest
+    build:
+      context: ../microservices/auth-service/
+      dockerfile: ../docker/compose/dockerfiles/node-service.Dockerfile
+      target: prod
+      platforms:
+        - linux/amd64
+
+  user-service:
+    image: ghcr.io/staxless/staxless/user-service:latest
+    build:
+      context: ../microservices/user-service/
+      dockerfile: ../docker/compose/dockerfiles/node-service.Dockerfile
+      target: prod
+      platforms:
+        - linux/amd64
+
+  stripe-service:
+    image: ghcr.io/staxless/staxless/stripe-service:latest
+    build:
+      context: ../microservices/stripe-service/
+      dockerfile: ../docker/compose/dockerfiles/node-service.Dockerfile
+      target: prod
+      platforms:
+        - linux/amd64
+
+  email-service:
+    image: ghcr.io/staxless/staxless/email-service:latest
+    build:
+      context: ../microservices/email-service/
+      dockerfile: ../docker/compose/dockerfiles/node-service.Dockerfile
+      target: prod
+      platforms:
+        - linux/amd64
+
+  kong-api-gateway:
+    image: ghcr.io/staxless/staxless/kong:latest
+    build:
+      context: ../microservices/kong-gateway/
+      dockerfile: ../docker/compose/dockerfiles/kong.Dockerfile
+      target: prod
+      platforms:
+        - linux/amd64
+        - linux/arm64

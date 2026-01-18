@@ -1,0 +1,268 @@
+name: Staxless Deployment Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_mode:
+        description: 'Deployment Mode'
+        required: true
+        type: choice
+        options:
+          - initial-deployment
+          - rolling-update
+          - deploy-new-service
+          - destroy
+      
+      mongodb_setup:
+        description: '☑ Setup MongoDB Atlas (initial deployment only)'
+        required: false
+        type: boolean
+        default: true
+      
+      update_all_services:
+        description: '☑ Update all services'
+        required: false
+        type: boolean
+        default: true
+      
+      update_frontend:
+        description: '☐ Update frontend'
+        required: false
+        type: boolean
+        default: false
+      
+      update_auth_service:
+        description: '☐ Update auth-service'
+        required: false
+        type: boolean
+        default: false
+      
+      update_user_service:
+        description: '☐ Update user-service'
+        required: false
+        type: boolean
+        default: false
+      
+      update_stripe_service:
+        description: '☐ Update stripe-service'
+        required: false
+        type: boolean
+        default: false
+      
+      update_email_service:
+        description: '☐ Update email-service'
+        required: false
+        type: boolean
+        default: false
+      
+      update_kong:
+        description: '☐ Update kong-api-gateway'
+        required: false
+        type: boolean
+        default: false
+      
+      new_service_name:
+        description: 'New service name (deploy-new-service only)'
+        required: false
+        type: string
+        default: ''
+      
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm (DigitalOcean only, MongoDB preserved)'
+        required: false
+        type: string
+        default: ''
+
+env:
+  DEPLOYMENT_ID: ${{ github.run_id }}-${{ github.run_number }}
+
+jobs:
+  validate:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.set-outputs.outputs.mode }}
+      services: ${{ steps.set-outputs.outputs.services }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate Inputs
+        run: bash scripts/deployment/validate-inputs.sh
+        env:
+          MODE: ${{ github.event.inputs.deployment_mode }}
+          CONFIRM_DESTROY: ${{ github.event.inputs.confirm_destroy }}
+          NEW_SERVICE_NAME: ${{ github.event.inputs.new_service_name }}
+      
+      - name: Build Service List
+        id: build-services
+        run: |
+          SERVICES=""
+          if [ "${{ github.event.inputs.update_all_services }}" = "true" ]; then
+            SERVICES="all"
+          else
+            [ "${{ github.event.inputs.update_frontend }}" = "true" ] && SERVICES="${SERVICES}frontend,"
+            [ "${{ github.event.inputs.update_auth_service }}" = "true" ] && SERVICES="${SERVICES}auth-service,"
+            [ "${{ github.event.inputs.update_user_service }}" = "true" ] && SERVICES="${SERVICES}user-service,"
+            [ "${{ github.event.inputs.update_stripe_service }}" = "true" ] && SERVICES="${SERVICES}stripe-service,"
+            [ "${{ github.event.inputs.update_email_service }}" = "true" ] && SERVICES="${SERVICES}email-service,"
+            [ "${{ github.event.inputs.update_kong }}" = "true" ] && SERVICES="${SERVICES}kong-api-gateway,"
+            SERVICES="${SERVICES%,}"
+          fi
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+      
+      - name: Set Outputs
+        id: set-outputs
+        run: |
+          echo "mode=${{ github.event.inputs.deployment_mode }}" >> $GITHUB_OUTPUT
+          echo "services=${{ steps.build-services.outputs.services }}" >> $GITHUB_OUTPUT
+
+  initial-deployment:
+    name: Initial Deployment
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.inputs.deployment_mode == 'initial-deployment'
+    timeout-minutes: 45
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        run: bash scripts/deployment/install-tools.sh
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Setup MongoDB Atlas
+        if: github.event.inputs.mongodb_setup == 'true'
+        run: bash scripts/infrastructure/setup-mongodb-atlas.sh
+        env:
+          MONGODB_ATLAS_PUBLIC_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}
+          MONGODB_ATLAS_PRIVATE_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}
+          MONGODB_ATLAS_PROJECT_ID: ${{ secrets.MONGODB_ATLAS_PROJECT_ID }}
+      - name: Provision Infrastructure
+        run: bash scripts/infrastructure/terraform-apply.sh
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          DO_SPACES_ACCESS_KEY: ${{ secrets.DO_SPACES_ACCESS_KEY }}
+          DO_SPACES_SECRET_KEY: ${{ secrets.DO_SPACES_SECRET_KEY }}
+      - name: Initialize Swarm
+        run: bash scripts/deployment/init-swarm.sh
+      - name: Setup Registry
+        run: doctl registry login
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Create Secrets
+        run: bash scripts/deployment/create-docker-secrets.sh
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_NAME: staxless
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+      - name: Build Images
+        run: bash scripts/deployment/build-images.sh all
+      - name: Deploy Stack
+        run: bash scripts/deployment/deploy-stack.sh
+      - name: Health Check
+        run: bash scripts/deployment/health-check.sh
+
+  rolling-update:
+    name: Rolling Update
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.inputs.deployment_mode == 'rolling-update'
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        run: bash scripts/deployment/install-tools.sh
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Build Images
+        run: bash scripts/deployment/build-images.sh "${{ needs.validate.outputs.services }}"
+      - name: Rolling Update
+        run: bash scripts/deployment/rolling-update.sh "${{ needs.validate.outputs.services }}"
+        env:
+          MANAGER_IP: ${{ secrets.DO_MANAGER_IP }}
+      - name: Health Check
+        run: bash scripts/deployment/health-check.sh
+        env:
+          MANAGER_IP: ${{ secrets.DO_MANAGER_IP }}
+
+  deploy-new-service:
+    name: Deploy New Service
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.inputs.deployment_mode == 'deploy-new-service'
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        run: bash scripts/deployment/install-tools.sh
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Validate & Detect Secrets
+        run: bash scripts/deployment/detect-service-secrets.sh "${{ github.event.inputs.new_service_name }}"
+      - name: Create Service Secrets
+        run: bash scripts/deployment/create-service-secrets.sh
+        env:
+          SERVICE_NAME: ${{ github.event.inputs.new_service_name }}
+          MANAGER_IP: ${{ secrets.DO_MANAGER_IP }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_NAME: staxless
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+      - name: Build Service
+        run: bash scripts/deployment/build-images.sh "${{ github.event.inputs.new_service_name }}"
+      - name: Deploy Service
+        run: bash scripts/deployment/deploy-new-service.sh "${{ github.event.inputs.new_service_name }}"
+        env:
+          MANAGER_IP: ${{ secrets.DO_MANAGER_IP }}
+      - name: Health Check
+        run: bash scripts/deployment/health-check.sh
+        env:
+          MANAGER_IP: ${{ secrets.DO_MANAGER_IP }}
+
+  destroy:
+    name: Destroy Infrastructure
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.inputs.deployment_mode == 'destroy'
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        run: bash scripts/deployment/install-tools.sh
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Confirm Destruction
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]; then
+            echo "❌ Must type DESTROY to confirm"
+            exit 1
+          fi
+      - name: Graceful Shutdown
+        run: bash scripts/deployment/graceful-shutdown.sh
+        env:
+          MANAGER_IP: ${{ secrets.DO_MANAGER_IP }}
+        continue-on-error: true
+      - name: Destroy Infrastructure
+        run: bash scripts/infrastructure/terraform-destroy.sh
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Summary
+        run: |
+          echo "✅ DigitalOcean infrastructure destroyed"
+          echo "⚠️  MongoDB Atlas preserved ($57/month)"
+          echo "Delete manually: https://cloud.mongodb.com"
