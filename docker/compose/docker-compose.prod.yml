@@ -23,8 +23,6 @@ secrets:
     external: true
   MAILGUN_API_KEY:
     external: true
-  PAYLOAD_SECRET:
-    external: true
   STRIPE_PRIVATE_KEY:
     external: true
   STRIPE_WEBHOOK_SECRET:

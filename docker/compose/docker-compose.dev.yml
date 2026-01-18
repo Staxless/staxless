@@ -12,10 +12,13 @@ x-kong-config: &kong-env
   KONG_DATABASE: ${KONG_DATABASE:-off}
 
 # Define DATABASE_URI as an anchor
-x-shared-env: &shared-env
-  DATABASE_URL: 
+x-common-environment: &common-environment
+  DATABASE_URL: mongodb://mongodb-service:27017
   DATABASE_NAME: db
   NODE_ENV: development
+  API_GATEWAY_URL: http://localhost:8000
+  FRONTEND_URL: http://localhost:3000
+  COOKIE_DOMAIN: localhost
 
 volumes:
   kong_data: {}
@@ -34,8 +37,8 @@ services:
   frontend:
     image: app_frontend
     build:
-      context: ../frontend/
-      dockerfile: ../config/dockerfiles/frontend.Dockerfile
+      context: ../../microservices/frontend/
+      dockerfile: ../../docker/dockerfiles/frontend.Dockerfile
       target: dev
     ports:
       - "3000:3000"
@@ -43,13 +46,13 @@ services:
       - "3000"
     restart: always
     volumes:
-      - ../frontend/src/:/app/src
+      - ../../microservices/frontend/src:/app/src
       - /app/node_modules
       - /app/.next
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     environment:
-      <<: *shared-env
+      <<: *common-environment
     networks:
       frontend:
         aliases:
@@ -59,12 +62,16 @@ services:
           - "frontend"
 
   kong-api-gateway:
-    image: "${KONG_DOCKER_TAG:-kong:latest}"
+    image: kong-api-gateway
+    build:
+      context: ../../microservices/kong-gateway/
+      dockerfile: ../../docker/dockerfiles/kong.Dockerfile
+      target: dev
     user: "${KONG_USER:-kong}"
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     environment:
-      <<: [*kong-env, *shared-env]
+      <<: [*kong-env, *common-environment]
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_PROXY_LISTEN: "${KONG_PROXY_LISTEN:-0.0.0.0:8000}"
@@ -96,8 +103,8 @@ services:
     volumes:
       - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
       - kong_tmp_vol:/tmp
-      - ../kong-gateway/src/kong.yaml:/opt/kong/src/kong.yaml
-      - ../kong-gateway/plugins/rbac-auth:/usr/local/share/lua/5.1/kong/plugins/rbac-auth
+      - ../../microservices/kong-gateway/src/kong.yaml:/opt/kong/src/kong.yaml
+      - ../../microservices/kong-gateway/plugins/rbac-auth:/usr/local/share/lua/5.1/kong/plugins/rbac-auth
     security_opt:
       - no-new-privileges
     networks:
@@ -111,11 +118,11 @@ services:
   mongodb-service:
     image: mongo:latest
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     volumes:
       - mongo_data:/data/db
     environment:
-      <<: *shared-env
+      <<: *common-environment
     ports:
       - "27017:27017"
     expose:
@@ -133,21 +140,21 @@ services:
   auth-service:
     image: app_auth_service
     build:
-      context: ../microservices/auth-service/
+      context: ../../microservices/auth-service/
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     environment:
-      <<: *shared-env
+      <<: *common-environment
       API_GATEWAY_URL: http://localhost:8000
     ports:
       - "8080:8080"
     expose:
       - "8080"
     volumes:
-      - ../microservices/auth-service/src:/home/node/src
-      - ../microservices/auth-service/src/server.js:/home/node/server.js
+      - ../../microservices/auth-service/src:/home/node/src
+      - ../../microservices/auth-service/src/server.js:/home/node/server.js
     networks:
       backend:
         aliases:
@@ -156,20 +163,20 @@ services:
   user-service:
     image: app_user_service
     build:
-      context: ../microservices/user-service/
+      context: ../../microservices/user-service/
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     environment:
-      <<: *shared-env
+      <<: *common-environment
     ports:
       - "8082:8082"
     expose:
       - "8082"
     volumes:
-      - ../microservices/user-service/src:/home/node/src
-      - ../microservices/user-service/src/server.js:/home/node/server.js
+      - ../../microservices/user-service/src:/home/node/src
+      - ../../microservices/user-service/src/server.js:/home/node/server.js
     networks:
       backend:
         aliases:
@@ -177,20 +184,20 @@ services:
 
   stripe-service:
     build:
-      context: ../microservices/stripe-service/
+      context: ../../microservices/stripe-service/
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     environment:
-      <<: *shared-env
+      <<: *common-environment
     ports:
       - "8083:8083"
     expose:
       - "8083"
     volumes:
-      - ../microservices/stripe-service/src:/home/node/src
-      - ../microservices/stripe-service/src/server.js:/home/node/server.js
+      - ../../microservices/stripe-service/src:/home/node/src
+      - ../../microservices/stripe-service/src/server.js:/home/node/server.js
     networks:
       backend:
         aliases:
@@ -250,18 +257,18 @@ services:
     image: app_email_service
 
     build:
-      context: ../microservices/email-service/
+      context: ../../microservices/email-service/
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../enviroments/dev/staxless.dev.env
+      - ../../enviroments/dev/staxless.dev.env
     ports:
       - "8084:8084"
     expose:
       - "8084"
     volumes:
-      - ../microservices/email-service/src:/home/node/src
-      - ../microservices/email-service/src/server.js:/home/node/server.js
+      - ../../microservices/email-service/src:/home/node/src
+      - ../../microservices/email-service/src/server.js:/home/node/server.js
     environment:
       - NODE_ENV=development
     networks:
