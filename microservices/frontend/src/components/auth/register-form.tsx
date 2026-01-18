@@ -99,7 +99,7 @@ export function RegisterForm() {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/auth/magic-link/register',
+        'api/auth/magic-link/register',
         formData,
         { headers: { 'X-CSRF-Token': csrfToken } }
       );
