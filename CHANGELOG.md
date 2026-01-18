@@ -1,3 +1,38 @@
+# [2.0.0](https://github.com/Staxless/staxless/compare/v1.39.0...v2.0.0) (2026-01-18)
+
+
+* feat!: transition backend services to event-based architecture ([2a3b6d4](https://github.com/Staxless/staxless/commit/2a3b6d45e937044c67017ad0521614c4f6806156))
+
+
+### Bug Fixes
+
+* correct regex to include base route ([a29bf5a](https://github.com/Staxless/staxless/commit/a29bf5a0b928cf51f52397ed31ce0a25aeccb291))
+* **linting:** restore deleted code from linting ([fd0f097](https://github.com/Staxless/staxless/commit/fd0f097f196369ad18dc1206075bd3c551103e60))
+* reset brand config to template ([95b17f3](https://github.com/Staxless/staxless/commit/95b17f3265646494951d8e60fc11a4ebd464030c))
+* **tailwind:** correct path for global CSS file and ensure package manager is specified ([0d54d71](https://github.com/Staxless/staxless/commit/0d54d710254161940a189f5205b4d1b416346886))
+* update admin route destination to correct port ([43cef73](https://github.com/Staxless/staxless/commit/43cef73383d4616d8a91a9084368be3334068797))
+
+
+### Features
+
+* add production deployment infrastructure with GitHub Actions ([0a06d66](https://github.com/Staxless/staxless/commit/0a06d66ae3c3b587bbd7569247a5156b70e48e5c))
+* Add subscription support alongside one-time payments ([8efc52d](https://github.com/Staxless/staxless/commit/8efc52df7c242aa2fcc2a1e00d0389a8c8eb5869))
+* **auth-service:** refactor OAuth providers with secrets manager, dynamic redirects & enhanced security ([a51268e](https://github.com/Staxless/staxless/commit/a51268e774af75652aa505d751ec3ebcdca41169))
+* **cookie-store:** add TypeScript interfaces for cookie store management ([512f70c](https://github.com/Staxless/staxless/commit/512f70cb64a450f3a507ebac720a10c5ccf8ec52))
+* enable prefetch admin dashboard to reduce cold starts ([9b7e8ba](https://github.com/Staxless/staxless/commit/9b7e8ba6dd5999c63c23dadf3d044036432f0bd6))
+* **health:** add health check endpoint returning status ([d023862](https://github.com/Staxless/staxless/commit/d023862ded8e20c34b8905e73ea0ce1b5482df06))
+* Implement blog post functionality ([9e30cd7](https://github.com/Staxless/staxless/commit/9e30cd71e217c430f1136119b1ab9edeb6fa4a6e))
+* implement email service with templated email support and Mailgun client integration ([ec644b7](https://github.com/Staxless/staxless/commit/ec644b72aa83e1c3aec966715ecc927d08d444da))
+* implement RBAC with Kong plugin, add rate limiting, timeout, and CORS configuration ([0bbcf7d](https://github.com/Staxless/staxless/commit/0bbcf7d962cf9c145408017e2222d372ad033d4b))
+* **public:** add favicon, logo image, and SVG icon for branding ([187529c](https://github.com/Staxless/staxless/commit/187529cfebb7895059bdf3082c7c2b22fb7263c0))
+* **secrets:** implement secure secret loader with caching and error handling for production ([6607f8c](https://github.com/Staxless/staxless/commit/6607f8cf61359148e66e0254746f7c82a00ae3a1))
+* **tailwind:** update Tailwind CSS configuration and update related files ([a5f3d93](https://github.com/Staxless/staxless/commit/a5f3d9370ee1be3e9fe826a6d5d58a8b634b0489))
+
+
+### BREAKING CHANGES
+
+* Replaced direct API calls with Kafka-based event-driven communication, requiring updates to client integrations and service configurations.
+
 # [2.0.0](https://github.com/Staxless/staxless/compare/v1.40.0...v2.0.0) (2025-06-25)
 
 
