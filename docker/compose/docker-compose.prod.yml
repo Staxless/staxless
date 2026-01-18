@@ -284,36 +284,7 @@ services:
     healthcheck:
       disable: true
 
-  cms-service:
-    image: ghcr.io/staxless/staxless/cms-service:latest
-    secrets:
-      - source: PAYLOAD_SECRET
-        target: /run/secrets/PAYLOAD_SECRET
-        uid: "1000"
-        gid: "1000"
-        mode: 0400
-      - source: DATABASE_NAME
-        target: /run/secrets/DATABASE_NAME
-        uid: "1000"
-        gid: "1000"
-        mode: 0400
-      - source: DATABASE_URL
-        target: /run/secrets/DATABASE_URL
-        uid: "1000"
-        gid: "1000"
-        mode: 0400
-    networks:
-      - backend
-    environment:
-      <<: [*common-environment]
-      PAYLOAD_PUBLIC_SERVER_URL: "https://int.staxless.com"
-      DATABASE_URL_FILE: /run/secrets/DATABASE_URL
-      DATABASE_NAME_FILE: /run/secrets/DATABASE_NAME
-      PAYLOAD_SECRET_FILE: /run/secrets/PAYLOAD_SECRET
-    deploy:
-      <<: *deploy-config
-    healthcheck:
-      disable: true
+
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0

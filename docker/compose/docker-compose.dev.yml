@@ -47,7 +47,7 @@ services:
       - /app/node_modules
       - /app/.next
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     environment:
       <<: *shared-env
     networks:
@@ -62,7 +62,7 @@ services:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     user: "${KONG_USER:-kong}"
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     environment:
       <<: [*kong-env, *shared-env]
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -111,7 +111,7 @@ services:
   mongodb-service:
     image: mongo:latest
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     volumes:
       - mongo_data:/data/db
     environment:
@@ -134,10 +134,10 @@ services:
     image: app_auth_service
     build:
       context: ../microservices/auth-service/
-      dockerfile: ../../config/dockerfiles/node-service.Dockerfile
+      dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     environment:
       <<: *shared-env
       API_GATEWAY_URL: http://localhost:8000
@@ -157,10 +157,10 @@ services:
     image: app_user_service
     build:
       context: ../microservices/user-service/
-      dockerfile: ../../config/dockerfiles/node-service.Dockerfile
+      dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     environment:
       <<: *shared-env
     ports:
@@ -178,10 +178,10 @@ services:
   stripe-service:
     build:
       context: ../microservices/stripe-service/
-      dockerfile: ../../config/dockerfiles/node-service.Dockerfile
+      dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     environment:
       <<: *shared-env
     ports:
@@ -251,10 +251,10 @@ services:
 
     build:
       context: ../microservices/email-service/
-      dockerfile: ../../config/dockerfiles/node-service.Dockerfile
+      dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../config/secrets/dev/staxless.dev.env
+      - ../enviroments/dev/staxless.dev.env
     ports:
       - "8084:8084"
     expose:
@@ -269,24 +269,4 @@ services:
         aliases:
           - "email"
 
-  cms-service:
-    image: node:18-alpine
-    env_file:
-      - ../config/secrets/dev/staxless.dev.env
-    ports:
-      - "8085:8085"
-    expose:
-      - "8085"
-    volumes:
-      - ../microservices/cms-service:/home/node/app
-      - ../microservices/cms-service/node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      - mongodb-service
-    environment:
-      - PORT=8085
-    networks:
-      backend:
-        aliases:
-          - "cms"
+

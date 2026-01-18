@@ -16,11 +16,6 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'cms-service',
-        port: '8085',
-      },
-      {
-        protocol: 'http',
         hostname: 'kong-api-gateway',
         port: '8000',
       },
@@ -37,27 +32,7 @@ const nextConfig = {
   },
   rewrites() {
     return [
-      // IMPORTANT: More specific routes MUST come first
-      // CMS media files - MOVED TO TOP
-      {
-        source: '/cms/api/media/:path*',
-        destination: 'http://kong-api-gateway:8000/cms/api/media/:path*',
-      },
-      // CMS admin requests
-      {
-        source: '/cms/admin/:path*',
-        destination: 'http://kong-api-gateway:8000/cms/admin/:path*',
-      },
-      {
-        source: '/admin/:path*',
-        destination: 'http://kong-api-gateway:8000/cms/admin/:path*',
-      },
-      // CMS API requests - LESS specific, comes after media
-      {
-        source: '/cms/api/:path*',
-        destination: 'http://kong-api-gateway:8000/cms/api/:path*',
-      },
-      // General API requests
+
       {
         source: '/api/:path*',
         destination: 'http://kong-api-gateway:8000/:path*',
