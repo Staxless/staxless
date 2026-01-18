@@ -163,7 +163,6 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
       - name: Build Images
         run: bash scripts/deployment/build-images.sh all
       - name: Deploy Stack
@@ -224,7 +223,6 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
       - name: Build Service
         run: bash scripts/deployment/build-images.sh "${{ github.event.inputs.new_service_name }}"
       - name: Deploy Service

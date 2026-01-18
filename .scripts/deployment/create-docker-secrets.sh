@@ -53,10 +53,6 @@ if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then
   echo "$CLOUDFLARE_TUNNEL_TOKEN" | docker secret create CLOUDFLARE_TUNNEL_TOKEN - 2>/dev/null || echo "ℹ️  CLOUDFLARE_TUNNEL_TOKEN exists"
 fi
 
-# Payload
-if [ -n "$PAYLOAD_SECRET" ]; then
-  echo "$PAYLOAD_SECRET" | docker secret create PAYLOAD_SECRET - 2>/dev/null || echo "ℹ️  PAYLOAD_SECRET exists"
-fi
 
 SSHEOF
 
