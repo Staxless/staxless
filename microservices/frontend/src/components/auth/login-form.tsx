@@ -1,9 +1,8 @@
 'use client';
 
-import axios from 'axios';
-import { AlertCircle, Mail, Sparkles } from 'lucide-react';
+import { AlertCircle, Loader2, Mail } from 'lucide-react';
 import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 import OAuthButton from '@/components/auth/oauth-button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -11,17 +10,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import { useProviders } from '@/hooks/use-provider';
 import { BRAND_CONFIG } from '@/lib/brand-config';
-import { getUserMessage, logError } from '@/lib/error-handling';
+import { logError } from '@/lib/error-handling';
 
 export function LoginForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState<string>('');
-  // const router = useRouter();
-  const { providers, isLoading, error: providersError } = useProviders();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { providers, isLoading: providersLoading, error: providersError } = useProviders();
 
   // Generate CSRF token
   const csrfToken = crypto.randomUUID();
@@ -46,36 +46,80 @@ export function LoginForm() {
    */
   async function handleMagicLinkSubmit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+
+    // Validate email
+    if (!email || !email.includes('@')) {
+      toast({
+        title: 'Invalid email',
+        description: 'Please enter a valid email address',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        '/api/auth/magic-link/login',
-        { email },
-        { headers: { 'X-CSRF-Token': csrfToken } }
-      );
-      setSuccess(response.data.message);
+      const response = await fetch('/api/auth/magic-link/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
+        body: JSON.stringify({ email }),
+      });
 
-      if (window.cookieStore) {
-        await window.cookieStore.set({
-          name: 'csrf_token',
-          value: csrfToken,
-          path: '/',
-          sameSite: 'lax',
-        });
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned an unexpected response format');
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Set CSRF token cookie
+        if (window.cookieStore) {
+          await window.cookieStore.set({
+            name: 'csrf_token',
+            value: csrfToken,
+            path: '/',
+            sameSite: 'lax',
+          });
+        } else {
+          // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
+          document.cookie = `csrf_token=${encodeURIComponent(csrfToken)}; path=/; max-age=900; samesite=lax; secure`;
+        }
+
+        // Redirect to success page
+        router.push(`/magic-link-sent?email=${encodeURIComponent(email)}`);
       } else {
-        // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
-        document.cookie = `csrf_token=${encodeURIComponent(csrfToken)}; path=/; max-age=900; samesite=lax; secure`;
+        // API error
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to send magic link',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
       }
     } catch (error) {
+      // Network error or parse error
       logError(error, { action: 'magic-link-login', email });
-      const errorMsg = getUserMessage(error);
-      setError(errorMsg);
+
+      const errorMessage = error instanceof Error && error.message.includes('unexpected response format')
+        ? 'The magic link service is currently unavailable. Please try again later.'
+        : 'Unable to send magic link. Please check your connection.';
+
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      setIsLoading(false);
     }
   }
 
-  if (isLoading) {
+  if (providersLoading) {
     return (
       <div className="flex h-32 items-center justify-center">
         <div
@@ -108,6 +152,7 @@ export function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
+              disabled={isLoading}
               style={{
                 backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
                 borderColor: BRAND_CONFIG.brand.colors.border,
@@ -123,45 +168,29 @@ export function LoginForm() {
           disabled={isLoading}
           style={{
             backgroundColor: BRAND_CONFIG.brand.colors.primary,
-            color: 'white',
+            color: BRAND_CONFIG.brand.colors.background,
           }}
           type="submit"
         >
-          <div className="flex items-center space-x-2">
-            <Sparkles className="h-4 w-4" />
-            <span>Send Magic Link</span>
-          </div>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending magic link...
+            </>
+          ) : (
+            <>
+              <Mail className="mr-2 h-4 w-4" />
+              Send magic link
+            </>
+          )}
         </Button>
       </form>
 
-      {(error || providersError) && (
+      {providersError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error || providersError}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert
-          className="border"
-          style={{
-            backgroundColor: `${BRAND_CONFIG.brand.colors.primary}10`,
-            borderColor: BRAND_CONFIG.brand.colors.primary,
-          }}
-        >
-          <Sparkles
-            className="h-4 w-4"
-            style={{ color: BRAND_CONFIG.brand.colors.primary }}
-          />
-          <AlertTitle style={{ color: BRAND_CONFIG.brand.colors.primary }}>
-            Success
-          </AlertTitle>
-          <AlertDescription
-            style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-          >
-            {success}
-          </AlertDescription>
+          <AlertDescription>{providersError}</AlertDescription>
         </Alert>
       )}
 
