@@ -7,6 +7,7 @@ import { getProducts, type Product } from '@/app/actions/get-products';
 import { Button } from '@/components/ui/button';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 import { logError } from '@/lib/error-handling';
+import { ProductGridSkeleton } from '@/components/ui/skeletons';
 
 const formatPrice = (
   price: unknown,
@@ -81,12 +82,23 @@ export default function Pricing() {
         id="pricing"
         style={{ backgroundColor: BRAND_CONFIG.brand.colors.background }}
       >
-        <div className="container mx-auto px-4 text-center">
-          <div
-            className="animate-pulse"
-            style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
-          >
-            Loading pricing...
+        <div className="container mx-auto px-4">
+          <div className="mb-16 text-center">
+            <h2
+              className="mb-4 font-bold text-4xl"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
+              {BRAND_CONFIG.content.pricing.title}
+            </h2>
+            <p
+              className="text-xl"
+              style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
+            >
+              {BRAND_CONFIG.content.pricing.subtitle}
+            </p>
+          </div>
+          <div className="mx-auto max-w-5xl">
+            <ProductGridSkeleton count={3} />
           </div>
         </div>
       </section>

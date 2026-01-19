@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, CreditCard } from 'lucide-react';
+import { Check, CreditCard, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { createCheckoutSession } from '@/app/actions/create-checkout-session';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 import { getUserMessage, logError } from '@/lib/error-handling';
+import { ProductGridSkeleton } from '@/components/ui/skeletons';
 
 export default function SelectionStep() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
@@ -101,7 +102,17 @@ export default function SelectionStep() {
   const isFormValid = !!selectedPlanId;
 
   if (isLoading || !products.length) {
-    return <div>Loading plans...</div>;
+    return (
+      <div className="space-y-8">
+        <h2
+          className="mb-6 font-bold text-2xl"
+          style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+        >
+          Choose Your Plan
+        </h2>
+        <ProductGridSkeleton count={3} />
+      </div>
+    );
   }
 
   return (
@@ -246,15 +257,15 @@ export default function SelectionStep() {
         }}
       >
         {isProcessing ? (
-          <div className="flex items-center space-x-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-white border-b-2" />
-            <span>Processing...</span>
-          </div>
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Processing...
+          </>
         ) : (
-          <div className="flex items-center space-x-2">
+          <>
             <CreditCard className="mr-2 h-5 w-5" />
-            <span>Proceed to Payment</span>
-          </div>
+            Proceed to Payment
+          </>
         )}
       </Button>
     </div>

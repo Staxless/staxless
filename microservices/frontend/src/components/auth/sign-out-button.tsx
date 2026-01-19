@@ -5,6 +5,7 @@
  */
 'use client';
 
+import { Loader2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -45,7 +46,17 @@ export function SignOutButton() {
       onClick={handleSignOut}
       variant="ghost"
     >
-      {isSigningOut ? 'Signing out...' : 'Sign out'}
+      {isSigningOut ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Signing out...
+        </>
+      ) : (
+        <>
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign out
+        </>
+      )}
     </Button>
   );
 }
