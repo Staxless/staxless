@@ -1,7 +1,11 @@
-import { Mail, Sparkles } from 'lucide-react';
-import type { Metadata } from 'next';
+'use client';
+
+import { CheckCircle2, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import Logo from '@/components/shared/logo';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,11 +15,10 @@ import {
 } from '@/components/ui/card';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-export const metadata: Metadata = {
-  title: 'Magic Link Sent',
-};
+function MagicLinkSentContent() {
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email') || 'your email address';
 
-export default function MagicLinkSentPage() {
   return (
     <div
       className="flex min-h-screen items-center justify-center p-4"
@@ -36,9 +39,6 @@ export default function MagicLinkSentPage() {
               {BRAND_CONFIG.company.name}
             </span>
           </Link>
-          <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-            Check your email for the magic link
-          </p>
         </div>
 
         <Card
@@ -49,53 +49,129 @@ export default function MagicLinkSentPage() {
           }}
         >
           <CardHeader className="text-center">
-            <CardTitle style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
-              Magic Link Sent
+            <div className="mb-4 flex justify-center">
+              <Mail
+                className="h-16 w-16"
+                style={{ color: BRAND_CONFIG.brand.colors.primary }}
+              />
+            </div>
+            <CardTitle
+              className="text-2xl"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
+              Check your email
             </CardTitle>
             <CardDescription
+              className="text-base"
               style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
             >
-              We&apos;ve sent a magic link to your email address
+              We sent a magic link to
             </CardDescription>
+            <div
+              className="mt-2 font-medium"
+              style={{ color: BRAND_CONFIG.brand.colors.primary }}
+            >
+              {email}
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6 text-center">
-              <div className="flex justify-center">
-                <Sparkles
-                  className="h-12 w-12"
-                  style={{ color: BRAND_CONFIG.brand.colors.primary }}
-                />
-              </div>
-              <p style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}>
-                A magic link has been sent to your email. Click the link to sign
-                in to your account.
-              </p>
-              <div className="flex justify-center">
-                <Mail
-                  className="h-8 w-8"
-                  style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-                />
-              </div>
-              <p
-                className="text-sm"
+          <CardContent className="space-y-6">
+            {/* Next Steps */}
+            <div>
+              <h3
+                className="mb-3 font-semibold"
+                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+              >
+                Next steps:
+              </h3>
+              <ol className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle2
+                    className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0"
+                    style={{ color: BRAND_CONFIG.brand.colors.success }}
+                  />
+                  <span
+                    style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
+                  >
+                    Check your inbox for an email from {BRAND_CONFIG.company.name}
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle2
+                    className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0"
+                    style={{ color: BRAND_CONFIG.brand.colors.success }}
+                  />
+                  <span
+                    style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
+                  >
+                    Click the magic link in the email
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle2
+                    className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0"
+                    style={{ color: BRAND_CONFIG.brand.colors.success }}
+                  />
+                  <span
+                    style={{ color: BRAND_CONFIG.brand.colors.textSecondary }}
+                  >
+                    You'll be automatically logged in
+                  </span>
+                </li>
+              </ol>
+            </div>
+
+            {/* Troubleshooting Section */}
+            <div
+              className="rounded-lg border p-4"
+              style={{
+                backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
+                borderColor: BRAND_CONFIG.brand.colors.border,
+              }}
+            >
+              <h4
+                className="mb-2 font-semibold text-sm"
+                style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+              >
+                Didn't receive the email?
+              </h4>
+              <ul
+                className="space-y-1 text-sm"
                 style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
               >
-                Didn&apos;t receive the email? Check your spam folder or{' '}
-                <Link
-                  className="font-medium hover:underline"
-                  href="/login"
-                  style={{ color: BRAND_CONFIG.brand.colors.primary }}
-                >
-                  try again
-                </Link>
-                .
-              </p>
+                <li>• Check your spam or junk folder</li>
+                <li>• Make sure you entered the correct email address</li>
+                <li>• Wait a few minutes for the email to arrive</li>
+                <li>
+                  • Contact support at{' '}
+                  <a
+                    className="font-medium hover:underline"
+                    href={`mailto:${BRAND_CONFIG.company.email}`}
+                    style={{ color: BRAND_CONFIG.brand.colors.primary }}
+                  >
+                    {BRAND_CONFIG.company.email}
+                  </a>
+                </li>
+              </ul>
             </div>
+
+            {/* Back to Login Button */}
+            <Link href="/login" className="block">
+              <Button
+                className="w-full"
+                variant="outline"
+                style={{
+                  borderColor: BRAND_CONFIG.brand.colors.border,
+                  color: BRAND_CONFIG.brand.colors.textPrimary,
+                }}
+              >
+                Back to Login
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
         {/* Footer Links */}
-        <div className="mt-6 space-y-2 text-center">
+        <div className="mt-6 text-center">
           <Link
             className="text-sm hover:underline"
             href="/"
@@ -106,5 +182,13 @@ export default function MagicLinkSentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MagicLinkSentPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MagicLinkSentContent />
+    </Suspense>
   );
 }

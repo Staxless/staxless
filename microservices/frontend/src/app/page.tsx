@@ -1,7 +1,7 @@
 // "use client"
 
 import { headers } from 'next/headers';
-import FAQ from '@/components/home/accordian-faq';
+import FAQ from '@/components/home/accordion-faq';
 import CTA from '@/components/home/cta';
 import Features from '@/components/home/features';
 import Hero from '@/components/home/hero';

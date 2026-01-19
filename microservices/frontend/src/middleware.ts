@@ -62,7 +62,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, { status: 403 });
   }
 
-  const user = await getUser();
+  const userResult = await getUser();
+  const user = userResult.success ? userResult.data : null;
   const pathname = request.nextUrl.pathname;
 
   const redirectResponse = handleRouteRedirect(request, user, pathname);

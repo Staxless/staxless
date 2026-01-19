@@ -6,6 +6,13 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import {
+  type ActionResult,
+  success,
+  failure,
+  safeFetch,
+  logError,
+} from '@/lib/error-handling';
 
 /**
  * @interface User
@@ -25,22 +32,27 @@ export interface User {
 /**
  * Retrieves the authenticated user's data by validating the session cookie.
  *
- * @returns {Promise<User | null>} A promise that resolves to the user object if authenticated, or null if not
+ * @returns {Promise<ActionResult<User>>} A promise that resolves to the user object if authenticated
  */
-export async function getUser(): Promise<User | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('auth_session');
-
-  console.log('[getUser] Session cookie:', sessionCookie?.value ? 'exists' : 'missing');
-
-  if (!sessionCookie) {
-    return null;
-  }
-
+export async function getUser(): Promise<ActionResult<User>> {
   try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('auth_session');
+
+    console.log('[getUser] Session cookie:', sessionCookie?.value ? 'exists' : 'missing');
+
+    if (!sessionCookie) {
+      return failure('No session cookie found. Please log in.');
+    }
+
     console.log('[getUser] Calling validate-request...');
-    
-    const response = await fetch(
+
+    interface ValidateResponse {
+      session: unknown;
+      user: User;
+    }
+
+    const data = await safeFetch<ValidateResponse>(
       'http://kong-api-gateway:8000/auth/validate-request',
       {
         method: 'POST',
@@ -51,23 +63,15 @@ export async function getUser(): Promise<User | null> {
       }
     );
 
-    console.log('[getUser] Response status:', response.status);
-
-    if (!response.ok) {
-      console.error('[getUser] Validation failed:', response.status);
-      return null;
-    }
-
-    const data = await response.json();
     console.log('[getUser] Validation succeeded, user:', data.user?.id);
-    
+
     if (data.session) {
-      return data.user as User;
+      return success(data.user);
     }
-    
-    return null;
+
+    return failure('Invalid session. Please log in again.');
   } catch (error) {
-    console.error('[getUser] Error:', error);
-    return null;
+    logError(error, { action: 'getUser' });
+    return failure('Failed to validate user session. Please log in again.');
   }
 }

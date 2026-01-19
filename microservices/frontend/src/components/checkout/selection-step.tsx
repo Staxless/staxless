@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, CreditCard } from 'lucide-react';
+import { Check, CreditCard, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { createCheckoutSession } from '@/app/actions/create-checkout-session';
@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { BRAND_CONFIG } from '@/lib/brand-config';
+import { getUserMessage, logError } from '@/lib/error-handling';
+import { ProductGridSkeleton } from '@/components/ui/skeletons';
 
 export default function SelectionStep() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
@@ -19,17 +21,26 @@ export default function SelectionStep() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts);
-        setSelectedPlanId(fetchedProducts[1]?.id || ''); // Default to second plan
-      } catch {
-        // Ignore product fetch errors
+        const result = await getProducts();
+        if (result.success) {
+          setProducts(result.data);
+          setSelectedPlanId(result.data[1]?.id || ''); // Default to second plan
+        } else {
+          logError(new Error(result.error), { action: 'fetchProducts' });
+          toast({
+            title: 'Error',
+            description: result.error,
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        logError(error, { action: 'fetchProducts' });
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [toast]);
 
   const selectedPlan = products.find((p) => p.id === selectedPlanId);
   const basePrice = selectedPlan?.default_price?.unit_amount
@@ -66,12 +77,21 @@ export default function SelectionStep() {
 
     setIsProcessing(true);
     try {
-      const { url } = await createCheckoutSession(selectedPlan.id);
-      window.location.href = url; // Redirect to Stripe checkout
-    } catch (_error) {
+      const result = await createCheckoutSession(selectedPlan.id);
+      if (result.success) {
+        window.location.href = result.data.url; // Redirect to Stripe checkout
+      } else {
+        toast({
+          title: 'Error',
+          description: result.error,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      logError(error, { action: 'createCheckoutSession', planId: selectedPlan.id });
       toast({
         title: 'Error',
-        description: `Failed to proceed to payment. Please try again. ${_error}`,
+        description: getUserMessage(error),
         variant: 'destructive',
       });
     } finally {
@@ -82,7 +102,17 @@ export default function SelectionStep() {
   const isFormValid = !!selectedPlanId;
 
   if (isLoading || !products.length) {
-    return <div>Loading plans...</div>;
+    return (
+      <div className="space-y-8">
+        <h2
+          className="mb-6 font-bold text-2xl"
+          style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+        >
+          Choose Your Plan
+        </h2>
+        <ProductGridSkeleton count={3} />
+      </div>
+    );
   }
 
   return (
@@ -227,15 +257,15 @@ export default function SelectionStep() {
         }}
       >
         {isProcessing ? (
-          <div className="flex items-center space-x-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-white border-b-2" />
-            <span>Processing...</span>
-          </div>
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Processing...
+          </>
         ) : (
-          <div className="flex items-center space-x-2">
+          <>
             <CreditCard className="mr-2 h-5 w-5" />
-            <span>Proceed to Payment</span>
-          </div>
+            Proceed to Payment
+          </>
         )}
       </Button>
     </div>
