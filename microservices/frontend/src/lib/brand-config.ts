@@ -89,25 +89,28 @@ export interface BrandStyle {
   };
 }
 
-/** Placeholder custom style configuration */
+/** Default style configuration with a modern dark theme */
 export const CUSTOM_STYLE: BrandStyle = {
   name: 'custom',
   colors: {
-    primary: '#000000', // Replace with your primary brand color
-    primaryHover: '#000000', // Replace with darker shade for hover
-    secondary: '#000000', // Replace with secondary brand color
-    accent: '#000000', // Replace with accent color
-    success: '#000000', // Replace with success state color
-    warning: '#000000', // Replace with warning state color
-    error: '#000000', // Replace with error state color
-    background: '#FFFFFF', // Replace with primary background color
-    backgroundSecondary: '#FFFFFF', // Replace with secondary background
-    backgroundTertiary: '#FFFFFF', // Replace with tertiary background
-    textPrimary: '#000000', // Replace with primary text color
-    textSecondary: '#000000', // Replace with secondary text color
-    textMuted: '#000000', // Replace with muted text color
-    border: '#000000', // Replace with border color
-    borderLight: '#000000', // Replace with light border color
+    primary: '#6366F1', // Indigo - main brand color
+    primaryHover: '#4F46E5', // Darker indigo for hover states
+    secondary: '#8B5CF6', // Purple - secondary actions
+    accent: '#22D3EE', // Cyan - highlights and accents
+    success: '#10B981', // Emerald green - success states
+    warning: '#F59E0B', // Amber - warning states
+    error: '#EF4444', // Red - error states
+    gradientStart: '#6366F1', // Gradient start (indigo)
+    gradientMiddle: '#8B5CF6', // Gradient middle (purple)
+    gradientEnd: '#22D3EE', // Gradient end (cyan)
+    background: '#0F172A', // Slate 900 - main background
+    backgroundSecondary: '#1E293B', // Slate 800 - cards/sections
+    backgroundTertiary: '#334155', // Slate 700 - inputs/elevated
+    textPrimary: '#F8FAFC', // Slate 50 - primary text (high contrast)
+    textSecondary: '#CBD5E1', // Slate 300 - secondary text
+    textMuted: '#94A3B8', // Slate 400 - muted/placeholder text
+    border: '#334155', // Slate 700 - borders
+    borderLight: '#475569', // Slate 600 - lighter borders
   },
   typography: {
     fontFamily: '"Cabinet Grotesk"', // system-ui, sans-serif', // Replace with your font family
