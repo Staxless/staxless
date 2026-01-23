@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { BRAND_CONFIG } from '@/lib/brand-config';
 
 interface Project {
   id: string;
@@ -18,6 +19,7 @@ interface Project {
 export function ProjectSettings() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [newProject, setNewProject] = useState({ name: '', url: '' });
+  const colors = BRAND_CONFIG.brand.colors;
 
   const addProject = () => {
     if (newProject.name && newProject.url) {
@@ -46,13 +48,15 @@ export function ProjectSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-medium text-lg">Connected Projects</h3>
-        <p className="text-muted-foreground text-sm">
+        <h3 className="font-medium text-lg" style={{ color: colors.textPrimary }}>
+          Connected Projects
+        </h3>
+        <p className="text-sm" style={{ color: colors.textMuted }}>
           Manage projects using your boilerplate.
         </p>
       </div>
 
-      <Separator />
+      <Separator style={{ backgroundColor: colors.border }} />
 
       <div className="space-y-4">
         {projects.map((project) => (
@@ -61,8 +65,12 @@ export function ProjectSettings() {
             key={project.id}
           >
             <div className="grow space-y-1">
-              <p className="font-medium">{project.name}</p>
-              <p className="text-muted-foreground text-sm">{project.url}</p>
+              <p className="font-medium" style={{ color: colors.textPrimary }}>
+                {project.name}
+              </p>
+              <p className="text-sm" style={{ color: colors.textMuted }}>
+                {project.url}
+              </p>
             </div>
             <div className="flex items-center space-x-2">
               <Switch
@@ -74,6 +82,7 @@ export function ProjectSettings() {
                 onClick={() => removeProject(project.id)}
                 size="icon"
                 variant="ghost"
+                style={{ color: colors.textMuted }}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -82,13 +91,17 @@ export function ProjectSettings() {
         ))}
       </div>
 
-      <Separator />
+      <Separator style={{ backgroundColor: colors.border }} />
 
       <div className="space-y-4">
-        <h4 className="font-medium text-sm">Add New Project</h4>
+        <h4 className="font-medium text-sm" style={{ color: colors.textPrimary }}>
+          Add New Project
+        </h4>
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="project-name">Project Name</Label>
+            <Label htmlFor="project-name" style={{ color: colors.textPrimary }}>
+              Project Name
+            </Label>
             <Input
               id="project-name"
               onChange={(e) =>
@@ -96,10 +109,17 @@ export function ProjectSettings() {
               }
               placeholder="My Awesome Project"
               value={newProject.name}
+              style={{
+                backgroundColor: colors.backgroundTertiary,
+                borderColor: colors.border,
+                color: colors.textPrimary,
+              }}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="project-url">Project URL</Label>
+            <Label htmlFor="project-url" style={{ color: colors.textPrimary }}>
+              Project URL
+            </Label>
             <Input
               id="project-url"
               onChange={(e) =>
@@ -107,10 +127,28 @@ export function ProjectSettings() {
               }
               placeholder="https://myproject.com"
               value={newProject.url}
+              style={{
+                backgroundColor: colors.backgroundTertiary,
+                borderColor: colors.border,
+                color: colors.textPrimary,
+              }}
             />
           </div>
         </div>
-        <Button className="w-full" onClick={addProject}>
+        <Button
+          className="w-full transition-colors"
+          onClick={addProject}
+          style={{
+            backgroundColor: colors.primary,
+            color: colors.background,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = colors.primaryHover;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = colors.primary;
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" /> Add Project
         </Button>
       </div>
