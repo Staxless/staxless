@@ -2,8 +2,8 @@
 
 import { AlertCircle, Loader2, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { type FormEvent, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type FormEvent, useEffect, useState } from 'react';
 import OAuthButton from '@/components/auth/oauth-button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,29 @@ export function LoginForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState<string>('');
+  const [urlError, setUrlError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const { providers, isLoading: providersLoading, error: providersError } = useProviders();
 
+  const isMagicLinkEnabled = providers.magicLink?.enabled ?? false;
+  const hasOAuthProviders = providers.oauth && providers.oauth.length > 0;
+
   // Generate CSRF token
   const csrfToken = crypto.randomUUID();
+
+  // Check for error in URL params (from OAuth redirects)
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      setUrlError(decodeURIComponent(error));
+      // Clean up URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('error');
+      window.history.replaceState({}, document.title, newUrl.toString());
+    }
+  }, [searchParams]);
 
   /**
    * Handle redirection to OAuth provider
@@ -47,11 +64,23 @@ export function LoginForm() {
   async function handleMagicLinkSubmit(e: FormEvent) {
     e.preventDefault();
 
-    // Validate email
-    if (!email || !email.includes('@')) {
+    // Sanitize and validate email
+    const sanitizedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!sanitizedEmail || !emailRegex.test(sanitizedEmail)) {
       toast({
         title: 'Invalid email',
         description: 'Please enter a valid email address',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (sanitizedEmail.length > 254) {
+      toast({
+        title: 'Invalid email',
+        description: 'Email address is too long',
         variant: 'destructive',
       });
       return;
@@ -66,7 +95,7 @@ export function LoginForm() {
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken,
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: sanitizedEmail }),
       });
 
       // Check if response is JSON
@@ -92,7 +121,7 @@ export function LoginForm() {
         }
 
         // Redirect to success page
-        router.push(`/magic-link-sent?email=${encodeURIComponent(email)}`);
+        router.push(`/magic-link-sent?email=${encodeURIComponent(sanitizedEmail)}`);
       } else {
         // API error
         toast({
@@ -132,59 +161,71 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-      <form className="space-y-4" onSubmit={handleMagicLinkSubmit}>
-        <div className="space-y-2">
-          <Label
-            htmlFor="email"
-            style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
-          >
-            Email Address
-          </Label>
-          <div className="relative">
-            <Mail
-              className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
-              style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-            />
-            <Input
-              className="border pl-10"
-              id="email"
-              name="email"
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              disabled={isLoading}
-              style={{
-                backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
-                borderColor: BRAND_CONFIG.brand.colors.border,
-                color: BRAND_CONFIG.brand.colors.textPrimary,
-              }}
-              type="email"
-              value={email}
-            />
+      {/* URL Error Alert (from OAuth redirects) */}
+      {urlError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Authentication Error</AlertTitle>
+          <AlertDescription>{urlError}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Magic Link Form - Only show if enabled */}
+      {isMagicLinkEnabled && (
+        <form className="space-y-4" onSubmit={handleMagicLinkSubmit}>
+          <div className="space-y-2">
+            <Label
+              htmlFor="email"
+              style={{ color: BRAND_CONFIG.brand.colors.textPrimary }}
+            >
+              Email Address
+            </Label>
+            <div className="relative">
+              <Mail
+                className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform"
+                style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+              />
+              <Input
+                className="border pl-10"
+                id="email"
+                name="email"
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                disabled={isLoading}
+                style={{
+                  backgroundColor: BRAND_CONFIG.brand.colors.backgroundTertiary,
+                  borderColor: BRAND_CONFIG.brand.colors.border,
+                  color: BRAND_CONFIG.brand.colors.textPrimary,
+                }}
+                type="email"
+                value={email}
+              />
+            </div>
           </div>
-        </div>
-        <Button
-          className="w-full"
-          disabled={isLoading}
-          style={{
-            backgroundColor: BRAND_CONFIG.brand.colors.primary,
-            color: BRAND_CONFIG.brand.colors.background,
-          }}
-          type="submit"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Sending magic link...
-            </>
-          ) : (
-            <>
-              <Mail className="mr-2 h-4 w-4" />
-              Send magic link
-            </>
-          )}
-        </Button>
-      </form>
+          <Button
+            className="w-full"
+            disabled={isLoading}
+            style={{
+              backgroundColor: BRAND_CONFIG.brand.colors.primary,
+              color: BRAND_CONFIG.brand.colors.background,
+            }}
+            type="submit"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending magic link...
+              </>
+            ) : (
+              <>
+                <Mail className="mr-2 h-4 w-4" />
+                Send magic link
+              </>
+            )}
+          </Button>
+        </form>
+      )}
 
       {providersError && (
         <Alert variant="destructive">
@@ -194,27 +235,35 @@ export function LoginForm() {
         </Alert>
       )}
 
-      <Separator
-        style={{ backgroundColor: BRAND_CONFIG.brand.colors.border }}
-      />
+      {/* Separator - Only show if both magic link and OAuth are available */}
+      {isMagicLinkEnabled && hasOAuthProviders && (
+        <Separator
+          style={{ backgroundColor: BRAND_CONFIG.brand.colors.border }}
+        />
+      )}
 
-      <div className="space-y-3">
-        <p
-          className="text-center text-sm"
-          style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
-        >
-          Or continue with
-        </p>
+      {/* OAuth Providers - Only show if available */}
+      {hasOAuthProviders && (
+        <div className="space-y-3">
+          {isMagicLinkEnabled && (
+            <p
+              className="text-center text-sm"
+              style={{ color: BRAND_CONFIG.brand.colors.textMuted }}
+            >
+              Or continue with
+            </p>
+          )}
 
-        {providers?.map((provider) => (
-          <OAuthButton
-            action="login"
-            key={provider.name}
-            onRedirect={handleOAuthRedirect}
-            provider={provider.name}
-          />
-        ))}
-      </div>
+          {providers.oauth.map((provider) => (
+            <OAuthButton
+              action="login"
+              key={provider.name}
+              onRedirect={handleOAuthRedirect}
+              provider={provider.name}
+            />
+          ))}
+        </div>
+      )}
 
       {isRedirecting && (
         <Alert

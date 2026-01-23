@@ -1,28 +1,48 @@
 /**
  * @file app/hooks/useProviders.ts
- * @description Custom hook for fetching and caching OAuth providers
+ * @description Custom hook for fetching and caching authentication providers (OAuth + Magic Link)
  */
 'use client';
 
 import { useEffect, useState } from 'react';
 
-interface Provider {
+interface OAuthProvider {
   name: string;
+  displayName: string;
+  description: string;
+}
+
+interface MagicLinkProvider {
+  enabled: boolean;
+  displayName: string;
+  description: string;
+}
+
+export interface AuthProviders {
+  magicLink?: MagicLinkProvider;
+  oauth: OAuthProvider[];
 }
 
 /**
  * Validates providers data format
  * @param data - Data to validate
- * @returns Validated providers array
- * @throws Error if data is not an array
+ * @returns Validated providers object
+ * @throws Error if data format is invalid
  */
-function validateProvidersData(data: unknown): Provider[] {
-  if (!Array.isArray(data)) {
+function validateProvidersData(data: unknown): AuthProviders {
+  if (typeof data !== 'object' || data === null) {
     throw new Error(
-      `Unexpected data format. Expected array, got: ${typeof data}`
+      `Unexpected data format. Expected object, got: ${typeof data}`
     );
   }
-  return data as Provider[];
+
+  const providers = data as Record<string, unknown>;
+
+  if (!Array.isArray(providers.oauth)) {
+    throw new Error('Invalid providers data: oauth must be an array');
+  }
+
+  return providers as unknown as AuthProviders;
 }
 
 /**
@@ -46,9 +66,9 @@ function parseResponseText(responseText: string): unknown {
  * Saves providers to session storage
  * @param data - Providers data to save
  */
-function saveProvidersToSession(data: Provider[]): void {
+function saveProvidersToSession(data: AuthProviders): void {
   try {
-    sessionStorage.setItem('oauthProviders', JSON.stringify(data));
+    sessionStorage.setItem('authProviders', JSON.stringify(data));
   } catch (_error) {
     throw new Error(`Failed to save providers to session storage: ${_error}`);
   }
@@ -70,15 +90,15 @@ function handleError(
  * Loads providers from session storage
  * @returns Providers data or null if not found/invalid
  */
-function loadFromSessionStorage(): Provider[] | null {
+function loadFromSessionStorage(): AuthProviders | null {
   try {
-    const cachedProviders = sessionStorage.getItem('oauthProviders');
+    const cachedProviders = sessionStorage.getItem('authProviders');
     if (cachedProviders) {
       const parsedData = parseResponseText(cachedProviders);
       return validateProvidersData(parsedData);
     }
   } catch (_err) {
-    sessionStorage.removeItem('oauthProviders');
+    sessionStorage.removeItem('authProviders');
     throw new Error(`Failed to load providers from session storage: ${_err}`);
   }
   return null;
@@ -90,8 +110,8 @@ function loadFromSessionStorage(): Provider[] | null {
  * @returns Providers data
  * @throws Error on fetch failure
  */
-async function fetchFromApi(abortSignal: AbortSignal): Promise<Provider[]> {
-  const response = await fetch('/api/oauth/providers', {
+async function fetchFromApi(abortSignal: AbortSignal): Promise<AuthProviders> {
+  const response = await fetch('/api/auth/providers', {
     headers: { Accept: 'application/json' },
     signal: abortSignal,
   });
@@ -104,13 +124,13 @@ async function fetchFromApi(abortSignal: AbortSignal): Promise<Provider[]> {
 }
 
 /**
- * Custom hook to fetch and manage OAuth providers.
+ * Custom hook to fetch and manage authentication providers (OAuth + Magic Link).
  * It first attempts to load providers from session storage for performance.
  * If not found, it fetches them from the API.
  * @returns {Object} An object containing providers, loading state, and error state
  */
 export function useProviders() {
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const [providers, setProviders] = useState<AuthProviders>({ oauth: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
