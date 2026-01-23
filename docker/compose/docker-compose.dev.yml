@@ -50,7 +50,7 @@ services:
       - /app/node_modules
       - /app/.next
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     environment:
       <<: *common-environment
     networks:
@@ -69,7 +69,7 @@ services:
       target: dev
     user: "${KONG_USER:-kong}"
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     environment:
       <<: [*kong-env, *common-environment]
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -118,7 +118,7 @@ services:
   mongodb-service:
     image: mongo:latest
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     volumes:
       - mongo_data:/data/db
     environment:
@@ -144,10 +144,11 @@ services:
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     environment:
       <<: *common-environment
       API_GATEWAY_URL: http://localhost:8000
+      KAFKA_ENABLED: "false"
     ports:
       - "8080:8080"
     expose:
@@ -167,7 +168,7 @@ services:
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     environment:
       <<: *common-environment
     ports:
@@ -188,7 +189,7 @@ services:
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     environment:
       <<: *common-environment
     ports:
@@ -261,7 +262,7 @@ services:
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
       target: dev
     env_file:
-      - ../../enviroments/dev/staxless.dev.env
+      - ../../environments/dev/staxless.dev.env
     ports:
       - "8084:8084"
     expose:
