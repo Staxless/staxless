@@ -18,9 +18,18 @@ import { randomBytes } from 'node:crypto';
 import { createProducer } from './kafka-client.js';
 import { auth } from './lucia-config.js';
 
-const producer = createProducer();
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000/api';
 const TOKEN_EXPIRY_MINUTES = 15;
+const KAFKA_ENABLED = process.env.KAFKA_ENABLED !== 'false';
+
+// Lazy initialization of Kafka producer
+let producer: ReturnType<typeof createProducer> | null = null;
+function getProducer() {
+  if (!producer && KAFKA_ENABLED) {
+    producer = createProducer();
+  }
+  return producer;
+}
 
 // Email validation regex defined at top-level scope for performance
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,10 +77,21 @@ export class MagicLinkProvider {
         throw new Error('Invalid email format');
       }
 
+      if (!KAFKA_ENABLED) {
+        console.warn('Kafka is disabled. Magic link email not sent.');
+        console.log(`Magic link for ${user.email}: ${magicLink}`);
+        return;
+      }
+
+      const kafkaProducer = getProducer();
+      if (!kafkaProducer) {
+        throw new Error('Kafka producer not available');
+      }
+
       try {
-        await producer.connect();
+        await kafkaProducer.connect();
         const token = new URL(magicLink).searchParams.get('token') || '';
-        await producer.send({
+        await kafkaProducer.send({
           topic: 'email-events',
           messages: [
             {
@@ -94,7 +114,7 @@ export class MagicLinkProvider {
             : String(error);
         throw new Error(`Failed to send magic link: ${errorMessage}`);
       } finally {
-        await producer.disconnect();
+        await kafkaProducer.disconnect();
       }
     }
   }

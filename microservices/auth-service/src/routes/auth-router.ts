@@ -4,6 +4,7 @@
  * Utilizes Lucia for session management and cookie-based authentication.
  *
  * Routes:
+ *  - GET /auth/providers: Returns all enabled authentication providers (OAuth + magic link).
  *  - POST /auth/validate-request: Validates and refreshes the user session if valid.
  *  - POST /auth/logout: Logs out the user by invalidating the session.
  *
@@ -13,9 +14,24 @@
 import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
 import { parseCookies } from 'oslo/cookie';
+import { getAllEnabledProviders } from '../config/auth-providers.config.js';
 import { auth } from '../config/lucia-config.js';
 
 export const router = Router();
+
+/**
+ * GET /auth/providers
+ * Returns all enabled authentication methods for the frontend to display.
+ * Includes magic link and OAuth providers based on auth-providers.config.ts settings.
+ */
+router.get('/auth/providers', (_req: Request, res: Response) => {
+  try {
+    res.json(getAllEnabledProviders());
+  } catch (error) {
+    console.error('Error fetching enabled providers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 router.post(
   '/auth/validate-request',
