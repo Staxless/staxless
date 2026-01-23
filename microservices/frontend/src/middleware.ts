@@ -24,10 +24,38 @@ function handleRouteRedirect(
   user: User | null,
   pathname: string
 ): NextResponse | null {
+  const searchParams = request.nextUrl.searchParams;
+
+  // Check for plan selection in URL params
+  const planParam = searchParams.get('plan') || searchParams.get('tier');
+  const priceParam = searchParams.get('price');
+  const intervalParam = searchParams.get('interval');
+
+  // Build plan query string if params exist
+  const buildPlanQuery = (): string => {
+    const params = new URLSearchParams();
+    if (planParam) params.set('plan', planParam);
+    if (priceParam) params.set('price', priceParam);
+    if (intervalParam) params.set('interval', intervalParam);
+    return params.toString();
+  };
+
+  // Authenticated user on login/register page
   if (
     (pathname.startsWith('/login') || pathname.startsWith('/register')) &&
     user
   ) {
+    // If user has inactive subscription, redirect based on plan selection
+    if (user.subscription.status !== 'active') {
+      const planQuery = buildPlanQuery();
+      if (planQuery) {
+        // Has pre-selected plan - go to checkout with plan params
+        return NextResponse.redirect(new URL(`/checkout?${planQuery}`, request.url));
+      }
+      // No plan selected - go to pricing to choose
+      return NextResponse.redirect(new URL('/pricing', request.url));
+    }
+    // Active subscription - go to dashboard
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
@@ -44,7 +72,10 @@ function handleRouteRedirect(
     user.subscription.status !== 'active' &&
     !pathname.startsWith('/checkout')
   ) {
-    return NextResponse.redirect(new URL('/checkout', request.url));
+    // Preserve plan params when redirecting to checkout
+    const planQuery = buildPlanQuery();
+    const checkoutUrl = planQuery ? `/checkout?${planQuery}` : '/checkout';
+    return NextResponse.redirect(new URL(checkoutUrl, request.url));
   }
 
   if (
