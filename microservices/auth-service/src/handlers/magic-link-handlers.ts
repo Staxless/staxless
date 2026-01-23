@@ -13,18 +13,25 @@ import { auth } from '../config/lucia-config.js';
 import { magicLinkProvider } from '../config/magic-link-config.js';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-
-const producer = createProducer();
 const TOKEN_EXPIRY_MINUTES = 15;
+const KAFKA_ENABLED = process.env.KAFKA_ENABLED !== 'false';
 
-// Initialize Kafka producer at startup
-(async () => {
-  await producer.connect();
-  process.on('SIGTERM', async () => {
-    await producer.disconnect();
-    process.exit(0);
-  });
-})();
+// Lazy initialization of Kafka producer
+let producer: ReturnType<typeof createProducer> | null = null;
+function getProducer() {
+  if (!producer && KAFKA_ENABLED) {
+    producer = createProducer();
+    // Connect producer and setup cleanup
+    producer.connect().catch(err => console.error('Kafka producer connection error:', err));
+    process.on('SIGTERM', async () => {
+      if (producer) {
+        await producer.disconnect();
+      }
+      process.exit(0);
+    });
+  }
+  return producer;
+}
 
 /**
  * Generates a random state token for security.
@@ -92,30 +99,37 @@ export async function handleRegistration(
   await auth.adapter.User.insertOne(newUser);
   const magicLink = await magicLinkProvider.generateMagicLink(userId, state);
 
-  try {
-    const token = new URL(magicLink).searchParams.get('token') || '';
-    await producer.send({
-      topic: 'email-events',
-      messages: [
-        {
-          key: 'send.magic-link.email',
-          value: JSON.stringify({
-            email,
-            variables: {
-              token,
-              link: magicLink,
-              expiryMinutes: TOKEN_EXPIRY_MINUTES,
+  if (KAFKA_ENABLED) {
+    const kafkaProducer = getProducer();
+    if (kafkaProducer) {
+      try {
+        const token = new URL(magicLink).searchParams.get('token') || '';
+        await kafkaProducer.send({
+          topic: 'email-events',
+          messages: [
+            {
+              key: 'send.magic-link.email',
+              value: JSON.stringify({
+                email,
+                variables: {
+                  token,
+                  link: magicLink,
+                  expiryMinutes: TOKEN_EXPIRY_MINUTES,
+                },
+              }),
             },
-          }),
-        },
-      ],
-    });
-  } catch (error) {
-    const errorMessage =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message?: string }).message
-        : String(error);
-    throw new Error(`Failed to send magic link: ${errorMessage}`);
+          ],
+        });
+      } catch (error) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? (error as { message?: string }).message
+            : String(error);
+        throw new Error(`Failed to send magic link: ${errorMessage}`);
+      }
+    }
+  } else {
+    console.log(`[DEV] Magic link: ${magicLink}`);
   }
 
   return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
@@ -142,30 +156,37 @@ export async function handleLogin(
 
   const magicLink = await magicLinkProvider.generateMagicLink(user._id, state);
 
-  try {
-    const token = new URL(magicLink).searchParams.get('token') || '';
-    await producer.send({
-      topic: 'email-events',
-      messages: [
-        {
-          key: 'send.magic-link.email',
-          value: JSON.stringify({
-            email,
-            variables: {
-              token,
-              link: magicLink,
-              expiryMinutes: TOKEN_EXPIRY_MINUTES,
+  if (KAFKA_ENABLED) {
+    const kafkaProducer = getProducer();
+    if (kafkaProducer) {
+      try {
+        const token = new URL(magicLink).searchParams.get('token') || '';
+        await kafkaProducer.send({
+          topic: 'email-events',
+          messages: [
+            {
+              key: 'send.magic-link.email',
+              value: JSON.stringify({
+                email,
+                variables: {
+                  token,
+                  link: magicLink,
+                  expiryMinutes: TOKEN_EXPIRY_MINUTES,
+                },
+              }),
             },
-          }),
-        },
-      ],
-    });
-  } catch (error) {
-    const errorMessage =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message?: string }).message
-        : String(error);
-    throw new Error(`Failed to send magic link: ${errorMessage}`);
+          ],
+        });
+      } catch (error) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? (error as { message?: string }).message
+            : String(error);
+        throw new Error(`Failed to send magic link: ${errorMessage}`);
+      }
+    }
+  } else {
+    console.log(`[DEV] Magic link: ${magicLink}`);
   }
 
   return { sessionId: '', redirectUrl: `${FRONTEND_URL}/magic-link-sent` };
@@ -218,6 +239,79 @@ export const handleError = (error: Error, res: Response): void => {
 };
 
 /**
+ * Checks if the request expects a JSON response (API call vs form submission)
+ * @param req - Express request object
+ * @returns true if the client expects JSON
+ */
+function expectsJson(req: Request): boolean {
+  const accept = req.headers.accept || '';
+  const contentType = req.headers['content-type'] || '';
+  return accept.includes('application/json') || contentType.includes('application/json');
+}
+
+// Validation constants
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_REGEX = /^[a-zA-Z\s'-]+$/;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_NAME_LENGTH = 50;
+const MIN_NAME_LENGTH = 2;
+
+/**
+ * Validates and sanitizes email input
+ * @param email - Email to validate
+ * @returns Object with isValid flag and sanitized email or error message
+ */
+function validateEmail(email: unknown): { isValid: boolean; value?: string; error?: string } {
+  if (!email || typeof email !== 'string') {
+    return { isValid: false, error: 'Email is required' };
+  }
+
+  const sanitized = email.trim().toLowerCase();
+
+  if (sanitized.length === 0) {
+    return { isValid: false, error: 'Email is required' };
+  }
+
+  if (sanitized.length > MAX_EMAIL_LENGTH) {
+    return { isValid: false, error: 'Email address is too long' };
+  }
+
+  if (!EMAIL_REGEX.test(sanitized)) {
+    return { isValid: false, error: 'Please enter a valid email address' };
+  }
+
+  return { isValid: true, value: sanitized };
+}
+
+/**
+ * Validates and sanitizes name input
+ * @param name - Name to validate
+ * @param fieldName - Field name for error messages
+ * @returns Object with isValid flag and sanitized name or error message
+ */
+function validateName(name: unknown, fieldName: string): { isValid: boolean; value?: string; error?: string } {
+  if (!name || typeof name !== 'string') {
+    return { isValid: false, error: `${fieldName} is required` };
+  }
+
+  const sanitized = name.trim();
+
+  if (sanitized.length < MIN_NAME_LENGTH) {
+    return { isValid: false, error: `${fieldName} must be at least ${MIN_NAME_LENGTH} characters` };
+  }
+
+  if (sanitized.length > MAX_NAME_LENGTH) {
+    return { isValid: false, error: `${fieldName} must be less than ${MAX_NAME_LENGTH} characters` };
+  }
+
+  if (!NAME_REGEX.test(sanitized)) {
+    return { isValid: false, error: `${fieldName} can only contain letters, spaces, hyphens, and apostrophes` };
+  }
+
+  return { isValid: true, value: sanitized };
+}
+
+/**
  * Initializes magic link flow for login or registration.
  * @param action - Magic link action ("register" or "login")
  * @returns Express middleware function to handle magic link flow initialization
@@ -228,31 +322,54 @@ export const initializeMagicLinkFlow = (action: string) => {
     res: Response,
     _next: NextFunction
   ): Promise<void> => {
+    const isApiRequest = expectsJson(req);
+
+    const sendError = (error: string, redirectPath = '/login') => {
+      if (isApiRequest) {
+        res.status(400).json({ error });
+      } else {
+        res.redirect(`${FRONTEND_URL}${redirectPath}?error=${encodeURIComponent(error)}`);
+      }
+    };
+
     if (!['login', 'register'].includes(action)) {
-      res.redirect(`${FRONTEND_URL}/login?error=Invalid action`);
+      sendError('Invalid action');
       return;
     }
 
     try {
-      const { email, firstName, lastName } = req.body as {
-        email?: string;
-        firstName?: string;
-        lastName?: string;
+      const { email: rawEmail, firstName: rawFirstName, lastName: rawLastName } = req.body as {
+        email?: unknown;
+        firstName?: unknown;
+        lastName?: unknown;
       };
-      if (!email || typeof email !== 'string') {
-        res.redirect(`${FRONTEND_URL}/login?error=Email is required`);
+
+      // Validate email
+      const emailValidation = validateEmail(rawEmail);
+      if (!emailValidation.isValid) {
+        sendError(emailValidation.error!);
         return;
       }
-      if (
-        action === 'register' &&
-        (!(firstName && lastName) ||
-          typeof firstName !== 'string' ||
-          typeof lastName !== 'string')
-      ) {
-        res.redirect(
-          `${FRONTEND_URL}/register?error=First name and last name are required`
-        );
-        return;
+      const email = emailValidation.value!;
+
+      // Validate names for registration
+      let firstName: string | undefined;
+      let lastName: string | undefined;
+
+      if (action === 'register') {
+        const firstNameValidation = validateName(rawFirstName, 'First name');
+        if (!firstNameValidation.isValid) {
+          sendError(firstNameValidation.error!, '/register');
+          return;
+        }
+        firstName = firstNameValidation.value;
+
+        const lastNameValidation = validateName(rawLastName, 'Last name');
+        if (!lastNameValidation.isValid) {
+          sendError(lastNameValidation.error!, '/register');
+          return;
+        }
+        lastName = lastNameValidation.value;
       }
 
       const state = generateStateToken();
@@ -279,9 +396,19 @@ export const initializeMagicLinkFlow = (action: string) => {
         res,
         state
       );
-      res.redirect(redirectUrl);
+
+      if (isApiRequest) {
+        res.json({ success: true, redirectUrl, message: 'Magic link sent successfully' });
+      } else {
+        res.redirect(redirectUrl);
+      }
     } catch (error) {
-      handleError(error as Error, res);
+      if (isApiRequest) {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+        res.status(400).json({ error: errorMessage });
+      } else {
+        handleError(error as Error, res);
+      }
     }
   };
 };
