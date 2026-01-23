@@ -74,7 +74,7 @@ export default function LegalPage() {
         minHeight: '100vh',
       }}
     >
-      <Header user={null} />
+      <Header />
 
       <div className="pt-20">
         {/* Hero Section */}

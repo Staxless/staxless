@@ -12,7 +12,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { headers } from 'next/headers';
+import DashboardWelcome from '@/components/dashboard/dashboard-welcome';
 import ConfettiTrigger from '@/components/effects/confetti-trigger';
 import Footer from '@/components/shared/footer';
 import Header from '@/components/shared/header';
@@ -28,9 +28,6 @@ import { Input } from '@/components/ui/input';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
 export default async function DashboardPage() {
-  const headersList = await headers();
-  const userInfoString = headersList.get('x-user-info');
-  const user = userInfoString ? JSON.parse(userInfoString) : null;
   const stats = [
     {
       title: 'Total Users',
@@ -78,7 +75,7 @@ export default async function DashboardPage() {
     >
       {/* Confetti Trigger - only shows once after successful checkout */}
       <ConfettiTrigger />
-      <Header user={user} />
+      <Header />
       <div className="pt-20">
         <div className="container mx-auto p-6">
           {/* Dashboard Header */}
@@ -90,10 +87,7 @@ export default async function DashboardPage() {
               >
                 Dashboard
               </h1>
-              <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-                Welcome back, {user.name}! Here&apos;s what&apos;s happening
-                with your SaaS.
-              </p>
+              <DashboardWelcome />
             </div>
 
             <div className="mt-4 flex items-center space-x-4 md:mt-0">
@@ -114,9 +108,18 @@ export default async function DashboardPage() {
                 />
               </div>
               <Button
+                className="transition-colors"
                 style={{
                   backgroundColor: BRAND_CONFIG.brand.colors.primary,
-                  color: 'white',
+                  color: BRAND_CONFIG.brand.colors.background,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    BRAND_CONFIG.brand.colors.primaryHover;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    BRAND_CONFIG.brand.colors.primary;
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" />

@@ -22,7 +22,7 @@ export default function PolicyPage() {
           minHeight: '100vh',
         }}
       >
-        <Header user={null} />
+        <Header />
         <div className="pt-20">
           <div className="container mx-auto px-4 py-12 text-center">
             <h1
@@ -59,7 +59,7 @@ export default function PolicyPage() {
         minHeight: '100vh',
       }}
     >
-      <Header user={null} />
+      <Header />
 
       <div className="pt-20">
         <div className="container mx-auto max-w-4xl px-4 py-12">
