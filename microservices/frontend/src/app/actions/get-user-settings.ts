@@ -12,6 +12,7 @@ import {
   safeFetch,
   logError,
 } from '@/lib/error-handling';
+import { getApiGatewayUrl } from '@/lib/api-config';
 
 export interface UserSettings {
   id: string;
@@ -37,7 +38,7 @@ export async function getUserSettings(): Promise<ActionResult<UserSettings>> {
     }
 
     const data = await safeFetch<UserSettings>(
-      'http://kong-api-gateway:8000/user/settings',
+      `${getApiGatewayUrl()}/user/settings`,
       {
         method: 'GET',
         headers: {
