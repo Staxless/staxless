@@ -13,6 +13,7 @@ import {
   safeFetch,
   logError,
 } from '@/lib/error-handling';
+import { getApiGatewayUrl } from '@/lib/api-config';
 
 /**
  * @interface User
@@ -49,7 +50,7 @@ export async function getUser(): Promise<ActionResult<User>> {
     }
 
     const data = await safeFetch<ValidateResponse>(
-      'http://kong-api-gateway:8000/auth/validate-request',
+      `${getApiGatewayUrl()}/auth/validate-request`,
       {
         method: 'POST',
         headers: {

@@ -11,6 +11,7 @@ import {
   safeFetch,
   logError,
 } from '@/lib/error-handling';
+import { getApiGatewayUrl } from '@/lib/api-config';
 export interface RecurringPrice {
   interval: 'day' | 'week' | 'month' | 'year';
 }
@@ -35,7 +36,7 @@ export interface Product {
 export const getProducts = async (): Promise<ActionResult<Product[]>> => {
   try {
     const products = await safeFetch<Product[]>(
-      'http://kong-api-gateway:8000/products',
+      `${getApiGatewayUrl()}/products`,
       {
         method: 'GET',
       }

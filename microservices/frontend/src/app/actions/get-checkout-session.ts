@@ -13,6 +13,7 @@ import {
   safeFetch,
   logError,
 } from '@/lib/error-handling';
+import { getApiGatewayUrl } from '@/lib/api-config';
 
 export interface CheckoutSessionData {
   id: string;
@@ -50,7 +51,7 @@ export async function getCheckoutSession(
     }
 
     const data = await safeFetch<CheckoutSessionData>(
-      `http://kong-api-gateway:8000/checkout/session/${encodeURIComponent(sessionId)}`,
+      `${getApiGatewayUrl()}/checkout/session/${encodeURIComponent(sessionId)}`,
       {
         method: 'GET',
         headers: {

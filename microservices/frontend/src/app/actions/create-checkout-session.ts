@@ -13,6 +13,7 @@ import {
   safeFetch,
   logError,
 } from '@/lib/error-handling';
+import { getApiGatewayUrl } from '@/lib/api-config';
 
 interface User {
   id: string;
@@ -56,7 +57,7 @@ export async function createCheckoutSession(
     }
 
     const data = await safeFetch<CheckoutResponse>(
-      'http://kong-api-gateway:8000/checkout',
+      `${getApiGatewayUrl()}/checkout`,
       {
         method: 'POST',
         headers: {
