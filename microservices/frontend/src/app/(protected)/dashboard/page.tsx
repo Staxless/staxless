@@ -1,4 +1,4 @@
-// "use client"
+'use client';
 
 import {
   Activity,
@@ -27,7 +27,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { BRAND_CONFIG } from '@/lib/brand-config';
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
   const stats = [
     {
       title: 'Total Users',

@@ -1,14 +1,29 @@
 // File: /microservices/email-service/src/consumers/handlers/handle-send-magic-link.ts
-import type { KafkaMessage } from 'kafkajs';
+import type { KafkaMessage, Producer } from 'kafkajs';
 import createEmailService from '../../config/email-service.js';
 import { kafkaClient } from '../../config/kafka-client.js';
 import { mailgunClient } from '../../config/mailgun-client.js';
 
 const { sendEmail } = createEmailService(mailgunClient);
-const producer = kafkaClient.producer(); // Create producer once at module level
 
 const MAX_RETRIES = 3;
 const DLQ_TOPIC = 'email-service-dlq';
+
+// Lazy producer initialization
+let producer: Producer | null = null;
+let producerConnected = false;
+
+async function getProducer(): Promise<Producer> {
+  if (!producer) {
+    producer = kafkaClient.producer();
+  }
+  if (!producerConnected) {
+    await producer.connect();
+    producerConnected = true;
+    console.log('✅ DLQ/Retry producer connected');
+  }
+  return producer;
+}
 
 interface MessagePayload {
   email: string;
@@ -31,14 +46,17 @@ export default async function handleSendMagicLink(message: KafkaMessage) {
   const { email, variables, retryCount = 0, errorHistory = [] } = payload;
 
   try {
+    console.log(`📧 Sending magic link email to ${email}...`);
     await sendEmail({
       templateKey: 'magic-link',
       email,
       variables,
     });
+    console.log(`✅ Magic link email sent to ${email}`);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
+    console.error(`❌ Failed to send email to ${email}: ${errorMessage}`, error);
     const currentAttempt = retryCount + 1;
 
     // Update error history
@@ -79,8 +97,8 @@ export default async function handleSendMagicLink(message: KafkaMessage) {
 
 async function retryMessage(payload: MessagePayload) {
   try {
-    await producer.send({
-      // Use the module-level producer
+    const prod = await getProducer();
+    await prod.send({
       topic: payload.originalTopic || 'send-magic-link',
       messages: [
         {
@@ -107,8 +125,8 @@ async function retryMessage(payload: MessagePayload) {
 
 async function sendToDLQ(payload: MessagePayload & { finalError?: string }) {
   try {
-    await producer.send({
-      // Use the module-level producer
+    const prod = await getProducer();
+    await prod.send({
       topic: DLQ_TOPIC,
       messages: [
         {

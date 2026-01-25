@@ -53,7 +53,7 @@ function handleRouteRedirect(
         return NextResponse.redirect(new URL(`/checkout?${planQuery}`, request.url));
       }
       // No plan selected - go to pricing to choose
-      return NextResponse.redirect(new URL('/pricing', request.url));
+      return NextResponse.redirect(new URL('/#pricing', request.url));
     }
     // Active subscription - go to dashboard
     return NextResponse.redirect(new URL('/dashboard', request.url));

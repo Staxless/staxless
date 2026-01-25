@@ -236,7 +236,7 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
                           Manage
                         </Button>
                       ) : (
-                        <Link href="/pricing" onClick={() => setOpen(false)}>
+                        <Link href="/#pricing" onClick={() => setOpen(false)}>
                           <Button
                             variant="outline"
                             style={{
@@ -288,7 +288,7 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
                               </p>
                             </div>
                           </div>
-                          <Link href="/pricing" onClick={() => setOpen(false)}>
+                          <Link href="/#pricing" onClick={() => setOpen(false)}>
                             <Button
                               size="sm"
                               style={{
