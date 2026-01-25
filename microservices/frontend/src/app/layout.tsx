@@ -15,6 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.FRONTEND_URL || BRAND_CONFIG.company.website || 'https://staxless.com'),
   title: `Home | ${BRAND_CONFIG.seo.title}`,
   description: BRAND_CONFIG.seo.description,
   keywords: BRAND_CONFIG.seo.keywords,

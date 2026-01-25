@@ -179,7 +179,7 @@ export default function FocusedCheckout({ hasPreSelectedPlan }: FocusedCheckoutP
     return (
       <div className="text-center py-12">
         <p style={{ color: colors.textSecondary }}>No plan found. Please select a plan.</p>
-        <Link href="/pricing">
+        <Link href="/#pricing">
           <Button
             className="mt-4"
             style={{ backgroundColor: colors.primary, color: colors.background }}
@@ -199,7 +199,7 @@ export default function FocusedCheckout({ hasPreSelectedPlan }: FocusedCheckoutP
           Complete your subscription
         </h1>
         <Link
-          href="/pricing"
+          href="/#pricing"
           className="flex items-center gap-2 text-sm transition-colors"
           style={{ color: colors.textMuted }}
         >

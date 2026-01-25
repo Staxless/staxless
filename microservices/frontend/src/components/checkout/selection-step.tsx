@@ -121,7 +121,7 @@ export default function SelectionStep() {
     return (
       <div className="text-center py-12">
         <p style={{ color: colors.textSecondary }}>No plans available.</p>
-        <Link href="/pricing">
+        <Link href="/#pricing">
           <Button
             className="mt-4"
             style={{ backgroundColor: colors.primary, color: colors.background }}
@@ -143,7 +143,7 @@ export default function SelectionStep() {
           Complete your subscription
         </h1>
         <Link
-          href="/pricing"
+          href="/#pricing"
           className="flex items-center gap-2 text-sm transition-colors"
           style={{ color: colors.textMuted }}
         >

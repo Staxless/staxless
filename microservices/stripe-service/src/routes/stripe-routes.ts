@@ -92,7 +92,7 @@ router.get('/checkout/session/:sessionId', async (req: Request, res: Response) =
     // Get plan name from line items
     const lineItem = session.line_items?.data?.[0];
     let planName = 'Unknown Plan';
-    if (lineItem?.price?.product && typeof lineItem.price.product === 'object') {
+    if (lineItem?.price?.product && typeof lineItem.price.product === 'object' && 'name' in lineItem.price.product) {
       planName = lineItem.price.product.name || 'Unknown Plan';
     }
 

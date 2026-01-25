@@ -152,5 +152,5 @@ export function getPostAuthRedirect(searchParams: URLSearchParams): string {
   }
 
   // No plan selected - redirect to pricing
-  return '/pricing';
+  return '/#pricing';
 }
