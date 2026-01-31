@@ -1,4 +1,4 @@
-import { BRAND_CONFIG, type BrandStyle, CUSTOM_STYLE } from './brand-config';
+import { BRAND_CONFIG, type BrandStyle, CUSTOM_STYLE } from '@config/brand-config';
 import { AVAILABLE_STYLES } from './style-presets';
 
 /**

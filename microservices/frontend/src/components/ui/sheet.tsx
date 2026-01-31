@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { BRAND_CONFIG } from "@/lib/brand-config"
+import { BRAND_CONFIG } from "@config/brand-config"
 
 const Sheet = SheetPrimitive.Root
 

@@ -1,3 +1,8 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['next-mdx-remote'],
@@ -27,6 +32,10 @@ const nextConfig = {
     config.watchOptions = {
       poll: 1000,
       aggregateTimeout: 300,
+    };
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@config': path.resolve(__dirname, 'config'),
     };
     return config;
   },

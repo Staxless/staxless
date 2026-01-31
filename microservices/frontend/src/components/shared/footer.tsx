@@ -3,7 +3,7 @@
 import { Github, X } from 'lucide-react';
 import Link from 'next/link';
 import Logo from '@/components/shared/logo';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import StaxlessBadge from './staxless-badge';
 
 export default function Footer() {

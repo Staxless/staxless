@@ -1,4 +1,4 @@
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export default function sitemap() {
   return [

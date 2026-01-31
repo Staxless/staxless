@@ -24,11 +24,11 @@ variable "PLATFORMS" {
 
 group "default" {
   targets = [
-    "frontend",
+    // "frontend",
     // "auth-service",
     // "user-service",
     // "stripe-service",
-    // "email-service",
+    "email-service",
     // "kong-api-gateway"
   ]
 }

@@ -1,4 +1,4 @@
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';

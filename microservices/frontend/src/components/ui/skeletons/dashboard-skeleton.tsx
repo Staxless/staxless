@@ -1,5 +1,5 @@
 import { Skeleton, SkeletonCircle } from '@/components/ui/skeleton';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export function DashboardSkeleton() {
   return (

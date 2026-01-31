@@ -6,7 +6,7 @@ import Logo from '@/components/shared/logo';
 import MobileMenu from '@/components/shared/mobile-menu';
 import UserMenu from '@/components/shared/user-menu';
 import { Button } from '@/components/ui/button';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import { useUser } from '@/contexts/user-context';
 
 export default function Header() {

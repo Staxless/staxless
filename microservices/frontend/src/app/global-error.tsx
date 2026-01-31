@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };

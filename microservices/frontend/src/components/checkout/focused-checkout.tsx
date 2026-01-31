@@ -9,7 +9,7 @@ import { getProducts, type Product } from '@/app/actions/get-products';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import { getUserMessage, logError } from '@/lib/error-handling';
 import {
   getPlanSelection,

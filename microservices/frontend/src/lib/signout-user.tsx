@@ -8,7 +8,7 @@
 
 import axios from 'axios';
 import { cookies } from 'next/headers';
-import { getApiGatewayUrl } from '@/lib/api-config';
+import { getApiGatewayUrl } from './api-config';
 
 /**
  * @interface LogoutResult
