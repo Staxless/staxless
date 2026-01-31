@@ -1,165 +1,183 @@
+<div align="center">
 
-# Staxless SaaS Boilerplate 
+# Staxless
 
-Welcome to **Staxless** – your all-in-one solution for building modern, subscription-based SaaS applications quickly and efficiently! This boilerplate combines a powerful Next.js frontend, Node.js microservices, and a Kong API gateway, all containerized with Docker. Whether you’re a startup founder or a seasoned developer, Staxless provides the tools you need to launch your SaaS product with authentication, payments, and marketing features out of the box.
+**Build Simple. Scale Smarter.**
 
----
+[![License](https://img.shields.io/badge/license-proprietary-8B7EC8?style=flat-square)](https://staxless.com)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-86EFAC?style=flat-square)](https://nodejs.org)
+[![Docker](https://img.shields.io/badge/docker-required-2496ED?style=flat-square)](https://docker.com)
 
-## ✨ Features
+The production-ready SaaS boilerplate for modern applications.
 
-- **Frontend**: Next.js with React, Tailwind CSS, and MDX for a stunning, responsive UI.
-- **Microservices**: Node.js with Express for authentication, user management, and Stripe payments.
-- **API Gateway**: Kong for seamless routing and proxying between services.
-- **Authentication**: Lucia with OAuth2 support (e.g., Google, GitHub).
-- **Payments**: Stripe integration for subscriptions and one-time purchases.
-- **Database**: MongoDB for scalable user and session management.
-- **Containerized**: Docker and Docker Compose with hot reloading for development and optimized builds for production.
-- **Marketing Ready**: Built-in docs, and legal pages with MDX support.
+</div>
 
 ---
 
-## 🛠️ Tech Stack
+## Features
 
-| Component         | Technology                  |
-|-------------------|-----------------------------|
-| **Frontend**      | Next.js, React, Tailwind CSS|
-| **Backend**       | Node.js, Express, MongoDB   |
-| **API Gateway**   | Kong                        |
-| **Payments**      | Stripe                      |
-| **Authentication**| Lucia, OAuth2               |
-| **DevOps**        | Docker, Docker Compose      |
-
----
-
-## 🚀 Quick Start
-
-Get Staxless up and running in just **5-10 minutes**!
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
-- [Git](https://git-scm.com/)
-- A [Stripe](https://stripe.com/) account (for payments)
-
-### Steps
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/zacharybenson/staxless.git
-   cd zacharybenson-staxless
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment**
-   - Copy `secrets/template.env` to `secrets/.env` in `frontend/`, `microservices/auth-service/`, `microservices/stripe-service/`, and `microservices/user-service/`.
-   - Update `.env` files with your Stripe keys, OAuth credentials, and MongoDB settings (see [Environment Configuration](#environment-configuration)).
-
-4. **Launch with Docker**
-   ```bash
-   docker-compose -f config/docker-compose.dev.yml up --build
-   ```
-
-5. **Open Your Browser**
-   Visit [http://localhost:3000](http://localhost:3000) to see Staxless in action! 🎉
+- **Frontend** - Next.js with React, Tailwind CSS, and shadcn/ui
+- **Microservices** - Node.js with Express for auth, users, payments, and email
+- **API Gateway** - Kong for routing and rate limiting
+- **Authentication** - Lucia with OAuth2 (Google, GitHub)
+- **Payments** - Stripe subscriptions and one-time purchases
+- **Database** - MongoDB for scalable data management
+- **Containerized** - Docker Compose with hot reloading
 
 ---
 
-## 📖 Documentation
-
-For detailed setup, development workflows, and feature breakdowns, check out the [full documentation](docs/staxless-documentation.md). Here’s a sneak peek:
-
-- **Setup Guide**: Prerequisites, installation, and environment setup.
-- **Core Features**: Authentication, payments, API endpoints, and database schema.
-- **User Guides**: Quick start, development with hot reloading, and deployment tips.
-
----
-
-## 🏗️ Project Structure
-
-```
-zacharybenson-staxless/
-├── README.md              # You’re here!
-├── config/                # Docker Compose and top-level configs
-│   ├── docker-compose.dev.yml
-│   ├── docker-compose.prod.yml
-│   └── package.json
-├── frontend/              # Next.js frontend
-│   ├── src/              # Pages, components, and utilities
-│   ├── dockerfiles/      # Frontend Docker setup
-│   └── secrets/          # Environment variables
-├── kong-gateway/          # Kong API gateway configuration
-└── microservices/         # Backend services
-    ├── auth-service/     # Authentication with OAuth
-    ├── stripe-service/   # Stripe payment integration
-    └── user-service/     # User management with MongoDB
-```
-
----
-
-## 🌟 Getting Started with Development
-
-1. **Run in Dev Mode**
-   ```bash
-   docker-compose -f config/docker-compose.dev.yml up --build
-   ```
-   *Hot reloading is enabled! Changes to frontend or microservices reflect instantly.*
-
-2. **Test APIs**
-   - Auth: `curl http://localhost:8080/health`
-   - Stripe: `curl http://localhost:8083/products`
-   - User: `curl http://localhost:8082/`
-
-3. **Explore the Frontend**
-   Edit `frontend/src/app/page.tsx` to customize the landing page!
-
----
-
-## 🔧 Environment Configuration
-
-Each service requires an `.env` file in its `secrets/` directory. Here’s an example for `microservices/stripe-service/secrets/.env`:
+## Quick Start
 
 ```bash
-PORT=8083
-STRIPE_PRIVATE_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+# Install the CLI
+npm install -g @staxless/cli
+
+# Initialize your project
+staxless init
+
+# Start development
+staxless dev start
 ```
 
-See the full list of variables in each `secrets/template.env` file.
+Visit [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🛡️ Deployment
+## Tech Stack
 
-Ready to go live? Use `docker-compose.prod.yml` for optimized production builds:
+| Component | Technology |
+|-----------|------------|
+| Frontend | Next.js, React, Tailwind CSS, shadcn/ui |
+| Backend | Node.js, Express, MongoDB |
+| API Gateway | Kong |
+| Payments | Stripe |
+| Authentication | Lucia, OAuth2 |
+| DevOps | Docker, Docker Compose |
+
+---
+
+## Project Structure
+
+```
+staxless/
+├── microservices/
+│   ├── frontend/          # Next.js application
+│   │   ├── src/
+│   │   │   ├── app/       # Next.js App Router
+│   │   │   └── components/
+│   │   │       ├── sales/ # Landing page sections
+│   │   │       ├── shared/# Header, Footer
+│   │   │       └── ui/    # shadcn components
+│   │   └── config/        # Brand & sales config
+│   ├── auth-service/      # Authentication
+│   ├── user-service/      # User management
+│   ├── stripe-service/    # Payments
+│   └── email-service/     # Transactional email
+├── kong-gateway/          # API Gateway config
+├── docker/                # Docker configurations
+└── environments/          # Environment templates
+```
+
+---
+
+## Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Frontend | 3000 | Next.js application |
+| API Gateway | 8000 | Kong API Gateway |
+| Auth Service | 8080 | Authentication & OAuth |
+| User Service | 8082 | User management |
+| Stripe Service | 8083 | Payments & subscriptions |
+| Email Service | 8084 | Transactional email |
+| MongoDB | 27017 | Database |
+
+---
+
+## Configuration
+
+### Frontend Customization
+
 ```bash
-docker-compose -f config/docker-compose.prod.yml up --build
+# Configure branding and styles
+staxless setup:frontend
 ```
 
-For AWS deployment, check the [Deploying to AWS](#deploying-to-aws) section in the docs!
+Or edit directly:
+- `frontend/config/brand-config.ts` - Colors, typography, company info
+- `frontend/config/sales-config.ts` - Landing page copy, testimonials, pricing
+
+### Environment Variables
+
+Copy templates and configure:
+
+```bash
+cp environments/template.env environments/.env
+```
+
+Required variables:
+- `STRIPE_PRIVATE_KEY` - Stripe API key
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - OAuth
+- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` - OAuth
+- `MONGODB_URI` - Database connection
 
 ---
 
-## 🤝 Contributing
+## Development
 
-We’d love your help to make Staxless even better! 
-- Fork the repo and submit a PR.
-- Report issues or suggest features via [GitHub Issues](https://github.com/zacharybenson/staxless/issues).
+```bash
+# Start all services
+staxless dev start
+
+# View logs
+staxless dev logs -f
+
+# Check status
+staxless dev status
+
+# Stop services
+staxless dev down
+
+# Full reset
+staxless dev reset
+```
 
 ---
 
-## 📜 License
+## Deployment
 
-This project is licensed under the [ISC License](LICENSE).
+```bash
+# Configure production secrets
+staxless setup:prod
+
+# Deploy to production
+staxless prod deploy
+
+# Check deployment status
+staxless prod status
+```
 
 ---
 
-## 👋 Connect with Us
+## Prerequisites
 
-- **Author**: Zachary Benson
-- **Twitter**: [@staxless](https://twitter.com/staxless)
-- **Website**: [staxless.com](https://staxless.com)
+- **Node.js 18+** - [nodejs.org](https://nodejs.org)
+- **Git** - [git-scm.com](https://git-scm.com)
+- **Docker** - [docker.com](https://docker.com)
+- **GitHub CLI** - [cli.github.com](https://cli.github.com)
 
-Happy building with Staxless! Let’s create something amazing together! 🌍
+---
+
+## Links
+
+- [Website](https://staxless.com)
+- [CLI Documentation](https://github.com/Staxless/staxless-cli)
+- [Report Issues](https://github.com/Staxless/staxless/issues)
+
+---
+
+<div align="center">
+
+Made with care by [Staxless](https://staxless.com)
+
+</div>
