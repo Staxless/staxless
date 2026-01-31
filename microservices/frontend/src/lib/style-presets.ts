@@ -1,4 +1,4 @@
-import type { BrandStyle } from './brand-config';
+import type { BrandStyle } from '@config/brand-config';
 
 // Linear.app-inspired minimal dark
 export const LINEAR_STYLE: BrandStyle = {

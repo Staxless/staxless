@@ -3,38 +3,53 @@
 import { Github, X } from 'lucide-react';
 import Link from 'next/link';
 import Logo from '@/components/shared/logo';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import StaxlessBadge from './staxless-badge';
 
-/**
- * Footer - The footer component for the application.
- * This component displays the footer with company info, quick links, resources, legal links,
- * and social media icons.
- *
- * @returns {JSX.Element} A footer layout with all sections.
- */
-
 export default function Footer() {
+  const colors = BRAND_CONFIG.brand.colors;
+
+  const linkStyle = {
+    color: colors.textMuted,
+  };
+
+  const linkHoverProps = {
+    onMouseEnter: (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.currentTarget.style.color = colors.textPrimary;
+    },
+    onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.currentTarget.style.color = colors.textMuted;
+    },
+  };
+
   return (
-    <footer className="w-full bg-muted">
+    <footer
+      className="w-full"
+      style={{ backgroundColor: colors.backgroundSecondary }}
+    >
       <div className="container mx-auto max-w-4xl px-4 py-10 md:py-16">
         <div className="grid grid-cols-1 justify-items-center gap-8 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
           {/* Company Info */}
           <div className="flex flex-col items-center space-y-4">
             <Link className="flex items-center space-x-2" href="/">
               <Logo size="medium" />
-              <span className="font-bold text-xl">
+              <span
+                className="font-bold text-xl"
+                style={{ color: colors.textPrimary }}
+              >
                 {BRAND_CONFIG.company.name}
               </span>
             </Link>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm" style={{ color: colors.textMuted }}>
               {BRAND_CONFIG.company.description}
             </p>
             <div className="flex justify-center space-x-4">
               {BRAND_CONFIG.social.twitter && (
                 <Link
-                  className="text-muted-foreground hover:text-foreground"
+                  className="transition-colors"
                   href={`https://twitter.com/${BRAND_CONFIG.social.twitter.replace('@', '')}`}
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   <X className="h-5 w-5" />
                   <span className="sr-only">X</span>
@@ -42,8 +57,10 @@ export default function Footer() {
               )}
               {BRAND_CONFIG.social.github && (
                 <Link
-                  className="text-muted-foreground hover:text-foreground"
+                  className="transition-colors"
                   href={BRAND_CONFIG.social.github}
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   <Github className="h-5 w-5" />
                   <span className="sr-only">GitHub</span>
@@ -54,28 +71,39 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="flex flex-col items-center space-y-4">
-            <h3 className="font-bold text-lg">Quick Links</h3>
+            <h3
+              className="font-bold text-lg"
+              style={{ color: colors.textPrimary }}
+            >
+              Quick Links
+            </h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                  className="text-sm transition-colors hover:underline"
                   href="/"
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   Home
                 </Link>
               </li>
               <li>
                 <Link
-                  className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                  className="text-sm transition-colors hover:underline"
                   href="#features"
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   Features
                 </Link>
               </li>
               <li>
                 <Link
-                  className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                  className="text-sm transition-colors hover:underline"
                   href="#pricing"
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   Pricing
                 </Link>
@@ -85,28 +113,39 @@ export default function Footer() {
 
           {/* Resources */}
           <div className="flex flex-col items-center space-y-4">
-            <h3 className="font-bold text-lg">Resources</h3>
+            <h3
+              className="font-bold text-lg"
+              style={{ color: colors.textPrimary }}
+            >
+              Resources
+            </h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                  className="text-sm transition-colors hover:underline"
                   href="/docs"
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   Documentation
                 </Link>
               </li>
               <li>
                 <Link
-                  className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                  className="text-sm transition-colors hover:underline"
                   href="/docs/quick-start"
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   Quick Start
                 </Link>
               </li>
               <li>
                 <Link
-                  className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                  className="text-sm transition-colors hover:underline"
                   href="#faq"
+                  style={linkStyle}
+                  {...linkHoverProps}
                 >
                   FAQ
                 </Link>
@@ -116,13 +155,20 @@ export default function Footer() {
 
           {/* Legal */}
           <div className="flex flex-col items-center space-y-4">
-            <h3 className="font-bold text-lg">Legal</h3>
+            <h3
+              className="font-bold text-lg"
+              style={{ color: colors.textPrimary }}
+            >
+              Legal
+            </h3>
             <ul className="space-y-2">
               {BRAND_CONFIG.navigation.footer.legal.map((link) => (
                 <li key={link.name}>
                   <Link
-                    className="text-muted-foreground text-sm hover:text-foreground hover:underline"
+                    className="text-sm transition-colors hover:underline"
                     href={link.href}
+                    style={linkStyle}
+                    {...linkHoverProps}
                   >
                     {link.name}
                   </Link>
@@ -134,7 +180,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Footer */}
-      <div className="border-border border-t">
+      <div style={{ borderTop: `1px solid ${colors.border}` }}>
         <div className="container mx-auto flex max-w-4xl flex-col items-center justify-between px-4 py-6 sm:flex-row">
           <StaxlessBadge />
         </div>

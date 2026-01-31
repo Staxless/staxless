@@ -4,6 +4,7 @@ import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -36,14 +37,27 @@ export class ErrorBoundary extends React.Component<
   }
 
   render() {
+    const colors = BRAND_CONFIG.brand.colors;
+
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen items-center justify-center p-4">
+        <div
+          className="flex min-h-screen items-center justify-center p-4"
+          style={{ backgroundColor: colors.background }}
+        >
           <div className="w-full max-w-md space-y-4">
-            <Alert variant="destructive">
+            <Alert
+              variant="destructive"
+              style={{
+                backgroundColor: colors.error,
+                borderColor: colors.error,
+              }}
+            >
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Something went wrong</AlertTitle>
-              <AlertDescription>
+              <AlertTitle style={{ color: colors.background }}>
+                Something went wrong
+              </AlertTitle>
+              <AlertDescription style={{ color: colors.background }}>
                 An unexpected error occurred. Please try refreshing the page.
               </AlertDescription>
             </Alert>
@@ -52,7 +66,17 @@ export class ErrorBoundary extends React.Component<
                 this.setState({ hasError: false });
                 window.location.href = '/';
               }}
-              className="w-full"
+              className="w-full transition-colors"
+              style={{
+                backgroundColor: colors.primary,
+                color: colors.background,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = colors.primaryHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = colors.primary;
+              }}
             >
               Return to Home
             </Button>

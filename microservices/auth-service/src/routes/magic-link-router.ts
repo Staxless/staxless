@@ -14,6 +14,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
 import { parseCookies, serializeCookie } from 'oslo/cookie';
 import { auth } from '../config/lucia-config.js';
+import { isMagicLinkEnabled } from '../config/auth-providers.config.js';
 import { magicLinkProvider } from '../config/magic-link-config.js';
 import {
   handleError,
@@ -22,6 +23,16 @@ import {
 
 const router = Router();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+// Check if magic link authentication is configured/enabled
+router.get('/magic-link/configured', (_req: Request, res: Response) => {
+  try {
+    res.json({ enabled: isMagicLinkEnabled() });
+  } catch (error) {
+    console.error('Error checking magic link configuration:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 router.post('/magic-link/login', initializeMagicLinkFlow('login'));
 

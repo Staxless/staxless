@@ -1,4 +1,4 @@
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
@@ -6,6 +6,7 @@ interface LogoProps {
 }
 
 export default function Logo({ size = 'medium', className = '' }: LogoProps) {
+  const colors = BRAND_CONFIG.brand.colors;
   const sizeMap = {
     small: 28,
     medium: 36,
@@ -16,11 +17,13 @@ export default function Logo({ size = 'medium', className = '' }: LogoProps) {
 
   return (
     <div
-      className={`flex items-center justify-center rounded-lg bg-black font-bold text-white ${className}`}
+      className={`flex items-center justify-center rounded-lg font-bold ${className}`}
       style={{
         width: logoSize,
         height: logoSize,
         fontSize: logoSize * 0.4,
+        backgroundColor: colors.primary,
+        color: colors.background,
       }}
     >
       {BRAND_CONFIG.company.name.charAt(0)}

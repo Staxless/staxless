@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { FaBitbucket, FaDiscord, FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import { SiAuth0, SiOkta } from 'react-icons/si';
 import { Button } from '@/components/ui/button';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 /**
  * @description Types of OAuth providers supported by the component
@@ -118,14 +118,15 @@ export default function OAuthButton({
     return luminance < 0.5;
   };
 
-  const textColor = isDarkBg(BRAND_CONFIG.brand.colors.backgroundSecondary)
-    ? '#ffffff'
-    : '#000000';
+  const colors = BRAND_CONFIG.brand.colors;
+  const textColor = isDarkBg(colors.backgroundSecondary)
+    ? colors.textPrimary
+    : colors.background;
 
   return (
     <div className="space-y-2">
       {error && (
-        <p className="text-red-500 text-sm" role="alert">
+        <p className="text-sm" role="alert" style={{ color: colors.error }}>
           {error}
         </p>
       )}

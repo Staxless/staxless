@@ -7,7 +7,7 @@ import Footer from '@/components/shared/footer';
 import Header from '@/components/shared/header';
 import { Card, CardContent } from '@/components/ui/card';
 import { getPolicyContent } from '@/content/policy-content';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export default function PolicyPage() {
   const params = useParams();
@@ -22,7 +22,7 @@ export default function PolicyPage() {
           minHeight: '100vh',
         }}
       >
-        <Header user={null} />
+        <Header />
         <div className="pt-20">
           <div className="container mx-auto px-4 py-12 text-center">
             <h1
@@ -59,7 +59,7 @@ export default function PolicyPage() {
         minHeight: '100vh',
       }}
     >
-      <Header user={null} />
+      <Header />
 
       <div className="pt-20">
         <div className="container mx-auto max-w-4xl px-4 py-12">

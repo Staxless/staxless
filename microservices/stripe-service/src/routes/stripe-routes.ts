@@ -65,6 +65,60 @@ router.get('/products', async (_req: Request, res: Response) => {
   }
 });
 
+router.get('/checkout/session/:sessionId', async (req: Request, res: Response) => {
+  const { sessionId } = req.params;
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['line_items', 'line_items.data.price.product', 'subscription', 'customer'],
+    });
+
+    // Get subscription details if it's a subscription
+    let nextBillingDate: number | null = null;
+    let interval: string | null = null;
+
+    if (session.subscription && typeof session.subscription === 'object') {
+      nextBillingDate = session.subscription.current_period_end;
+      const subItem = session.subscription.items?.data?.[0];
+      if (subItem?.price?.recurring) {
+        interval = subItem.price.recurring.interval;
+      }
+    }
+
+    // Get plan name from line items
+    const lineItem = session.line_items?.data?.[0];
+    let planName = 'Unknown Plan';
+    if (lineItem?.price?.product && typeof lineItem.price.product === 'object' && 'name' in lineItem.price.product) {
+      planName = lineItem.price.product.name || 'Unknown Plan';
+    }
+
+    res.json({
+      id: session.id,
+      planName,
+      amount: session.amount_total,
+      currency: session.currency,
+      interval,
+      nextBillingDate,
+      customerEmail: session.customer_details?.email || null,
+      status: session.status,
+      paymentStatus: session.payment_status,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Stripe.errors.StripeError) {
+      return res.status(500).json({
+        error: `Failed to retrieve session: ${error.message}`,
+      });
+    }
+    return res.status(500).json({
+      error: 'Failed to retrieve session: Unknown error',
+    });
+  }
+});
+
 router.post(
   '/checkout',
   async (req: Request<unknown, unknown, CheckoutRequest>, res: Response) => {

@@ -74,20 +74,29 @@ export function createMailgunClient(): MailgunClient {
     messages: () => ({
       send: async (data: EmailData): Promise<SendResponse> => {
         // Build message data with proper structure
-        const messageData = {
+        const messageData: Record<string, unknown> = {
           to: [data.to],
           from: data.from,
           subject: data.subject,
-          text: data.text || '',
-          html: data.html,
         };
 
-        // Use Record type assertion for compatibility
-        const response = await mg.messages.create(
-          domain,
-          // @ts-expect-error
-          messageData as Record<string, unknown>
-        );
+        // Support template-based emails
+        if (data.template) {
+          messageData.template = data.template;
+          // Pass template variables if provided
+          if (data['h:X-Mailgun-Variables']) {
+            messageData['h:X-Mailgun-Variables'] = data['h:X-Mailgun-Variables'];
+          }
+        } else {
+          // Fallback to text/html content
+          messageData.text = data.text || '';
+          if (data.html) {
+            messageData.html = data.html;
+          }
+        }
+
+        // @ts-expect-error - Mailgun types don't include template fields
+        const response = await mg.messages.create(domain, messageData);
 
         return {
           id: response.id || '',

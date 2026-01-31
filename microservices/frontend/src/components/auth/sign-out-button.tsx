@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/lib/signout-user';
+import { useUser } from '@/contexts/user-context';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 /**
  * @description SignOutButton component for handling user sign out
@@ -17,26 +19,34 @@ import { logout } from '@/lib/signout-user';
  */
 export function SignOutButton() {
   const router = useRouter();
+  const { clearUser } = useUser();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const colors = BRAND_CONFIG.brand.colors;
 
   /**
    * @description Handles the sign out process
+   * Clears user state immediately and redirects to home page
+   * while the server-side logout happens in the background
    */
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    try {
-      const result = await logout();
-      if (result.success) {
-        router.push('/');
-        router.refresh(); // Refresh the current route to update the UI
-      } else {
-        // Intentionally left blank: no action needed if sign out fails
-      }
-    } catch {
-      // Intentionally left blank: error is handled elsewhere or not needed
-    } finally {
-      setIsSigningOut(false);
-    }
+
+    // Clear user state immediately for instant UI feedback
+    clearUser();
+
+    // Redirect to home page immediately
+    router.push('/');
+
+    // Perform server-side logout in the background
+    // We don't wait for this - user already sees logged out state
+    logout().catch(() => {
+      // Logout error is non-critical since we already cleared local state
+      // The session cookie will be invalidated on next server request anyway
+    });
+
+    // Force a hard navigation to ensure middleware runs
+    // This clears any cached state and validates the session is gone
+    router.refresh();
   };
 
   return (
@@ -45,6 +55,7 @@ export function SignOutButton() {
       disabled={isSigningOut}
       onClick={handleSignOut}
       variant="ghost"
+      style={{ color: colors.error }}
     >
       {isSigningOut ? (
         <>

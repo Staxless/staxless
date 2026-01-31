@@ -8,6 +8,7 @@
 
 import axios from 'axios';
 import { cookies } from 'next/headers';
+import { getApiGatewayUrl } from './api-config';
 
 /**
  * @interface LogoutResult
@@ -40,7 +41,7 @@ export async function logout(): Promise<LogoutResult> {
 
   try {
     const response = await axios.post(
-      'http://kong-api-gateway:8000/auth/logout',
+      `${getApiGatewayUrl()}/auth/logout`,
       {},
       {
         headers: {
