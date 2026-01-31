@@ -73,6 +73,6 @@
     ]
   },
   "dependencies": {
-    "@staxless/cli": "^1.0.0"
+    "@staxless/cli": "^2.0.1"
   }
 }
