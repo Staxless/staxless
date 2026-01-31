@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Header from '@/components/shared/header';
 import { Button } from '@/components/ui/button';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export default function NotFound() {
   const colors = BRAND_CONFIG.brand.colors;

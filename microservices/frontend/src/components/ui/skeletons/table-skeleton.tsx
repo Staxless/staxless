@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export function TableSkeleton({
   rows = 5,

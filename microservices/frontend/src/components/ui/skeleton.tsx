@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface SkeletonProps {
   className?: string;

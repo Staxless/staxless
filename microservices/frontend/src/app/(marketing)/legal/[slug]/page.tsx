@@ -7,7 +7,7 @@ import Footer from '@/components/shared/footer';
 import Header from '@/components/shared/header';
 import { Card, CardContent } from '@/components/ui/card';
 import { getPolicyContent } from '@/content/policy-content';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export default function PolicyPage() {
   const params = useParams();

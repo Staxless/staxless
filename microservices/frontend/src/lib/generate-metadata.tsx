@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { BRAND_CONFIG } from './brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 export type MetadataProps = {
   title?: string;

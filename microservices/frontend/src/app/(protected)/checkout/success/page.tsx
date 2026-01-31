@@ -16,7 +16,7 @@ import Footer from '@/components/shared/footer';
 import Header from '@/components/shared/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import { markCheckoutSuccess } from '@/lib/confetti-utils';
 
 function SuccessContent() {

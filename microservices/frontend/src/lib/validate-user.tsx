@@ -13,7 +13,7 @@ import {
   safeFetch,
   logError,
 } from '@/lib/error-handling';
-import { getApiGatewayUrl } from '@/lib/api-config';
+import { getApiGatewayUrl } from './api-config';
 
 /**
  * @interface User

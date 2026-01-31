@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SignOutButton } from '../auth/sign-out-button';
 import { SettingsDialog } from './settings-dialog';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface User {
   name: string;

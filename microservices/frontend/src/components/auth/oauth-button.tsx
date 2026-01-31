@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { FaBitbucket, FaDiscord, FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import { SiAuth0, SiOkta } from 'react-icons/si';
 import { Button } from '@/components/ui/button';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 /**
  * @description Types of OAuth providers supported by the component

@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/lib/signout-user';
 import { useUser } from '@/contexts/user-context';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 /**
  * @description SignOutButton component for handling user sign out

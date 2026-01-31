@@ -274,9 +274,10 @@ services:
       - backend
     environment:
       <<: [*common-environment, *kafka-environment]
-      MAILGUN_DOMAIN: "sandboxc84e20d8cf4941c0b1fc96e8f3af303f.mailgun.org"
+      MAILGUN_DOMAIN: "sandbox09a3dace331342f8bf3513b95ba10d0b.mailgun.org"
       MAILGUN_FROM_NAME: "Mailgun Sandbox"
-      MAILGUN_FROM_EMAIL: "postmaster@sandboxc84e20d8cf4941c0b1fc96e8f3af303f.mailgun.org"
+      MAILGUN_FROM_EMAIL: "postmaster@sandbox09a3dace331342f8bf3513b95ba10d0b.mailgun.org"
+
     deploy:
       <<: *deploy-config
     healthcheck:

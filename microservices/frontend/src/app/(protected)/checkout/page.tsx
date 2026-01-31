@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import FocusedCheckout from '@/components/checkout/focused-checkout';
 import SelectionStep from '@/components/checkout/selection-step';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import { hasPreSelectedPlan, getPlanSelection } from '@/lib/plan-selection';
 import { Loader2 } from 'lucide-react';
 

@@ -4,7 +4,7 @@
  */
 
 import type { MetadataRoute } from 'next';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 /**
  * Generates the robots.txt configuration for the website.

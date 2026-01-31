@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import type React from 'react';
 import '@/styles/globals.css';
 import Script from 'next/script';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { UserProvider } from '@/contexts/user-context';

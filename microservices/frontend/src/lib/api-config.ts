@@ -9,5 +9,5 @@
  * In development: falls back to Docker internal network URL
  */
 export function getApiGatewayUrl(): string {
-  return process.env.API_GATEWAY_URL || 'http://kong-api-gateway:8000';
+  return 'http://kong-api-gateway:8000';
 }

@@ -6,7 +6,7 @@ import { DataSettings } from '@/components/dashboard/data-settings';
 import { ProjectSettings } from '@/components/dashboard/project-settings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BRAND_CONFIG } from '@/lib/brand-config';
+import { BRAND_CONFIG } from '@config/brand-config';
 
 interface UserDashboardProps {
   user: {
