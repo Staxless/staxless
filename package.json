@@ -1,11 +1,11 @@
 {
-  "name": "staxless",
+  "name": "staxless-site",
   "version": "2.25.10",
   "private": true,
   "description": "SaaS boilerplate with Next.js frontend, Node.js microservices, and Kong API gateway",
   "license": "ISC",
   "scripts": {
-    "docker:build-push": "bash ./.scripts/docker-build-push.sh",
+    "docker:build-push": "bash ./.scripts/deployment/build-images.sh",
     "install:microservices": "bash .scripts/development/install-services.sh",
     "dev:start": "docker compose -f ./docker/compose/docker-compose.dev.yml up --build",
     "dev:up": "docker compose -f ./docker/compose/docker-compose.dev.yml up",

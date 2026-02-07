@@ -41,7 +41,7 @@ router.get('/login/:providerName', initializeOAuthFlow('login'));
 router.get('/register/:providerName', initializeOAuthFlow('register'));
 
 router.get('/:providerName/callback', async (req: Request, res: Response) => {
-  const providerName = req.params.providerName?.toLowerCase();
+  const providerName = (req.params.providerName as string)?.toLowerCase();
 
   if (!providerName) {
     res.redirect(`${FRONTEND_URL}/login?error=Provider name missing`);

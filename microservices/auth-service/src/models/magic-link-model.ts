@@ -239,7 +239,7 @@ export const initializeOAuthFlow = (action: string) => {
     res: Response,
     _next: NextFunction
   ): Promise<void> => {
-    const providerName = req.params.providerName.toLowerCase();
+    const providerName = (req.params.providerName as string).toLowerCase();
     const provider: Provider = providers[providerName];
     if (!['login', 'register'].includes(action)) {
       res.redirect(`${FRONTEND_URL}/login?error=Invalid action`);

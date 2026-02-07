@@ -11,6 +11,7 @@ import { initializeDatabase } from './config/db-config.js';
 import { startUserConsumer } from './consumers/index.js';
 import healthCheckRoutes from './routes/health-router.js';
 import userRoutes from './routes/user-routes.js';
+import projectRoutes from './routes/project-routes.js';
 
 // Load environment variables
 dotenv.config({ path: './secrets/.env' });
@@ -29,6 +30,7 @@ app.use(
 // Routes
 app.use('/', healthCheckRoutes);
 app.use('/', userRoutes);
+app.use('/', projectRoutes);
 
 /**
  * Initialize Kafka consumer in background (non-blocking)

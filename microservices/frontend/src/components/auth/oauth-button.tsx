@@ -119,9 +119,10 @@ export default function OAuthButton({
   };
 
   const colors = BRAND_CONFIG.brand.colors;
+  // If background is dark, use light text; if light, use dark text
   const textColor = isDarkBg(colors.backgroundSecondary)
-    ? colors.textPrimary
-    : colors.background;
+    ? '#FFFFFF'
+    : colors.textPrimary;
 
   return (
     <div className="space-y-2">

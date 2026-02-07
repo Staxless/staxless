@@ -5,7 +5,7 @@ SERVICES="${1:-all}"
 
 echo "🔨 Building images for: $SERVICES..."
 
-doctl registry login
+github login
 
 if [ "$SERVICES" = "all" ]; then
   docker buildx bake -f config/docker-bake.hcl --push

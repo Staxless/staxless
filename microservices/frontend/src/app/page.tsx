@@ -47,7 +47,7 @@ export default function Home() {
       <Solution />
       <Features />
       <Outcomes />
-      <SocialProof />
+      {/* <SocialProof /> */}
       <CaseStudies />
       <Reassurance />
       <WhyDifferent />

@@ -28,7 +28,7 @@ import type { Provider } from '../lib/providers/provider-types.js';
 // All available provider instances
 const allProviders: { [key: string]: Provider } = {
   github: new GitHubProvider(),
-  google: new GoogleProvider(),
+  // google: new GoogleProvider(),
   // microsoft: new MicrosoftProvider(),
   // discord: new DiscordProvider(),
   // twitter: new TwitterProvider(),

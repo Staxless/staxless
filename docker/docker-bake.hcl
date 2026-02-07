@@ -4,7 +4,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 
 variable "REGISTRY" {
-  default     = "ghcr.io/staxless/staxless"
+  default     = "ghcr.io/staxless/staxless-site"
   description = "Container registry prefix (without trailing slash)"
 }
 
@@ -24,12 +24,13 @@ variable "PLATFORMS" {
 
 group "default" {
   targets = [
-    // "frontend",
+    "frontend",
     // "auth-service",
-    // "user-service",
+     "user-service",
     // "stripe-service",
-    "email-service",
-    // "kong-api-gateway"
+    // "email-service",
+    // "github-service",
+     "kong-api-gateway"
   ]
 }
 
@@ -78,6 +79,12 @@ target "email-service" {
   inherits = ["node-base"]
   context  = "../microservices/email-service/"
   tags     = ["${REGISTRY}/email-service:${VERSION}"]
+}
+
+target "github-service" {
+  inherits = ["node-base"]
+  context  = "../microservices/github-service/"
+  tags     = ["${REGISTRY}/github-service:${VERSION}"]
 }
 
 target "kong-api-gateway" {

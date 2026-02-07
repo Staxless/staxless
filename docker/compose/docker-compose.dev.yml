@@ -256,7 +256,6 @@ services:
 
   email-service:
     image: app_email_service
-
     build:
       context: ../../microservices/email-service/
       dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
@@ -276,5 +275,27 @@ services:
       backend:
         aliases:
           - "email"
+
+  github-service:
+    image: app_github_service
+    build:
+      context: ../../microservices/github-service/
+      dockerfile: ../../docker/dockerfiles/node-service.Dockerfile
+      target: dev
+    env_file:
+      - ../../environments/dev/staxless.dev.env
+    environment:
+      <<: *common-environment
+    ports:
+      - "8085:8085"
+    expose:
+      - "8085"
+    volumes:
+      - ../../microservices/github-service/src:/home/node/src
+      - ../../microservices/github-service/src/server.js:/home/node/server.js
+    networks:
+      backend:
+        aliases:
+          - "github"
 
 

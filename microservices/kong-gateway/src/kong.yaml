@@ -238,6 +238,84 @@ services:
                   - "Content-Type:application/json"
                   - "x-user-info:${request.headers.x-user-info}"
                   - "cookie:auth_session=${request.headers.cookie.auth_session}"
+      - name: user-projects
+        methods:
+          - GET
+          - POST
+        paths:
+          - /user/projects
+        strip_path: false
+        plugins:
+          - name: rbac-auth
+            config:
+              auth_service_url: http://auth-service:8080
+              required_roles:
+                - user
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - "Content-Type:application/json"
+                  - "x-user-info:${request.headers.x-user-info}"
+                  - "cookie:auth_session=${request.headers.cookie.auth_session}"
+      - name: user-projects-crud
+        methods:
+          - PUT
+          - DELETE
+          - PATCH
+        paths:
+          - /user/projects/(.+)
+        strip_path: false
+        plugins:
+          - name: rbac-auth
+            config:
+              auth_service_url: http://auth-service:8080
+              required_roles:
+                - user
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - "Content-Type:application/json"
+                  - "x-user-info:${request.headers.x-user-info}"
+                  - "cookie:auth_session=${request.headers.cookie.auth_session}"
+
+  - name: github
+    url: http://github-upstream
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 600
+          policy: local
+          limit_by: consumer
+      - name: proxy-cache
+        config:
+          strategy: memory
+          cache_ttl: 300
+    read_timeout: 10000
+    write_timeout: 10000
+    connect_timeout: 5000
+    routes:
+      - name: github-changelog
+        methods:
+          - GET
+        paths:
+          - /github/changelog
+        strip_path: false
+        plugins:
+          - name: rbac-auth
+            config:
+              auth_service_url: http://auth-service:8080
+              required_roles:
+                - user
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - "Content-Type:application/json"
+                  - "x-user-info:${request.headers.x-user-info}"
+                  - "cookie:auth_session=${request.headers.cookie.auth_session}"
 
 upstreams:
   - name: auth-upstream
@@ -315,6 +393,30 @@ upstreams:
   - name: user-upstream
     targets:
       - target: user-service:8082
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        timeout: 5
+        concurrency: 10
+        headers: {}
+        healthy:
+          interval: 10
+          successes: 1
+          http_statuses:
+            - 200
+            - 302
+        unhealthy:
+          interval: 10
+          http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
+
+  - name: github-upstream
+    targets:
+      - target: github-service:8085
     healthchecks:
       active:
         type: http

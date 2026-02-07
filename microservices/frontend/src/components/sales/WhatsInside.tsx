@@ -1,56 +1,8 @@
 'use client';
 
-import { Eye, UserPlus, Unlock, Rocket, Zap, Star, Shield } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { BRAND_CONFIG } from '@config/brand-config';
-import { getSalesSection, type HowItWorksStep } from '@config/sales-config';
-
-const stepIcons: Record<string, React.ElementType> = {
-  UserPlus,
-  Unlock,
-  Rocket,
-  Zap,
-  Star,
-  Shield,
-};
-
-function StepCard({ step }: { step: HowItWorksStep }) {
-  const colors = BRAND_CONFIG.brand.colors;
-  const Icon = step.icon ? stepIcons[step.icon] || Zap : Zap;
-
-  return (
-    <div className="text-center">
-      <div
-        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 relative"
-        style={{
-          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-        }}
-      >
-        <Icon className="w-8 h-8" style={{ color: colors.background }} />
-        <div
-          className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-          style={{
-            backgroundColor: colors.accent,
-            color: colors.background,
-          }}
-        >
-          {step.step}
-        </div>
-      </div>
-      <h4
-        className="text-lg font-semibold mb-2"
-        style={{ color: colors.textPrimary }}
-      >
-        {step.title}
-      </h4>
-      <p
-        className="text-sm"
-        style={{ color: colors.textSecondary }}
-      >
-        {step.description}
-      </p>
-    </div>
-  );
-}
+import { getSalesSection } from '@config/sales-config';
 
 export default function WhatsInside() {
   const colors = BRAND_CONFIG.brand.colors;
@@ -89,7 +41,7 @@ export default function WhatsInside() {
         </div>
 
         {/* Visual Previews Grid */}
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 mb-16">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {whatsInside.visualPreviews.map((preview, index) => (
             <div
               key={index}
@@ -147,21 +99,14 @@ export default function WhatsInside() {
           ))}
         </div>
 
-        {/* How It Works */}
-        {whatsInside.howItWorks && whatsInside.howItWorks.length > 0 && (
-          <div className="max-w-4xl mx-auto">
-            <h3
-              className="text-2xl font-bold text-center mb-8"
-              style={{ color: colors.textPrimary }}
-            >
-              How It Works
-            </h3>
-            <div className="grid md:grid-cols-3 gap-8">
-              {whatsInside.howItWorks.map((step, index) => (
-                <StepCard key={index} step={step} />
-              ))}
-            </div>
-          </div>
+        {/* Credibility Note */}
+        {whatsInside.credibilityNote && (
+          <p
+            className="text-center text-sm mt-8 font-medium"
+            style={{ color: colors.textMuted }}
+          >
+            {whatsInside.credibilityNote}
+          </p>
         )}
       </div>
     </section>

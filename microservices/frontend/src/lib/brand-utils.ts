@@ -1,4 +1,4 @@
-import { BRAND_CONFIG, type BrandStyle, CUSTOM_STYLE } from '@config/brand-config';
+import { BRAND_CONFIG, type BrandStyle, ACTIVE_STYLE } from '@config/brand-config';
 import { AVAILABLE_STYLES } from './style-presets';
 
 /**
@@ -53,13 +53,13 @@ export function generateCSSVariables(style: BrandStyle = BRAND_CONFIG.style) {
 /**
  * Switches to a named style preset
  * @param styleName - The name of the style to switch to
- * @returns The selected BrandStyle or CUSTOM_STYLE as fallback
+ * @returns The selected BrandStyle or ACTIVE_STYLE as fallback
  */
 export function switchToStyle(styleName: string): BrandStyle {
   const styles = {
-    custom: CUSTOM_STYLE,
+    custom: ACTIVE_STYLE,
   };
-  return styles[styleName as keyof typeof styles] || CUSTOM_STYLE;
+  return styles[styleName as keyof typeof styles] || ACTIVE_STYLE;
 }
 
 /**

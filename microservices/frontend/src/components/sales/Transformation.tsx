@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Sparkles } from 'lucide-react';
+import { Sparkles, X, Check, ArrowRight } from 'lucide-react';
 import { BRAND_CONFIG } from '@config/brand-config';
 import { getSalesSection } from '@config/sales-config';
 
@@ -8,10 +8,13 @@ export default function Transformation() {
   const colors = BRAND_CONFIG.brand.colors;
   const transformation = getSalesSection('transformation');
 
+  // Support both old and new config structure
+  const hasBeforeAfter = 'beforePoints' in transformation && 'afterPoints' in transformation;
+
   return (
-    <section className="py-20" style={{ backgroundColor: colors.background }}>
+    <section className="py-20 md:py-28" style={{ backgroundColor: colors.background }}>
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 mb-4">
@@ -37,63 +40,122 @@ export default function Transformation() {
             </p>
           </div>
 
-          {/* Champagne Moments */}
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
-            <div className="space-y-4">
-              <h3
-                className="text-lg font-semibold mb-4"
-                style={{ color: colors.textPrimary }}
+          {/* Before/After Comparison */}
+          {hasBeforeAfter ? (
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              {/* Before Column */}
+              <div
+                className="p-6 rounded-2xl"
+                style={{
+                  backgroundColor: colors.backgroundSecondary,
+                  border: `1px solid ${colors.border}`,
+                }}
               >
-                Imagine...
-              </h3>
-              {transformation.champagneMoments.map((moment, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-4 rounded-lg"
-                  style={{
-                    backgroundColor: `${colors.success}10`,
-                    border: `1px solid ${colors.success}30`,
-                  }}
+                <h3
+                  className="text-lg font-semibold mb-6 flex items-center gap-2"
+                  style={{ color: colors.textMuted }}
                 >
-                  <Check
-                    className="w-5 h-5 flex-shrink-0 mt-0.5"
-                    style={{ color: colors.success }}
-                  />
-                  <p style={{ color: colors.textPrimary }}>{moment}</p>
+                  <X className="w-5 h-5" style={{ color: colors.error }} />
+                  Where You Are Now
+                </h3>
+                <div className="space-y-3">
+                  {transformation.beforePoints.map((point, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 rounded-lg"
+                      style={{
+                        backgroundColor: `${colors.error}08`,
+                      }}
+                    >
+                      <X
+                        className="w-4 h-4 flex-shrink-0 mt-0.5"
+                        style={{ color: colors.error }}
+                      />
+                      <p
+                        className="text-sm"
+                        style={{ color: colors.textSecondary }}
+                      >
+                        {point.text}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="space-y-4">
-              <h3
-                className="text-lg font-semibold mb-4"
-                style={{ color: colors.textPrimary }}
+              {/* After Column */}
+              <div
+                className="p-6 rounded-2xl"
+                style={{
+                  backgroundColor: colors.backgroundSecondary,
+                  border: `1px solid ${colors.success}30`,
+                }}
               >
-                All of this...
-              </h3>
-              {transformation.withoutPainPoints.map((point, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-4 rounded-lg"
-                  style={{
-                    backgroundColor: colors.backgroundSecondary,
-                    border: `1px solid ${colors.border}`,
-                  }}
+                <h3
+                  className="text-lg font-semibold mb-6 flex items-center gap-2"
+                  style={{ color: colors.textPrimary }}
                 >
-                  <div
-                    className="w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center mt-0.5"
-                    style={{ backgroundColor: `${colors.primary}20` }}
-                  >
-                    <Check
-                      className="w-3 h-3"
-                      style={{ color: colors.primary }}
-                    />
-                  </div>
-                  <p style={{ color: colors.textSecondary }}>{point}</p>
+                  <Check className="w-5 h-5" style={{ color: colors.success }} />
+                  Where You Could Be
+                </h3>
+                <div className="space-y-3">
+                  {transformation.afterPoints.map((point, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 rounded-lg"
+                      style={{
+                        backgroundColor: `${colors.success}08`,
+                      }}
+                    >
+                      <Check
+                        className="w-4 h-4 flex-shrink-0 mt-0.5"
+                        style={{ color: colors.success }}
+                      />
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        {point.text}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Legacy support for old structure */
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textPrimary }}>
+                  Imagine...
+                </h3>
+                {(transformation as any).champagneMoments?.map((moment: string, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-4 rounded-lg"
+                    style={{ backgroundColor: `${colors.success}10` }}
+                  >
+                    <Check className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: colors.success }} />
+                    <p style={{ color: colors.textPrimary }}>{moment}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textPrimary }}>
+                  All of this...
+                </h3>
+                {(transformation as any).withoutPainPoints?.map((point: string, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-4 rounded-lg"
+                    style={{ backgroundColor: colors.backgroundSecondary }}
+                  >
+                    <Check className="w-3 h-3" style={{ color: colors.primary }} />
+                    <p style={{ color: colors.textSecondary }}>{point}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Closing Statement */}
           <div
@@ -103,8 +165,8 @@ export default function Transformation() {
             }}
           >
             <p
-              className="text-xl font-semibold"
-              style={{ color: colors.background }}
+              className="text-lg md:text-xl font-medium leading-relaxed"
+              style={{ color: '#FFFFFF' }}
             >
               {transformation.closingStatement}
             </p>

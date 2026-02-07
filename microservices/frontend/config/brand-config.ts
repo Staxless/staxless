@@ -1,326 +1,284 @@
-// 
+/**
+ * @file Brand Configuration for Staxless
+ * @description Centralized brand styling, colors, typography, and company info
+ */
 
 /** Interface defining the structure of a brand style configuration */
 export interface BrandStyle {
-  /** Name of the style preset */
   name: string;
-  /** Color palette for the brand */
   colors: {
-    /** Primary brand color */
     primary: string;
-    /** Hover state for primary color */
     primaryHover: string;
-    /** Secondary brand color */
     secondary: string;
-    /** Accent color for highlights */
     accent: string;
-    /** Color for success states */
     success: string;
-    /** Color for warning states */
     warning: string;
-    /** Color for error states */
     error: string;
-    /** Gradient start color (optional) */
     gradientStart?: string;
-    /** Gradient middle color (optional) */
     gradientMiddle?: string;
-    /** Gradient end color (optional) */
     gradientEnd?: string;
-    /** Primary background color */
     background: string;
-    /** Secondary background color */
     backgroundSecondary: string;
-    /** Tertiary background color */
     backgroundTertiary: string;
-    /** Primary text color */
     textPrimary: string;
-    /** Secondary text color */
     textSecondary: string;
-    /** Muted text color */
     textMuted: string;
-    /** Border color */
     border: string;
-    /** Light border color */
     borderLight: string;
   };
-  /** Typography settings */
   typography: {
-    /** Font family for text */
     fontFamily: string;
-    /** Font weight for headings */
+    headingFont: string;
     headingWeight: string;
-    /** Font weight for body text */
     bodyWeight: string;
-    /** Heading sizes for different levels */
     headingSize: {
-      /** Size for hero headings */
       hero: string;
-      /** Size for h1 headings */
       h1: string;
-      /** Size for h2 headings */
       h2: string;
-      /** Size for h3 headings */
       h3: string;
     };
   };
-  /** Spacing settings */
   spacing: {
-    /** Padding for sections */
     section: string;
-    /** Container max-width and padding */
     container: string;
-    /** Padding for cards */
     cardPadding: string;
   };
-  /** Visual effect settings */
   effects: {
-    /** Border radius for elements */
     borderRadius: string;
-    /** Shadow style */
     shadow: string;
-    /** Blur effect for backgrounds */
     blur: string;
-    /** Gradient effect (optional) */
     gradient?: string;
-    /** Enable glassmorphism effect */
     glassmorphism: boolean;
-    /** Enable animations */
     animations: boolean;
   };
 }
 
-/** Default style configuration with a modern dark theme */
-export const CUSTOM_STYLE: BrandStyle = {
-  name: 'custom',
+/** Staxless brand style - Light mode with indigo/purple/cyan gradient */
+export const STAXLESS_STYLE: BrandStyle = {
+  name: 'staxless',
   colors: {
-    primary: '#6366F1', // Indigo - main brand color
-    primaryHover: '#4F46E5', // Darker indigo for hover states
-    secondary: '#8B5CF6', // Purple - secondary actions
-    accent: '#22D3EE', // Cyan - highlights and accents
-    success: '#10B981', // Emerald green - success states
-    warning: '#F59E0B', // Amber - warning states
-    error: '#EF4444', // Red - error states
-    gradientStart: '#6366F1', // Gradient start (indigo)
-    gradientMiddle: '#8B5CF6', // Gradient middle (purple)
-    gradientEnd: '#22D3EE', // Gradient end (cyan)
-    background: '#0F172A', // Slate 900 - main background
-    backgroundSecondary: '#1E293B', // Slate 800 - cards/sections
-    backgroundTertiary: '#334155', // Slate 700 - inputs/elevated
-    textPrimary: '#F8FAFC', // Slate 50 - primary text (high contrast)
-    textSecondary: '#CBD5E1', // Slate 300 - secondary text
-    textMuted: '#94A3B8', // Slate 400 - muted/placeholder text
-    border: '#334155', // Slate 700 - borders
-    borderLight: '#475569', // Slate 600 - lighter borders
+    // Primary brand colors
+    primary: '#6366F1',       // Indigo - main brand color, buttons, links
+    primaryHover: '#4F46E5',  // Darker indigo for hover states
+    secondary: '#8B5CF6',     // Purple - secondary actions, gradients
+    accent: '#22D3EE',        // Cyan - highlights, gradient endpoints
+
+    // State colors
+    success: '#10B981',       // Emerald - success states
+    warning: '#F59E0B',       // Amber - warning states
+    error: '#EF4444',         // Red - error states
+
+    // Gradient colors
+    gradientStart: '#6366F1', // Indigo
+    gradientMiddle: '#8B5CF6', // Purple
+    gradientEnd: '#22D3EE',   // Cyan
+
+    // Light mode backgrounds
+    background: '#FFFFFF',           // White - page background
+    backgroundSecondary: '#F8FAFC',  // Slate 50 - card backgrounds, sections
+    backgroundTertiary: '#F1F5F9',   // Slate 100 - inputs, elevated elements
+
+    // Light mode text
+    textPrimary: '#0F172A',    // Slate 900 - headings, body text
+    textSecondary: '#64748B',  // Slate 500 - muted text, descriptions
+    textMuted: '#94A3B8',      // Slate 400 - placeholder text
+
+    // Borders
+    border: '#E2E8F0',         // Slate 200 - borders
+    borderLight: '#F1F5F9',    // Slate 100 - lighter borders
   },
   typography: {
-    fontFamily: '"Cabinet Grotesk"', // system-ui, sans-serif', // Replace with your font family
-    headingWeight: 'font-bold', // Replace with heading font weight
-    bodyWeight: 'font-normal', // Replace with body font weight
+    fontFamily: 'Inter, system-ui, sans-serif',
+    headingFont: '"Cabinet Grotesk", system-ui, sans-serif',
+    headingWeight: 'font-bold',
+    bodyWeight: 'font-normal',
     headingSize: {
-      hero: 'text-5xl', // Replace with hero heading size
-      h1: 'text-4xl', // Replace with h1 size
-      h2: 'text-3xl', // Replace with h2 size
-      h3: 'text-2xl', // Replace with h3 size
+      hero: 'text-5xl md:text-6xl',
+      h1: 'text-4xl md:text-5xl',
+      h2: 'text-3xl md:text-4xl',
+      h3: 'text-2xl md:text-3xl',
     },
   },
   spacing: {
-    section: 'py-12', // Replace with section padding
-    container: 'max-w-7xl mx-auto px-4', // Replace with container styles
-    cardPadding: 'p-6', // Replace with card padding
+    section: 'py-16 md:py-24',
+    container: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8',
+    cardPadding: 'p-6 md:p-8',
   },
   effects: {
-    borderRadius: 'rounded-md', // Replace with border radius
-    shadow: 'shadow-md', // Replace with shadow style
-    blur: 'backdrop-blur-sm', // Replace with blur effect
-    glassmorphism: false, // Enable/disable glassmorphism
-    animations: true, // Enable/disable animations
+    borderRadius: 'rounded-2xl',
+    shadow: 'shadow-lg',
+    blur: 'backdrop-blur-sm',
+    gradient: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400',
+    glassmorphism: false,
+    animations: true,
   },
 };
 
-/** Active style selection to switch between design presets */
-export const ACTIVE_STYLE: BrandStyle = CUSTOM_STYLE;
+/** Active style selection */
+export const ACTIVE_STYLE: BrandStyle = STAXLESS_STYLE;
 
-/** Company configuration (style-independent) */
+/** Company configuration */
 export const COMPANY_CONFIG = {
-  /** Company name */
-  name: 'YourSaaSName', // Replace with your company name
-  /** Company tagline */
-  tagline: 'Your Tagline Here', // Replace with your tagline
-  /** Company description */
-  description: 'Describe your SaaS or business here.', // Replace with your description
-  /** Company website URL */
-  website: 'https://yourdomain.com', // Replace with your website
-  /** Support email address */
-  email: 'support@yourdomain.com', // Replace with your support email
-  /** Support phone number */
-  phone: '+1 (555) 123-4567', // Replace with your support phone
-  /** Company address */
-  address: '123 Your Street, City, State 12345', // Replace with your address
+  name: 'Staxless',
+  tagline: 'Build Simple. Scale Smart. Stay Secure.',
+  description: 'The production-ready microservice SaaS boilerplate that lets you launch in under 2 weeks—without the tech debt that kills momentum when traction hits.',
+  website: 'https://staxless.com',
+  email: 'zach@staxless.com',
+  phone: '',
+  address: '',
+  founder: {
+    name: 'Zach',
+    fullName: 'Zachary Benson',
+    title: 'Founder',
+  },
 };
 
-/** Content configuration for website sections (style-independent) */
+/** Content configuration for website sections */
 export const CONTENT_CONFIG = {
-  /** Hero section content */
   hero: {
-    title: 'Welcome to YourSaaSName', // Replace with hero title
-    titleHighlight: 'Highlight Text', // Replace with highlighted text
-    titleEnd: '', // Replace with title end (optional)
-    subtitle: 'Describe what your SaaS does in one sentence.', // Replace with subtitle
-    primaryCTA: 'Get Started', // Replace with primary CTA text
-    secondaryCTA: 'Learn More', // Replace with secondary CTA text
+    title: 'Stop Fighting Your Infrastructure.',
+    titleHighlight: 'Start Shipping Your Product.',
+    titleEnd: '',
+    subtitle: 'The production-ready microservice SaaS foundation that lets you launch in under 2 weeks—without the tech debt that kills momentum when traction hits.',
+    primaryCTA: 'Get Staxless',
+    secondaryCTA: 'See How It Works',
   },
-  /** Features section content */
   features: {
-    title: 'Features of YourSaaSName', // Replace with features title
-    subtitle: 'Describe the key features of your SaaS.', // Replace with features subtitle
+    title: 'Everything You Need to Launch and Scale',
+    subtitle: 'A complete foundation with auth, payments, email, and API gateway—all wired up and production-ready.',
     items: [
       {
-        id: 'feature1',
-        icon: 'Lock', // Replace with icon name (e.g., Lock, Star)
-        title: 'Feature One', // Replace with feature title
-        description: 'Describe the first feature of your SaaS.', // Replace with description
+        id: 'microservices',
+        icon: 'Boxes',
+        title: '6 Pre-Wired Microservices',
+        description: 'Auth, User, Payments, Email, Frontend, and API Gateway—already built, connected, and production-ready.',
       },
       {
-        id: 'feature2',
-        icon: 'DollarSign', // Replace with icon name
-        title: 'Feature Two', // Replace with feature title
-        description: 'Describe the second feature of your SaaS.', // Replace with description
+        id: 'cli',
+        icon: 'Terminal',
+        title: 'Powerful CLI Tool',
+        description: '15+ commands for init, dev, deploy, and service generation. One command to start, one command to deploy.',
       },
       {
-        id: 'feature3',
-        icon: 'Users' ,// Replace with icon name
-        title: 'Feature Three', // Replace with feature title
-        description: 'Describe the third feature of your SaaS.', // Replace with description
+        id: 'kafka',
+        icon: 'Zap',
+        title: 'Kafka Event Bus',
+        description: 'Services communicate asynchronously out of the box. Scale independently without rewriting anything.',
+      },
+      {
+        id: 'kong',
+        icon: 'Shield',
+        title: 'Kong API Gateway',
+        description: 'Pre-configured routing, rate limiting, and RBAC. Production-grade security from day one.',
+      },
+      {
+        id: 'components',
+        icon: 'Layout',
+        title: '40+ UI Components',
+        description: 'Landing pages, auth flows, dashboard, checkout—all ready to customize with Tailwind and shadcn/ui.',
+      },
+      {
+        id: 'docs',
+        icon: 'BookOpen',
+        title: '14 Task-Based Tutorials',
+        description: 'Learn by doing what you actually need to do. Add pages, protect routes, integrate Stripe, and more.',
       },
     ],
   },
-  /** Pricing section content */
   pricing: {
-    title: 'Pricing Plans', // Replace with pricing title
-    subtitle: 'Choose the plan that fits your needs.', // Replace with pricing subtitle
+    title: 'Choose Your Path',
+    subtitle: 'One-time purchase. Lifetime access to the code. No subscriptions.',
   },
-  /** FAQ section content */
   faq: {
-    title: 'Frequently Asked Questions', // Replace with FAQ title
-    subtitle: 'Answers to common questions about YourSaaSName.', // Replace with FAQ subtitle
+    title: 'Frequently Asked Questions',
+    subtitle: 'Got questions? We\'ve got answers.',
     items: [
       {
         id: 'faq1',
-        question: 'What does YourSaaSName do?', // Replace with question
-        answer: 'Provide a brief answer to the question.', // Replace with answer
+        question: 'I\'ve never worked with microservices before. Is this too advanced?',
+        answer: 'If you can run npm install and use Docker, you can use Staxless. The CLI abstracts all the complexity. You don\'t need to understand Kafka or Kong to benefit from them.',
       },
       {
         id: 'faq2',
-        question: 'How do I get started?', // Replace with question
-        answer: 'Provide a brief answer to the question.', // Replace with answer
+        question: 'What\'s the tech stack?',
+        answer: 'Next.js 15, React 19, Express, MongoDB, Kafka, Kong, Stripe, Mailgun, Docker, Terraform. All modern, all production-tested.',
       },
     ],
   },
-  /** Call-to-action section content */
   cta: {
-    title: 'Ready to Start?', // Replace with CTA title
-    subtitle: 'Join users who love YourSaaSName.', // Replace with CTA subtitle
-    buttonText: 'Start Now', // Replace with CTA button text
+    title: 'Ready to Build Your Foundation?',
+    subtitle: 'Skip the tech debt. Own your stack. Ship your product.',
+    buttonText: 'Get Staxless',
   },
 };
 
-/** Social media configuration (style-independent) */
+/** Social media configuration */
 export const SOCIAL_CONFIG = {
-  /** Twitter handle */
-  twitter: '@YourSaaSName', // Replace with your Twitter handle
-  /** GitHub profile URL */
-  github: 'https://github.com/yourusername', // Replace with your GitHub URL
-  /** LinkedIn company page URL */
-  linkedin: 'https://linkedin.com/company/yourcompany', // Replace with your LinkedIn URL
-  /** Discord community URL */
-  discord: 'https://discord.gg/yourinvite', // Replace with your Discord URL
+  twitter: '@zachbenson817',
+  github: 'https://github.com/staxless',
+  linkedin: '',
+  discord: '',
 };
 
-/** Navigation configuration for main menu and footer (style-independent) */
+/** Navigation configuration */
 export const NAVIGATION_CONFIG = {
-  /** Main navigation items */
   main: [
-    { name: 'Features', href: '#features' }, // Replace with navigation item
-    { name: 'Pricing', href: '#pricing' }, // Replace with navigation item
-    { name: 'Docs', href: '/docs' }, // Replace with navigation item
-    { name: 'Blog', href: '/blog' }, 
+    { name: 'Features', href: '#features' },
+    { name: 'Pricing', href: '#pricing' },
+    { name: 'Docs', href: 'https://github.com/staxless/staxless-docs' },
   ],
-  /** Footer navigation sections */
   footer: {
     product: [
-      { name: 'Features', href: '#features' }, // Replace with product link
-      { name: 'Pricing', href: '#pricing' }, // Replace with product link
-      { name: 'Documentation', href: '/docs' }, // Replace with product link
+      { name: 'Features', href: '#features' },
+      { name: 'Pricing', href: '#pricing' },
+      { name: 'Documentation', href: '/docs' },
     ],
     company: [
-      { name: 'About', href: '/about' }, // Replace with company link
-      { name: 'Contact', href: '/contact' }, // Replace with company link
+      { name: 'About', href: '/about' },
+      { name: 'Contact', href: 'mailto:zach@staxless.com' },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/legal/privacy' }, // Replace with legal link
-      { name: 'Terms of Service', href: '/legal/terms' }, // Replace with legal link
+      { name: 'Privacy Policy', href: '/legal/privacy' },
+      { name: 'Terms of Service', href: '/legal/terms' },
     ],
   },
 };
 
-/** SEO configuration (style-independent) */
+/** SEO configuration */
 export const SEO_CONFIG = {
-  /** Page title for SEO */
-  title: 'YourSaaSName - Your SaaS Description', // Replace with SEO title
-  /** Meta description for SEO */
-  description: 'Describe your SaaS for search engines.', // Replace with SEO description
-  /** SEO keywords */
-  keywords: ['your', 'saas', 'keywords'], // Replace with SEO keywords
-  /** Open Graph image URL */
-  ogImage: '/your-og-image.png', // Replace with Open Graph image URL
-  /** Twitter card type */
-  twitterCard: 'summary_large_image', // Replace with Twitter card type
+  title: 'Staxless - Build Simple. Scale Smart. Stay Secure.',
+  description: 'The production-ready microservice SaaS boilerplate that lets you launch in under 2 weeks. Auth, payments, email, and API gateway—all wired up.',
+  keywords: ['saas boilerplate', 'microservices', 'next.js', 'starter kit', 'indie hackers', 'solo founder'],
+  ogImage: '/og-image.png',
+  twitterCard: 'summary_large_image',
 };
 
-/** Unified brand configuration combining all settings */
+/** Unified brand configuration */
 export const BRAND_CONFIG = {
-  /** Active style configuration */
   style: ACTIVE_STYLE,
-  /** Company information */
   company: COMPANY_CONFIG,
-  /** Website content */
   content: CONTENT_CONFIG,
-  /** Social media links */
   social: SOCIAL_CONFIG,
-  /** Navigation settings */
   navigation: NAVIGATION_CONFIG,
-  /** SEO settings */
   seo: SEO_CONFIG,
-  /** Legacy brand properties for backward compatibility */
   brand: {
-    /** Logo configuration */
     logo: {
-      /** Logo text (first letter of company name) */
-      text: 'Y', // Replace with first letter of your company name
-      /** Logo source */
-      src: '/your-logo.png', // Replace with your logo path
-      /** Logo sizes */
+      text: 'S',
+      src: '/logo.png',
       size: {
-        small: 24, // Replace with small logo size
-        medium: 32, // Replace with medium logo size
-        large: 48, // Replace with large logo size
+        small: 24,
+        medium: 32,
+        large: 48,
       },
     },
-    /** Brand colors (direct access) */
     colors: ACTIVE_STYLE.colors,
-    /** Font settings */
     fonts: {
-      heading: ACTIVE_STYLE.typography.fontFamily,
+      heading: ACTIVE_STYLE.typography.headingFont,
       body: ACTIVE_STYLE.typography.fontFamily,
     },
   },
 };
 
-/** Type definition for the unified brand configuration */
 export type BrandConfig = typeof BRAND_CONFIG;
-
-/** Type definition for brand colors */
 export type BrandColors = BrandStyle['colors'];
-
-/** Type definition for navigation items */
 export type NavigationItem = { name: string; href: string };

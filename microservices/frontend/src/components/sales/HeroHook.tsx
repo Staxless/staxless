@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight, Play, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { BRAND_CONFIG } from '@config/brand-config';
@@ -12,53 +12,100 @@ export default function HeroHook() {
 
   return (
     <section
-      className="relative min-h-[90vh] flex items-center"
+      className="relative min-h-[90vh] flex items-center overflow-hidden"
       style={{ backgroundColor: colors.background }}
     >
       {/* Background gradient */}
       <div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-40"
         style={{
-          background: `radial-gradient(ellipse at top, ${colors.primary}20 0%, transparent 50%)`,
+          background: `radial-gradient(ellipse at top, ${colors.primary}15 0%, transparent 50%)`,
         }}
       />
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
+      {/* Decorative elements */}
+      <div
+        className="absolute top-20 right-10 w-72 h-72 rounded-full blur-3xl opacity-20"
+        style={{ backgroundColor: colors.secondary }}
+      />
+      <div
+        className="absolute bottom-20 left-10 w-96 h-96 rounded-full blur-3xl opacity-10"
+        style={{ backgroundColor: colors.accent }}
+      />
+
+      <div className="container mx-auto px-4 py-25 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+            style={{
+              backgroundColor: `${colors.primary}10`,
+              border: `1px solid ${colors.primary}30`,
+            }}
+          >
+            <Terminal className="w-4 h-4" style={{ color: colors.primary }} />
+            <span className="text-sm font-medium" style={{ color: colors.primary }}>
+              Build Simple. Scale Smart. Stay Secure.
+            </span>
+          </div>
+
           {/* Main Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            <span style={{ color: colors.textPrimary }}>{hero.headline} </span>
+            <span style={{ color: colors.textPrimary }}>{hero.headline}</span>
             {hero.headlineHighlight && (
-              <span
-                style={{
-                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                {hero.headlineHighlight}
-              </span>
+              <>
+                <br />
+                <span
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.accent} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {hero.headlineHighlight}
+                </span>
+              </>
             )}
           </h1>
 
           {/* Subheadline */}
           <p
-            className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed"
             style={{ color: colors.textSecondary }}
           >
             {hero.subheadline}
           </p>
 
+          {/* Tech Stack Badges */}
+          {hero.techStack && hero.techStack.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {hero.techStack.map((tech, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 text-xs font-medium rounded-full"
+                  style={{
+                    backgroundColor: colors.backgroundSecondary,
+                    color: colors.textSecondary,
+                    border: `1px solid ${colors.border}`,
+                  }}
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Link href={hero.ctaUrl}>
               <Button
                 size="lg"
-                className="text-lg px-8 py-6 font-semibold transition-all hover:scale-105"
+                className="text-lg px-8 py-6 font-semibold transition-all hover:scale-105 rounded-xl"
                 style={{
-                  backgroundColor: colors.primary,
-                  color: colors.background,
+                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                  color: '#FFFFFF',
+                  boxShadow: `0 4px 20px ${colors.primary}40`,
                 }}
               >
                 {hero.ctaText}
@@ -71,7 +118,7 @@ export default function HeroHook() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-lg px-8 py-6 font-semibold transition-all"
+                  className="text-lg px-8 py-6 font-semibold transition-all hover:scale-105 rounded-xl"
                   style={{
                     borderColor: colors.border,
                     color: colors.textPrimary,
@@ -85,49 +132,32 @@ export default function HeroHook() {
             )}
           </div>
 
-          {/* Trust indicators */}
-          <div className="mt-12 flex flex-wrap justify-center gap-6 items-center">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full border-2"
-                    style={{
-                      backgroundColor: colors.backgroundTertiary,
-                      borderColor: colors.background,
-                    }}
-                  />
-                ))}
-              </div>
-              <span
-                className="text-sm font-medium"
-                style={{ color: colors.textMuted }}
-              >
-                500+ members
-              </span>
+          {/* CLI Preview */}
+          <div
+            className="max-w-md mx-auto p-4 rounded-xl text-left font-mono text-sm"
+            style={{
+              backgroundColor: '#0F172A',
+              border: `1px solid ${colors.border}`,
+            }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#EF4444' }} />
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#10B981' }} />
             </div>
-            <div
-              className="h-4 w-px"
-              style={{ backgroundColor: colors.border }}
-            />
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <svg
-                  key={i}
-                  className="w-4 h-4"
-                  fill={colors.warning}
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-              <span
-                className="text-sm font-medium ml-1"
-                style={{ color: colors.textMuted }}
-              >
-                4.9/5 rating
-              </span>
+            <div className="space-y-1">
+              <p>
+                <span style={{ color: '#94A3B8' }}>$</span>{' '}
+                <span style={{ color: colors.accent }}>staxless</span>{' '}
+                <span style={{ color: '#F8FAFC' }}>init</span>
+              </p>
+              <p style={{ color: '#10B981' }}>✓ Project initialized</p>
+              <p>
+                <span style={{ color: '#94A3B8' }}>$</span>{' '}
+                <span style={{ color: colors.accent }}>staxless</span>{' '}
+                <span style={{ color: '#F8FAFC' }}>dev start</span>
+              </p>
+              <p style={{ color: '#10B981' }}>✓ All services running</p>
             </div>
           </div>
         </div>

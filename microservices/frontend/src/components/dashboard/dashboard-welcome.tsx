@@ -10,8 +10,7 @@ export default function DashboardWelcome() {
 
   return (
     <p style={{ color: BRAND_CONFIG.brand.colors.textMuted }}>
-      Welcome back, {displayName}! Here&apos;s what&apos;s happening with your
-      SaaS.
+      Welcome back, {displayName}! Here&apos;s your Staxless setup hub.
     </p>
   );
 }

@@ -61,7 +61,7 @@ export default function EstablishTrust() {
 
               {/* Credibility Stats */}
               <div className="flex flex-wrap gap-4">
-                {trust.credibility.yearsExperience && (
+                {trust.credibility.monthsBuilding && (
                   <div
                     className="flex items-center gap-2 px-4 py-2 rounded-full"
                     style={{
@@ -71,11 +71,11 @@ export default function EstablishTrust() {
                   >
                     <Clock className="w-4 h-4" style={{ color: colors.primary }} />
                     <span className="text-sm" style={{ color: colors.textPrimary }}>
-                      {trust.credibility.yearsExperience}+ years experience
+                      {trust.credibility.monthsBuilding}+ months building
                     </span>
                   </div>
                 )}
-                {trust.credibility.peopleHelped && (
+                {trust.credibility.commits && (
                   <div
                     className="flex items-center gap-2 px-4 py-2 rounded-full"
                     style={{
@@ -85,7 +85,7 @@ export default function EstablishTrust() {
                   >
                     <Users className="w-4 h-4" style={{ color: colors.primary }} />
                     <span className="text-sm" style={{ color: colors.textPrimary }}>
-                      {trust.credibility.peopleHelped}+ people helped
+                      {trust.credibility.commits}+ commits
                     </span>
                   </div>
                 )}

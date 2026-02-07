@@ -22,6 +22,7 @@ export const LINEAR_STYLE: BrandStyle = {
   },
   typography: {
     fontFamily: 'SF Pro Display',
+    headingFont: 'SF Pro Display',
     headingWeight: 'font-medium',
     bodyWeight: 'font-normal',
     headingSize: {
@@ -67,6 +68,7 @@ export const NOTION_STYLE: BrandStyle = {
   },
   typography: {
     fontFamily: 'ui-sans-serif',
+    headingFont: 'ui-sans-serif',
     headingWeight: 'font-semibold',
     bodyWeight: 'font-normal',
     headingSize: {
@@ -112,6 +114,7 @@ export const VERCEL_STYLE: BrandStyle = {
   },
   typography: {
     fontFamily: 'Inter',
+    headingFont: 'Inter',
     headingWeight: 'font-bold',
     bodyWeight: 'font-normal',
     headingSize: {
@@ -157,6 +160,7 @@ export const GROK_STYLE: BrandStyle = {
   },
   typography: {
     fontFamily: 'system-ui',
+    headingFont: 'system-ui',
     headingWeight: 'font-medium',
     bodyWeight: 'font-normal',
     headingSize: {
@@ -205,6 +209,7 @@ export const REVELATOR_STYLE: BrandStyle = {
   },
   typography: {
     fontFamily: 'system-ui',
+    headingFont: 'system-ui',
     headingWeight: 'font-medium',
     bodyWeight: 'font-normal',
     headingSize: {

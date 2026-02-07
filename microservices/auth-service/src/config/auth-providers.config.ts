@@ -30,7 +30,7 @@ export const authProvidersConfig = {
    * Magic Link (passwordless email) authentication
    */
   magicLink: {
-    enabled: true,
+    enabled: false,
     displayName: 'Email Magic Link',
     description: 'Sign in with a magic link sent to your email',
   },
@@ -45,7 +45,7 @@ export const authProvidersConfig = {
       description: 'Sign in with your GitHub account',
     },
     google: {
-      enabled: true,
+      enabled: false,
       displayName: 'Google',
       description: 'Sign in with your Google account',
     },
