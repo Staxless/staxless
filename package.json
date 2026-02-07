@@ -1,6 +1,6 @@
 {
   "name": "staxless-site",
-  "version": "2.25.10",
+  "version": "2.26.0",
   "private": true,
   "description": "SaaS boilerplate with Next.js frontend, Node.js microservices, and Kong API gateway",
   "license": "ISC",

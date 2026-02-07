@@ -1,3 +1,10 @@
+# [2.26.0](https://github.com/Staxless/staxless/compare/v2.25.10...v2.26.0) (2026-02-07)
+
+
+### Features
+
+* add github service, project management, and redesigned dashboard ([b0c4524](https://github.com/Staxless/staxless/commit/b0c4524c0cbad9156cd5417a205ec98363f6b9d7))
+
 # [2.0.0](https://github.com/Staxless/staxless/compare/v1.39.0...v2.0.0) (2026-01-31)
 
 
