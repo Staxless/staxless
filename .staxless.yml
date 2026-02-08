@@ -1,0 +1,14 @@
+cloud:
+  provider: digitalocean
+  region: nyc3
+
+infrastructure:
+  manager_size: s-2vcpu-4gb
+  worker_size: s-2vcpu-4gb
+  worker_count: 2
+
+deployment:
+  stack_name: staxless
+  compose_file: docker/compose/docker-compose.prod.yml
+  bake_file: docker/docker-bake.hcl
+  registry: ghcr.io
