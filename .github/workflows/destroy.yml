@@ -1,0 +1,16 @@
+name: Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm'
+        type: string
+        required: true
+
+jobs:
+  destroy:
+    uses: staxless/staxless-deploy/.github/workflows/destroy.yml@v1
+    with:
+      confirm: ${{ inputs.confirm_destroy }}
+    secrets: inherit
