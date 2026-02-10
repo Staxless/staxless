@@ -1,0 +1,16 @@
+name: Add Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'Name of the service to add'
+        type: string
+        required: true
+
+jobs:
+  add:
+    uses: staxless/staxless-deploy/.github/workflows/add-service.yml@v1
+    with:
+      service_name: ${{ inputs.service_name }}
+    secrets: inherit

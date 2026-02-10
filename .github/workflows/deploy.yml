@@ -1,61 +1,18 @@
 name: Deploy
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
-      action:
-        description: 'Deployment action'
-        required: true
-        type: choice
-        options:
-          - update-services
-          - initial-deploy
-          - add-service
-          - destroy
-
       services:
         description: 'Services to update (comma-separated or "all")'
-        required: false
         type: string
         default: 'all'
 
-      service_name:
-        description: 'New service name (add-service only)'
-        required: false
-        type: string
-        default: ''
-
-      confirm_destroy:
-        description: 'Type "DESTROY" to confirm (destroy only)'
-        required: false
-        type: string
-        default: ''
-
 jobs:
   update:
-    if: inputs.action == 'update-services'
     uses: staxless/staxless-deploy/.github/workflows/update-services.yml@v1
     with:
-      services: ${{ inputs.services }}
-    secrets: inherit
-
-  initial:
-    if: inputs.action == 'initial-deploy'
-    uses: staxless/staxless-deploy/.github/workflows/initial-deploy.yml@v1
-    with:
-      domain: ${{ vars.DOMAIN }}
-    secrets: inherit
-
-  add:
-    if: inputs.action == 'add-service'
-    uses: staxless/staxless-deploy/.github/workflows/add-service.yml@v1
-    with:
-      service_name: ${{ inputs.service_name }}
-    secrets: inherit
-
-  destroy:
-    if: inputs.action == 'destroy'
-    uses: staxless/staxless-deploy/.github/workflows/destroy.yml@v1
-    with:
-      confirm: ${{ inputs.confirm_destroy }}
+      services: ${{ inputs.services || 'all' }}
     secrets: inherit

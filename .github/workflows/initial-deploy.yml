@@ -1,0 +1,11 @@
+name: Initial Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: staxless/staxless-deploy/.github/workflows/initial-deploy.yml@v1
+    with:
+      domain: ${{ vars.DOMAIN }}
+    secrets: inherit
