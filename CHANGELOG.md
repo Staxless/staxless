@@ -1,3 +1,15 @@
+# [2.26.0](https://github.com/Staxless/staxless/compare/v2.25.10...v2.26.0) (2026-02-12)
+
+
+### Bug Fixes
+
+* track package-lock.json files required for npm ci ([1301926](https://github.com/Staxless/staxless/commit/13019260432f912687f3e771ffdc01d39910d4d6))
+
+
+### Features
+
+* split deploy.yml into separate workflow files ([c7fccdc](https://github.com/Staxless/staxless/commit/c7fccdc81006d411332a28b3c14d0eb1ece74251))
+
 # [2.0.0](https://github.com/Staxless/staxless/compare/v1.39.0...v2.0.0) (2026-01-31)
 
 
