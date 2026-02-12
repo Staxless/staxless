@@ -3,6 +3,10 @@ name: Initial Deploy
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     uses: staxless/staxless-deploy/.github/workflows/initial-deploy.yml@v1

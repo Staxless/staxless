@@ -8,6 +8,10 @@ on:
         type: string
         required: true
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   add:
     uses: staxless/staxless-deploy/.github/workflows/add-service.yml@v1

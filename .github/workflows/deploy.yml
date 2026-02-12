@@ -10,6 +10,10 @@ on:
         type: string
         default: 'all'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   update:
     uses: staxless/staxless-deploy/.github/workflows/update-services.yml@v1
