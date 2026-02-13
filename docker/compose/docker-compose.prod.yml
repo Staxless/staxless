@@ -11,9 +11,9 @@ networks:
 secrets:
   CLOUDFLARE_TUNNEL_TOKEN:
     external: true
-  GITHUB_CLIENT_ID:
+  GH_OAUTH_CLIENT_ID:
     external: true
-  GITHUB_CLIENT_SECRET:
+  GH_OAUTH_CLIENT_SECRET:
     external: true
   GOOGLE_CLIENT_ID:
     external: true
@@ -174,13 +174,13 @@ services:
   auth-service:
     image: ghcr.io/staxless/staxless/auth-service:latest
     secrets:
-      - source: GITHUB_CLIENT_ID
-        target: /run/secrets/GITHUB_CLIENT_ID
+      - source: GH_OAUTH_CLIENT_ID
+        target: /run/secrets/GH_OAUTH_CLIENT_ID
         uid: "1000"
         gid: "1000"
         mode: 0400
-      - source: GITHUB_CLIENT_SECRET
-        target: /run/secrets/GITHUB_CLIENT_SECRET
+      - source: GH_OAUTH_CLIENT_SECRET
+        target: /run/secrets/GH_OAUTH_CLIENT_SECRET
         uid: "1000"
         gid: "1000"
         mode: 0400

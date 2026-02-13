@@ -118,7 +118,7 @@ cp environments/template.env environments/.env
 Required variables:
 - `STRIPE_PRIVATE_KEY` - Stripe API key
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - OAuth
-- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` - OAuth
+- `GH_OAUTH_CLIENT_ID` / `GH_OAUTH_CLIENT_SECRET` - OAuth
 - `MONGODB_URI` - Database connection
 
 ---

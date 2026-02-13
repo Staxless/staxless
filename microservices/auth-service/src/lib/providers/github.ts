@@ -9,8 +9,8 @@ import { Provider, ProviderConfig, NormalizedUserInfo } from "./provider-types.j
 import { loadSecret } from "../../lib/secrets-manager.js";
 
 const config: ProviderConfig = {
-  clientId: loadSecret('GITHUB_CLIENT_ID') ?? process.env.GITHUB_CLIENT_ID ?? "",
-  clientSecret: loadSecret('GITHUB_CLIENT_SECRET') ?? process.env.GITHUB_CLIENT_SECRET ?? "",
+  clientId: loadSecret('GH_OAUTH_CLIENT_ID') ?? process.env.GH_OAUTH_CLIENT_ID ?? "",
+  clientSecret: loadSecret('GH_OAUTH_CLIENT_SECRET') ?? process.env.GH_OAUTH_CLIENT_SECRET ?? "",
   userInfoUrl: "https://api.github.com/user",
   scopes: ["user:email"],
   usePKCE: false,
@@ -38,7 +38,7 @@ export class GitHubProvider extends Provider {
   protected createProviderInstance(): arctic.GitHub {
     const { clientId, clientSecret } = this.config;
     if (!clientId || !clientSecret) {
-      throw new Error("GitHub requires GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET");
+      throw new Error("GitHub requires GH_OAUTH_CLIENT_ID and GH_OAUTH_CLIENT_SECRET");
     }
     const redirectUri = `${process.env.API_GATEWAY_URL}/oauth/github/callback`;  
      
