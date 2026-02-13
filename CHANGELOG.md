@@ -1,3 +1,17 @@
+# [2.26.0](https://github.com/Staxless/staxless/compare/v2.25.10...v2.26.0) (2026-02-13)
+
+
+### Bug Fixes
+
+* add packages:write permission for GHCR push ([e31d102](https://github.com/Staxless/staxless/commit/e31d102c2478b548e1f984679dc8b163e7149199))
+* rename GITHUB_CLIENT_ID/SECRET to GH_OAUTH_ prefix ([5e92e48](https://github.com/Staxless/staxless/commit/5e92e48ef9b91013a6def1895d1886a3a6e74f16))
+* track package-lock.json files required for npm ci ([1301926](https://github.com/Staxless/staxless/commit/13019260432f912687f3e771ffdc01d39910d4d6))
+
+
+### Features
+
+* split deploy.yml into separate workflow files ([c7fccdc](https://github.com/Staxless/staxless/commit/c7fccdc81006d411332a28b3c14d0eb1ece74251))
+
 # [2.26.0](https://github.com/Staxless/staxless/compare/v2.25.10...v2.26.0) (2026-02-12)
 
 
