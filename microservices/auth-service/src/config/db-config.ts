@@ -16,7 +16,7 @@ export const database: BaseDatabase = createMongoDatabase({
     loadSecret('DATABASE_URL') ||
     process.env.DATABASE_URL ||
     'mongodb://localhost:27017',
-  dbName: 'db', //process.env.DATABASE_NAME ?? 'db',
+  dbName: loadSecret('DATABASE_NAME') || process.env.DATABASE_NAME || 'db',
 });
 /**
  * Initializes the database connection.
