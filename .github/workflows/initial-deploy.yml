@@ -1,4 +1,4 @@
-name: Initial Deploy
+name: "1. Initial Deploy"
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   deploy:
-    uses: staxless/staxless-deploy/.github/workflows/initial-deploy.yml@v1
+    uses: staxless/staxless-workflows/.github/workflows/initial-deploy.yml@v1
     with:
       domain: ${{ vars.DOMAIN }}
     secrets: inherit

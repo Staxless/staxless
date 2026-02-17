@@ -1,4 +1,4 @@
-name: Rolling Update
+name: "2. Rolling Update"
 
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   update:
-    uses: staxless/staxless-deploy/.github/workflows/rolling-update.yml@v1
+    uses: staxless/staxless-workflows/.github/workflows/rolling-update.yml@v1
     with:
       services: ${{ inputs.services || 'all' }}
       auto_detect: ${{ github.event_name == 'push' }}
